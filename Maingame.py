@@ -4,13 +4,12 @@ import math
 from player import Player
 from enemy import Enemy
 
-# Initialize Pygame
+
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
-pygame.display.set_caption("Isaac-like Prototype")
 clock = pygame.time.Clock()
 
-# Colors
+
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -20,9 +19,8 @@ WHITE = (255, 255, 255)
 ROOM_WIDTH, ROOM_HEIGHT = 700, 500
 CELL_SIZE = 40
 
-# Player
 
-# Tears (projectiles)
+
 class Tear(pygame.sprite.Sprite):
     def __init__(self, x, y, direction):
         super().__init__()
@@ -32,7 +30,7 @@ class Tear(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = 7
         self.direction = direction
-        self.lifetime = 60
+        self.lifetime = 1
         
     def update(self):
         self.rect.x += self.direction[0] * self.speed
@@ -40,16 +38,13 @@ class Tear(pygame.sprite.Sprite):
         self.lifetime -= 1
         return self.lifetime <= 0
 
-# Enemies
 
-# Walls
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y, w, h):
         super().__init__()
         self.image_orig = pygame.image.load("images/Wall.jpg").convert_alpha()
         self.image = pygame.transform.scale(self.image_orig,(w,h))
-        # self.image = pygame.Surface((w, h))
-        # self.image.fill(WHITE)
+        
         self.rect = self.image.get_rect(topleft=(x, y))
 
 # Room generation
@@ -73,20 +68,16 @@ def generate_room():
     
     return walls
 
-# Game setup
+
 player = Player()
 walls = generate_room()
 enemies = pygame.sprite.Group()
 enemies_counter = 0
-# for _ in range(5):
-#     x = random.randint(100, 700)
-#     y = random.randint(100, 500)
-#     enemies.add(Enemy(x, y))
-    
-# Game loop
+
 running = True
+stop = False 
 while running:
-    # Event handling
+  if stop == False:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -128,15 +119,13 @@ while running:
                         enemies_counter -=1
                     break
     
-    # Player-enemy collision
     for enemy in enemies:
         if player.rect.colliderect(enemy.rect):
-            player.health -= 0.1  # Gradual damage
+            player.health -= 0.1 
     
-    # Drawing
+    
     screen.fill(BLACK)
     
-    # Draw grid (optional)
     for x in range(50, 750, CELL_SIZE):
         pygame.draw.line(screen, (50, 50, 50), (x, 50), (x, 550))
     for y in range(50, 550, CELL_SIZE):
@@ -148,13 +137,15 @@ while running:
         screen.blit(tear.image, tear.rect)
     screen.blit(player.image, player.rect)
     
-    # UI
+    
     font = pygame.font.SysFont(None, 36)
     health_text = font.render(f"Hearts: {int(player.health)}", True, WHITE)
     screen.blit(health_text, (20, 20))
-    if player.health <= 0 : 
+    if player.health <= 1 : 
         pygame.quit()   
-    pygame.display.flip()
-    clock.tick(60)
+  if stop == True : 
+      {}
+  pygame.display.flip()
+  clock.tick(60)
 
 pygame.quit()

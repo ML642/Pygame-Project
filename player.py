@@ -7,13 +7,13 @@ class Tear(pygame.sprite.Sprite):
         super().__init__()
         self.orig = pygame.image.load('images/bullet.png').convert_alpha()
         
-        self.image = pygame.transform.scale(self.orig,(10,10))
+        self.image = pygame.transform.scale(self.orig,(20,20))
         
 
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = 7
         self.direction = direction
-        self.lifetime = 60
+        self.lifetime = 20
         
     def update(self):
         self.rect.x += self.direction[0] * self.speed
@@ -31,9 +31,10 @@ WHITE = (255, 255, 255)
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.orig = pygame.image.load('images/player.png').convert_alpha()
+        self.orig = pygame.image.load('images/Soldier1.png').convert_alpha()
         
-        self.image = pygame.transform.scale(self.orig,(20,20))
+        self.image = pygame.transform.scale(self.orig,(50,50))
+      
         self.rect = self.image.get_rect(center=(400, 300))
         self.speed = 5
         self.health = 3

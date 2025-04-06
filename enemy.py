@@ -14,10 +14,10 @@ WHITE = (255, 255, 255)
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y):
         super().__init__()
-        self.orig = pygame.image.load('images/Soldier.png').convert_alpha()
+        self.orig = pygame.image.load('images/Soldier1.png').convert_alpha()
         self.image = pygame.transform.scale(self.orig, (50, 50))
         self.rect = self.image.get_rect(center=(x, y))
-        self.speed = 1
+        self.speed = (random.uniform(1,2))
         self.health = 2
         
     def update(self, player, walls):
