@@ -1,6 +1,8 @@
 import pygame
 import random
 import math
+from player import Player
+from enemy import Enemy
 
 # Initialize Pygame
 pygame.init()
@@ -15,70 +17,18 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 
-# Game states
 ROOM_WIDTH, ROOM_HEIGHT = 700, 500
 CELL_SIZE = 40
 
 # Player
-class Player(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image = pygame.Surface((30, 30))
-        self.image.fill(RED)
-        self.rect = self.image.get_rect(center=(400, 300))
-        self.speed = 5
-        self.health = 3
-        self.shot_cooldown = 0
-        self.tears = []  # Projectiles
-        
-    def update(self, walls):
-        keys = pygame.key.get_pressed()
-        dx, dy = 0, 0
-        
-        if keys[pygame.K_LEFT]: dx -= self.speed
-        if keys[pygame.K_RIGHT]: dx += self.speed
-        if keys[pygame.K_UP]: dy -= self.speed
-        if keys[pygame.K_DOWN]: dy += self.speed
-        
-        # Diagonal movement normalization
-        if dx != 0 and dy != 0:
-            dx *= 0.7071  # 1/sqrt(2)
-            dy *= 0.7071
-        
-        # Wall collision
-        new_rect = self.rect.copy()
-        new_rect.x += dx
-        for wall in walls:
-            if new_rect.colliderect(wall.rect):
-                dx = 0
-                break
-                
-        new_rect = self.rect.copy()
-        new_rect.y += dy
-        for wall in walls:
-            if new_rect.colliderect(wall.rect):
-                dy = 0
-                break
-                
-        self.rect.x += dx
-        self.rect.y += dy
-        
-        # Shooting cooldown
-        if self.shot_cooldown > 0:
-            self.shot_cooldown -= 1
-            
-    def shoot(self, direction):
-        if self.shot_cooldown == 0:
-            tear = Tear(self.rect.centerx, self.rect.centery, direction)
-            self.tears.append(tear)
-            self.shot_cooldown = 15
 
 # Tears (projectiles)
 class Tear(pygame.sprite.Sprite):
     def __init__(self, x, y, direction):
         super().__init__()
-        self.image = pygame.Surface((10, 10))
-        self.image.fill(BLUE)
+        self.orig = pygame.image.load('images/Soldier.png').convert_alpha()
+        self.image = pygame.transform.scale(self.orig , (10,10))
+        
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = 7
         self.direction = direction
@@ -91,46 +41,15 @@ class Tear(pygame.sprite.Sprite):
         return self.lifetime <= 0
 
 # Enemies
-class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.image = pygame.Surface((30, 30))
-        self.image.fill(GREEN)
-        self.rect = self.image.get_rect(center=(x, y))
-        self.speed = 1
-        self.health = 2
-        
-    def update(self, player, walls):
-        # Simple AI: move toward player
-        dx = player.rect.centerx - self.rect.centerx
-        dy = player.rect.centery - self.rect.centery
-        dist = max(1, math.sqrt(dx*dx + dy*dy))
-        dx, dy = dx/dist, dy/dist
-        
-        # Wall collision
-        new_rect = self.rect.copy()
-        new_rect.x += dx * self.speed
-        for wall in walls:
-            if new_rect.colliderect(wall.rect):
-                dx = 0
-                break
-                
-        new_rect = self.rect.copy()
-        new_rect.y += dy * self.speed
-        for wall in walls:
-            if new_rect.colliderect(wall.rect):
-                dy = 0
-                break
-                
-        self.rect.x += dx * self.speed
-        self.rect.y += dy * self.speed
 
 # Walls
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y, w, h):
         super().__init__()
-        self.image = pygame.Surface((w, h))
-        self.image.fill(WHITE)
+        self.image_orig = pygame.image.load("images/Wall.jpg").convert_alpha()
+        self.image = pygame.transform.scale(self.image_orig,(w,h))
+        # self.image = pygame.Surface((w, h))
+        # self.image.fill(WHITE)
         self.rect = self.image.get_rect(topleft=(x, y))
 
 # Room generation
@@ -158,11 +77,12 @@ def generate_room():
 player = Player()
 walls = generate_room()
 enemies = pygame.sprite.Group()
-for _ in range(5):
-    x = random.randint(100, 700)
-    y = random.randint(100, 500)
-    enemies.add(Enemy(x, y))
-
+enemies_counter = 0
+# for _ in range(5):
+#     x = random.randint(100, 700)
+#     y = random.randint(100, 500)
+#     enemies.add(Enemy(x, y))
+    
 # Game loop
 running = True
 while running:
@@ -173,7 +93,12 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
-    
+    if enemies_counter <= 0 :
+        enemies_counter = int(random.uniform(0,6))
+        for _ in range(enemies_counter):
+            x = random.randint(100, 700)
+            y = random.randint(100, 500)
+            enemies.add(Enemy(x, y))
     # Shooting (mouse)
     mouse_buttons = pygame.mouse.get_pressed()
     if mouse_buttons[0]:  # Left click
@@ -200,6 +125,7 @@ while running:
                         player.tears.remove(tear)
                     if enemy.health <= 0:
                         enemies.remove(enemy)
+                        enemies_counter -=1
                     break
     
     # Player-enemy collision
@@ -226,7 +152,8 @@ while running:
     font = pygame.font.SysFont(None, 36)
     health_text = font.render(f"Hearts: {int(player.health)}", True, WHITE)
     screen.blit(health_text, (20, 20))
-    
+    if player.health <= 0 : 
+        pygame.quit()   
     pygame.display.flip()
     clock.tick(60)
 
