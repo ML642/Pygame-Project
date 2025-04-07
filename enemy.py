@@ -21,7 +21,7 @@ class Enemy(pygame.sprite.Sprite):
         self.health = 2
         
     def update(self, player, walls):
-        # Simple AI: move toward player
+        # moving towards player 
         dx = player.rect.centerx - self.rect.centerx
         dy = player.rect.centery - self.rect.centery
         dist = max(1, math.sqrt(dx*dx + dy*dy))

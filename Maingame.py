@@ -19,26 +19,6 @@ WHITE = (255, 255, 255)
 ROOM_WIDTH, ROOM_HEIGHT = 700, 500
 CELL_SIZE = 40
 
-
-
-class Tear(pygame.sprite.Sprite):
-    def __init__(self, x, y, direction):
-        super().__init__()
-        self.orig = pygame.image.load('images/Soldier.png').convert_alpha()
-        self.image = pygame.transform.scale(self.orig , (10,10))
-        
-        self.rect = self.image.get_rect(center=(x, y))
-        self.speed = 7
-        self.direction = direction
-        self.lifetime = 1
-        
-    def update(self):
-        self.rect.x += self.direction[0] * self.speed
-        self.rect.y += self.direction[1] * self.speed
-        self.lifetime -= 1
-        return self.lifetime <= 0
-
-
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y, w, h):
         super().__init__()
@@ -47,11 +27,9 @@ class Wall(pygame.sprite.Sprite):
         
         self.rect = self.image.get_rect(topleft=(x, y))
 
-# Room generation
 def generate_room():
     walls = pygame.sprite.Group()
     
-    # Outer walls
     walls.add(Wall(50, 50, ROOM_WIDTH, 20))  # Top
     walls.add(Wall(50, 50, 20, ROOM_HEIGHT))  # Left
     walls.add(Wall(50, 50+ROOM_HEIGHT-20, ROOM_WIDTH, 20))  # Bottom
@@ -65,7 +43,6 @@ def generate_room():
             walls.add(Wall(x, y, random.randint(50, 150), 20))
         else:
             walls.add(Wall(x, y, 20, random.randint(50, 150)))
-    
     return walls
 
 
@@ -84,13 +61,26 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
-    if enemies_counter <= 0 :
-        enemies_counter = int(random.uniform(0,6))
-        for _ in range(enemies_counter):
-            x = random.randint(100, 700)
-            y = random.randint(100, 500)
-            enemies.add(Enemy(x, y))
-    # Shooting (mouse)
+    #when there are no enemies adds more 
+    if enemies_counter <= 0:
+            enemies_counter = random.randint(1, 6) 
+            enemies_to_spawn = enemies_counter
+            
+            while enemies_to_spawn > 0:
+                x = random.randint(100, 700)
+                y = random.randint(100, 500)
+                enemy = Enemy(x, y)
+                
+                # Check collision with all walls
+                collision = False
+                for wall in walls:
+                    if enemy.rect.colliderect(wall.rect):
+                        collision = True
+                        break  
+                
+                if not collision:
+                    enemies.add(enemy)
+                    enemies_to_spawn -= 1
     mouse_buttons = pygame.mouse.get_pressed()
     if mouse_buttons[0]:  # Left click
         mx, my = pygame.mouse.get_pos()
@@ -99,16 +89,15 @@ while running:
         dist = max(1, math.sqrt(dx*dx + dy*dy))
         player.shoot((dx/dist, dy/dist))
     
-    # Update
+   
     player.update(walls)
     enemies.update(player, walls)
     
-    # Update tears
+
     for tear in player.tears[:]:
         if tear.update():
             player.tears.remove(tear)
         else:
-            # Tear-enemy collision
             for enemy in enemies:
                 if tear.rect.colliderect(enemy.rect):
                     enemy.health -= 1
@@ -118,11 +107,15 @@ while running:
                         enemies.remove(enemy)
                         enemies_counter -=1
                     break
+    for tear in player.tears[:] : 
+        for wall in walls : 
+           if tear.rect.colliderect(wall.rect) : 
+               player.tears.remove(tear)
     
     for enemy in enemies:
         if player.rect.colliderect(enemy.rect):
             player.health -= 0.1 
-    
+   
     
     screen.fill(BLACK)
     
