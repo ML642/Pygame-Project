@@ -19,6 +19,24 @@ WHITE = (255, 255, 255)
 ROOM_WIDTH, ROOM_HEIGHT = 700, 500
 CELL_SIZE = 40
 
+floors = pygame.sprite.Group()
+
+
+class Floor (pygame.sprite.Sprite) : 
+    def __init__ (self, x , y): 
+        super().__init__()
+        try :
+            self.image_orig = pygame.image.load("images/Floor.png").convert_alpha()
+            self.image = pygame.transform.scale(self.image_orig , (ROOM_WIDTH,ROOM_HEIGHT))
+        except :
+            self.image = pygame.Surface((50, 50))
+            self.image.fill((100, 100, 100))
+        
+        self.rect = self.image.get_rect(topleft=(x,y))
+floors.add(Floor(50,50))
+
+
+
 class Wall(pygame.sprite.Sprite):
     def __init__(self, x, y, w, h):
         super().__init__()
@@ -26,6 +44,8 @@ class Wall(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image_orig,(w,h))
         
         self.rect = self.image.get_rect(topleft=(x, y))
+
+
 
 def generate_room():
     walls = pygame.sprite.Group()
@@ -54,7 +74,9 @@ enemies_counter = 0
 running = True
 stop = False 
 while running:
+
   if stop == False:
+    floors.draw(screen)  
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -81,6 +103,7 @@ while running:
                 if not collision:
                     enemies.add(enemy)
                     enemies_to_spawn -= 1
+                    
     mouse_buttons = pygame.mouse.get_pressed()
     if mouse_buttons[0]:  # Left click
         mx, my = pygame.mouse.get_pos()
@@ -118,12 +141,13 @@ while running:
    
     
     screen.fill(BLACK)
-    
+   
     for x in range(50, 750, CELL_SIZE):
         pygame.draw.line(screen, (50, 50, 50), (x, 50), (x, 550))
     for y in range(50, 550, CELL_SIZE):
         pygame.draw.line(screen, (50, 50, 50), (50, y), (750, y))
-    
+
+    floors.draw(screen) 
     walls.draw(screen)
     enemies.draw(screen)
     for tear in player.tears:
