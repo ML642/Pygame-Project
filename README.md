@@ -9,7 +9,5 @@
               
               📊 Permadeath & progression (unlock new starting bonuses)
               
-              🎲 RPG elements (stats, equipment, potions)
-              
               🎵 Atmospheric chiptune soundtrack
 
