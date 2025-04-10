@@ -37,7 +37,7 @@ class Player(pygame.sprite.Sprite):
       
         self.rect = self.image.get_rect(center=(400, 300))
         self.speed = 5
-        self.health = 3
+        self.health = 300
         self.shot_cooldown = 0
         self.tears = []  # Projectiles
         
