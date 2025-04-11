@@ -18,7 +18,7 @@ class Enemy(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.orig, (50, 50))
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = (random.uniform(1,2))
-        self.health = 2
+        self.health = 3
         
     def update(self, player, walls):
         # moving towards player 
