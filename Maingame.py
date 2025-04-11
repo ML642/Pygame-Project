@@ -3,7 +3,7 @@ import random
 import math
 from player import Player
 from enemy import Enemy
-
+from camera import Camera
 
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
@@ -15,6 +15,7 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
+camera = Camera(800,600 , 2000,2000)
 
 ROOM_WIDTH, ROOM_HEIGHT = 700, 500
 CELL_SIZE = 40
@@ -135,31 +136,32 @@ last_spawn_time = 0
 
 running = True
 stop = False 
+# ... (keep all your previous code until the main loop)
+
+running = True
+stop = False 
 while running:
-  
-  if stop == False:
-    floors.draw(screen)  
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
+    if stop == False:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
                 running = False
-    #when there are no enemies adds more 
-    if enemies_counter > 0 :
-        for wall in walls :
-            if isinstance(wall, Gate):
-                if wall.is_open == True   :
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+
+        # Game logic updates
+        if enemies_counter > 0:
+            for wall in walls:
+                if isinstance(wall, Gate) and wall.is_open:
                     wall.toogle(walls)
-                #print(wall.is_open)
-   # print(enemies_counter)
-    if enemies_counter <=0 : 
-        for wall in walls :
-                 if isinstance(wall, Gate):
-                     if wall.is_open == False  :
-                      wall.toogle(walls)
-    if enemies_counter <= 0 and pygame.time.get_ticks() - last_spawn_time > spawn_delay:
-            enemies_counter = random.randint(1, 6) 
+        
+        if enemies_counter <= 0: 
+            for wall in walls:
+                if isinstance(wall, Gate) and not wall.is_open:
+                    wall.toogle(walls)
+
+        if enemies_counter <= 0 and pygame.time.get_ticks() - last_spawn_time > spawn_delay:
+            enemies_counter = random.randint(1, 6)
             enemies_to_spawn = enemies_counter
             last_spawn_time = pygame.time.get_ticks()
             
@@ -168,35 +170,32 @@ while running:
                 y = random.randint(100, 500)
                 enemy = Enemy(x, y)
                 
-                # Check collision with all walls
-                collision = False
-                for wall in walls:
-                    if enemy.rect.colliderect(wall.rect):
-                        collision = True
-                        break  
-                
-                if not collision:
+                if not any(enemy.rect.colliderect(wall.rect) for wall in walls):
                     enemies.add(enemy)
                     enemies_to_spawn -= 1
-                    
-    mouse_buttons = pygame.mouse.get_pressed()
-    if mouse_buttons[0]:  # Left click
-        mx, my = pygame.mouse.get_pos()
-        dx = mx - player.rect.centerx
-        dy = my - player.rect.centery
-        dist = max(1, math.sqrt(dx*dx + dy*dy))
-        player.shoot((dx/dist, dy/dist))
-    
-   
-    player.update(walls)
-    enemies.update(player, walls)
-   
 
-    for tear in player.tears[:]:
-        if tear.update():
+        # Player input and updates
+        mouse_buttons = pygame.mouse.get_pressed()
+        if mouse_buttons[0]:  # Left click
+    # Get mouse position in WORLD coordinates
+          mouse_world_x = pygame.mouse.get_pos()[0] - camera.camera.x
+          mouse_world_y = pygame.mouse.get_pos()[1] - camera.camera.y
+    
+    # Calculate direction relative to player's WORLD position
+          dx = mouse_world_x - player.rect.centerx
+          dy = mouse_world_y - player.rect.centery
+          dist = max(1, math.sqrt(dx*dx + dy*dy))
+          player.shoot((dx/dist, dy/dist))
+        player.update(walls)
+        camera.update(player)
+
+       
+        screen.fill(BLACK)
+        for tear in player.tears[:]:
+         if tear.update():
             if tear in player.tears:
                 player.tears.remove(tear)
-        else:
+         else:
             for enemy in enemies:
                 if tear.rect.colliderect(enemy.rect):
                     enemy.health -= 1
@@ -207,40 +206,49 @@ while running:
                         kills +=1 
                         enemies_counter -=1
                     break
-    for tear in player.tears[:] : 
-        for wall in walls : 
-           if tear.rect.colliderect(wall.rect) :
-                if tear in player.tears: 
-                  player.tears.remove(tear)
-    
-    for enemy in enemies:
-        if player.rect.colliderect(enemy.rect):
-            player.health -= 0.1 
-   
-    
-    screen.fill(BLACK)
-   
-    for x in range(50, 750, CELL_SIZE):
-        pygame.draw.line(screen, (50, 50, 50), (x, 50), (x, 550))
-    for y in range(50, 550, CELL_SIZE):
-        pygame.draw.line(screen, (50, 50, 50), (50, y), (750, y))
+        
+        for floor in floors:
+            screen.blit(floor.image, camera.apply(floor))
 
-    floors.draw(screen) 
-    walls.draw(screen)
-    enemies.draw(screen)
-    for tear in player.tears:
-        screen.blit(tear.image, tear.rect)
-    screen.blit(player.image, player.rect)
-    
-    
-    font = pygame.font.SysFont(None, 36)
-    health_text = font.render(f"Hearts: {int(player.health)}", True, WHITE)
-    screen.blit(health_text, (20, 20))
-    if player.health <= 1 : 
-        pygame.quit()   
-  if stop == True : 
-      {}
-  pygame.display.flip()
-  clock.tick(60)
+        
+       
+        
+        for wall in walls:
+            screen.blit(wall.image, camera.apply(wall))
+
+        
+        for enemy in enemies:
+            screen.blit(enemy.image, camera.apply(enemy))
+
+        
+        screen.blit(player.image, camera.apply(player))
+
+        # Draw tears with camera offset
+        for tear in player.tears:
+            adjusted_pos = tear.rect.topleft + pygame.math.Vector2(camera.camera.topleft)
+            screen.blit(tear.image, adjusted_pos)
+
+        # Collision detection and game logic
+        enemies.update(player, walls)
+        
+        for tear in player.tears[:]:
+            tear.update()
+            for wall in walls:
+                if tear.rect.colliderect(wall.rect):
+                    player.tears.remove(tear)
+                    break
+
+        # Health and UI elements (drawn without camera offset)
+        font = pygame.font.SysFont(None, 36)
+        health_text = font.render(f"Hearts: {int(player.health)}", True, WHITE)
+        coordinates  = font.render(f"Player coordinates: X  {int(player.rect.x)} Y  {int(player.rect.y)}", True, WHITE)
+        
+        screen.blit(health_text, (20, 20))
+        screen.blit(coordinates, (20, 50))
+        if player.health <= 1:
+            pygame.quit()
+
+    pygame.display.flip()
+    clock.tick(60)
 
 pygame.quit()
