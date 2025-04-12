@@ -51,55 +51,57 @@ class Gate(Wall):
               self.rect = self.original_rect 
              
           self.update_image()
-def generate_room():
+def generate_room(x,y):
     walls = pygame.sprite.Group()
     
-    walls.add(Wall(50 + ROOM_WIDTH- 450, 70-(ROOM_HEIGHT-320)  ,20 , ROOM_HEIGHT-320))
-    walls.add(Wall(50 + ROOM_WIDTH- 250, 70-(ROOM_HEIGHT-320)  ,20 , ROOM_HEIGHT-320)) # - top 
-    walls.add(Wall(50, 50, ROOM_WIDTH - 450 , 20))# Top
-    walls.add(Wall(500, 50, ROOM_WIDTH - 450 , 20))# Top
+    walls.add(Wall((x-50)+50 + ROOM_WIDTH- 450,(y-50)+ 70-(ROOM_HEIGHT-320)  ,20 , ROOM_HEIGHT-320))
+    walls.add(Wall((x-50)+50 + ROOM_WIDTH- 250,(y-50)+ 70-(ROOM_HEIGHT-320)  ,20 , ROOM_HEIGHT-320)) # - top 
+    walls.add(Wall((x-50)+50, 50 + (y-50), ROOM_WIDTH - 450 , 20))# Top
+    walls.add(Wall((x-50)+500, 50 + (y-50), ROOM_WIDTH - 450 , 20))# Top
     
     
     
-    Gate1 = Gate(ROOM_WIDTH - 400, 50, 220, 20, "images/Gate_Open.png", "images/Gate_Closed.png")
+    Gate1 = Gate((x-50)+ROOM_WIDTH - 400,(y-50) +  50, 220, 20, "images/Gate_Open.png", "images/Gate_Closed.png")
     walls.add(Gate1)
     # top gate gap 
     
-    walls.add(Wall(50, 50, 20, ROOM_HEIGHT-320))  # Left
-    walls.add(Wall(50,  ROOM_HEIGHT - 150 , 20 , ROOM_HEIGHT-300))
-    walls.add(Wall(50 - 180,  50+ROOM_HEIGHT-320 , 200, 20 ))
-    walls.add(Wall(50 - 180,  50+ROOM_HEIGHT-320 + 100 , 200, 20 ))
+    walls.add(Wall(x, y, 20, ROOM_HEIGHT-320))  # Left
+    walls.add(Wall(x, (y-50)+ ROOM_HEIGHT - 150 , 20 , ROOM_HEIGHT-300))
+    walls.add(Wall(x - 180, (y-50)+ 50+ROOM_HEIGHT-320 , 200, 20 ))
+    walls.add(Wall(x - 180, (y-50)+ 50+ROOM_HEIGHT-320 + 100 , 200, 20 ))
     
-    Gate2 = Gate(50, ROOM_HEIGHT - 270, 20, 120, "images/Gate_Open.png", "images/Gate_Closed.png")
+    Gate2 = Gate(x,(y-50) + ROOM_HEIGHT - 270, 20, 120, "images/Gate_Open.png", "images/Gate_Closed.png")
     walls.add(Gate2)
     #left gate gap 
     
-    walls.add(Wall(50+ROOM_WIDTH-20, 50, 20, ROOM_HEIGHT -320))  # Right
-    walls.add(Wall(ROOM_WIDTH+30,  ROOM_HEIGHT - 150 , 20 , ROOM_HEIGHT-300))
-    walls.add(Wall(50 +680,  50+ROOM_HEIGHT-320 , 200, 20 ))
-    walls.add(Wall(50 + 680,  50+ROOM_HEIGHT-320 + 100 , 200, 20 ))
+    walls.add(Wall(x+ROOM_WIDTH-20, y, 20, ROOM_HEIGHT -320))  # Right
+    walls.add(Wall(ROOM_WIDTH+x-20, y - 50 +  ROOM_HEIGHT - 150 , 20 , ROOM_HEIGHT-300))
+    walls.add(Wall(x +680,  y+ROOM_HEIGHT-320 , 200, 20 ))
+    walls.add(Wall(x + 680,  y+ROOM_HEIGHT-320 + 100 , 200, 20 ))
     
-    Gate3 = Gate(30+ROOM_WIDTH , ROOM_HEIGHT-270  , 20  , 120, "images/Gate_Open.png", "images/Gate_Closed.png")
+    Gate3 = Gate(x-20+ROOM_WIDTH ,y - 50 +  ROOM_HEIGHT-270  , 20  , 120, "images/Gate_Open.png", "images/Gate_Closed.png")
     
     walls.add(Gate3)
     
-    walls.add(Wall(50, 50+ROOM_HEIGHT-20, ROOM_WIDTH - 450, 20))  # Bottom
-    walls.add(Wall(500, 50+ROOM_HEIGHT-20, ROOM_WIDTH - 450, 20)) 
+    walls.add(Wall(x, y+ROOM_HEIGHT-20, ROOM_WIDTH - 450, 20))  # Bottom
+    walls.add(Wall(x - 50 + 500, y+ROOM_HEIGHT-20, ROOM_WIDTH - 450, 20)) 
 
-    walls.add(Wall(50 + ROOM_WIDTH- 450, 70-(ROOM_HEIGHT-320)+640  ,20 , ROOM_HEIGHT-320))
-    walls.add(Wall(50 + ROOM_WIDTH- 250, 70-(ROOM_HEIGHT-320)+640  ,20 , ROOM_HEIGHT-320)) # - bottom 
+    walls.add(Wall(x + ROOM_WIDTH- 450,y + 20-(ROOM_HEIGHT-320)+640  ,20 , ROOM_HEIGHT-320))
+    walls.add(Wall(x + ROOM_WIDTH- 250,y+ 20-(ROOM_HEIGHT-320)+640  ,20 , ROOM_HEIGHT-320)) # - bottom 
     
     
-    Gate4 = Gate(ROOM_WIDTH-400 , 30+ROOM_HEIGHT, 220  , 20 ,   "images/Gate_Open.png", "images/Gate_Closed.png")
+    Gate4 = Gate(x -50 + ROOM_WIDTH-400 ,y-50+ 30+ROOM_HEIGHT, 220  , 20 ,   "images/Gate_Open.png", "images/Gate_Closed.png")
   
     walls.add(Gate4)
-    
     # Inner walls (random)
-    for _ in range(5):
-        x = random.randint(100, 600)
-        y = random.randint(100, 400)
+    for _ in range(2):
+        q = random.randint(x+50 +100, x+50  + ROOM_WIDTH -300)
+        w = random.randint(y+50  + 100, y+50 + ROOM_HEIGHT -300)
+     
+        
         if random.random() > 0.5:
-            walls.add(Wall(x, y, random.randint(50, 150), 20))
+            walls.add(Wall(q, w, random.randint(50, 150), 20))
         else:
-            walls.add(Wall(x, y, 20, random.randint(50, 150)))
+            walls.add(Wall(q, w, 20, random.randint(50, 150)))
     return walls
+

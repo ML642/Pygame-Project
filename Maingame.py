@@ -27,30 +27,30 @@ kills = 0
 camera = Camera(800,600 , 2000,2000)
 
 floors.add(Floor(50,50))
+
+
 player = Player()
-walls = generate_room()
+
+walls = generate_room(50,50)
+
+walls.add(generate_room(ROOM_WIDTH + 50 + 240 ,50))
+floors.add(Floor(ROOM_WIDTH + 50 + 240 ,50))
+
+walls.add(generate_room(50,ROOM_HEIGHT + 50 + 240))
+floors.add(Floor(50,ROOM_HEIGHT +50 +240))
+
+
 enemies = pygame.sprite.Group()
 enemies_counter = 0
 copy = walls.copy()
 spawn_delay = 5000 
 last_spawn_time = 0
 
-running = True
-stop = False 
-# ... (keep all your previous code until the main loop)
+
 
 running = True
 stop = False
 
-def draw_health_bar(surface, current_hp, max_hp):
-    bg_rect = pygame.Rect(20, 20, 200 , 20)
-    pygame.draw.rect(surface, WHITE, bg_rect)
-
-    health_width = int((current_hp / max_hp) * 200)
-    health_rect = pygame.Rect(20, 20, health_width, 20 )
-    
-    pygame.draw.rect(surface, RED, health_rect)
-    pygame.draw.rect(surface, BLACK, bg_rect, 2) 
 while running:
     if stop == False:
         for event in pygame.event.get():
