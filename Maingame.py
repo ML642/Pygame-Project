@@ -4,13 +4,14 @@ import math
 from player import Player
 from enemy import Enemy
 from camera import Camera
-from room_generation import generate_room , Wall ,  Gate , Floor
+from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room , generate_level_1
 from UI_components import draw_health_bar
 
 
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
 clock = pygame.time.Clock()
+
 
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -21,23 +22,57 @@ WHITE = (255, 255, 255)
 
 ROOM_WIDTH, ROOM_HEIGHT = 700, 500
 CELL_SIZE = 40
+level_1data = [
+    {"x": 50, "y": 50, "form": 2, "type": 1, "enemies_counter": 3},
+    {"x": ROOM_WIDTH + 50 + 240 + 100, "y": 50, "form": 9, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 2, "y": 50, "form": 3, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 2, "y": 50 - (ROOM_HEIGHT + 260), "form": 8, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 2, "y": -50 + ROOM_HEIGHT + 260, "form": 10, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 3, "y": 50 - (ROOM_HEIGHT + 260), "form": 9, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 4, "y": 50 - (ROOM_HEIGHT + 260), "form": 6, "type": 1, "enemies_counter": 3},
+    {"x": 50, "y": ROOM_HEIGHT + 50 + 260, "form": 5, "type": 1, "enemies_counter": 3},
+    {"x": 50, "y": 30 + (ROOM_HEIGHT + 260) * 2, "form": 11, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (ROOM_WIDTH + 240 + 100), "y": 30 + (ROOM_HEIGHT + 260) * 2, "form": 2, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 2, "y": 30 + (ROOM_HEIGHT + 260) * 2, "form": 6, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (ROOM_WIDTH + 240 + 100), "y": 10 + (ROOM_HEIGHT + 260) * 4, "form": 11, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (ROOM_WIDTH + 240 + 100) , "y": 30 + (ROOM_HEIGHT + 260) * 3, "form": 5, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 2, "y": 10 + (ROOM_HEIGHT + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 3, "y": 10 + (ROOM_HEIGHT + 260) * 4, "form": 6, "type": 1, "enemies_counter": 3}
+]
 
+
+
+Rooms = pygame.sprite.Group()
 floors = pygame.sprite.Group()
 kills = 0
-camera = Camera(800,600 , 2000,2000)
+camera = Camera(800,600 , 12000,12000)
 
 floors.add(Floor(50,50))
+def Room_Create ( x , y  , form , type , enemies_counter):
+    walls.add(generate_room(x,y,form,type))
+    floors.add(Floor(x,y))
+    
+    
+    Rooms.add(Room(x,y+50,enemies_counter))
+    if form == 1 or form == 2 or form ==9 or form == 8 or form == 11 or form ==7 :   # right corridor  
+         floors.add(Floor_Hallway(x + 677 , y + 195 , 300 , 90))
+    if form == 1 or form == 2 or form == 3 or form == 4 or form == 5 or form ==8 : # bottom corridor 
+        floors.add(Floor_Hallway( x + 250 , y + 480 , 210 , 260 ))
+    if form ==1 or form == 2 or form == 3 or form == 4 or form ==6 or form == 9  : # left corrior 
+        floors.add(Floor_Hallway( x  - 300 , y + 195 , 300 ,  90 ))	
+    if form == 1 or form == 3 or form ==4 or form == 5  or form == 7 : # top corridor , 
+        floors.add(Floor_Hallway( x + 250 , y -  230   , 210 , 255 ))
 
-
+    
 player = Player()
+#############################
+walls = generate_room(-300- ROOM_WIDTH , 50 , 7 ,1) # initiate first room 
+floors.add(Floor(-300- ROOM_WIDTH , 50))
+floors.add(Floor_Hallway(-250- ROOM_WIDTH - 30 + 677 , 50 + 195 , 400 , 90))
+#############################
 
-walls = generate_room(50,50)
-
-walls.add(generate_room(ROOM_WIDTH + 50 + 240 ,50))
-floors.add(Floor(ROOM_WIDTH + 50 + 240 ,50))
-
-walls.add(generate_room(50,ROOM_HEIGHT + 50 + 240))
-floors.add(Floor(50,ROOM_HEIGHT +50 +240))
+for room_data in level_1data:
+    Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
 
 
 enemies = pygame.sprite.Group()
@@ -47,11 +82,18 @@ spawn_delay = 5000
 last_spawn_time = 0
 
 
-
 running = True
 stop = False
 
+
+    
+player.rect.center = ( -250 , 50 + ROOM_HEIGHT/2 )  # - move the player to the room 
+
+# Main game loop  
+
+   
 while running:
+    #print(enemies_counter)
     if stop == False:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -59,7 +101,11 @@ while running:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     running = False
-
+        for room in Rooms :
+            if player.rect.colliderect(room.rect) and room.active == False:
+                room.active = True
+                #enemies_counter = room.enemies_counter
+        
         # Game logic updates
         if enemies_counter > 0:
             for wall in walls:
@@ -70,20 +116,22 @@ while running:
             for wall in walls:
                 if isinstance(wall, Gate) and not wall.is_open:
                     wall.toogle(walls)
-
-        if enemies_counter <= 0 and pygame.time.get_ticks() - last_spawn_time > spawn_delay:
-            enemies_counter = random.randint(1, 6)
+        for room in Rooms :
+          if  room.active == True  and enemies_counter <= 0 and room.clear == False :
+            enemies_counter = room.enemies_counter
             enemies_to_spawn = enemies_counter
             last_spawn_time = pygame.time.get_ticks()
-            
+            room.clear = True 
             while enemies_to_spawn > 0:
-                x = random.randint(100, 700)
-                y = random.randint(100, 500)
+                x = random.randint(room.rect.x, room.rect.x  + ROOM_WIDTH - 160)
+                
+                y = random.randint(room.rect.y, room.rect.y  + ROOM_HEIGHT - 160)
                 enemy = Enemy(x, y)
                 
                 if not any(enemy.rect.colliderect(wall.rect) for wall in walls):
                     enemies.add(enemy)
                     enemies_to_spawn -= 1
+                
 
         # Player input and updates
         mouse_buttons = pygame.mouse.get_pressed()
