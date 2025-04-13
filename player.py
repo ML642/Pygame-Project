@@ -34,14 +34,14 @@ class Player(pygame.sprite.Sprite):
         self.orig = pygame.image.load('images/player.png').convert_alpha()
         
         self.image = pygame.transform.scale(self.orig,(50,50))
-      
+        self.original_image = self.image   
         self.rect = self.image.get_rect(center=(400, 300))
         self.speed = 5
         self.health = 300
         self.max_health = 300
         self.shot_cooldown = 0
         self.tears = []  # Projectiles
-        
+        self.angle = 0
     def update(self, walls):
         keys = pygame.key.get_pressed()
         dx, dy = 0, 0

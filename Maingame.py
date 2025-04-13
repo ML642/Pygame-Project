@@ -148,8 +148,17 @@ while running:
         player.update(walls)
         camera.update(player)
 
-       
+        
         screen.fill(BLACK)
+        mouse_world_x = pygame.mouse.get_pos()[0] - camera.camera.x
+        mouse_world_y = pygame.mouse.get_pos()[1] - camera.camera.y
+        dx = mouse_world_x - player.rect.centerx
+        dy = mouse_world_y - player.rect.centery
+        player_angle = math.degrees(math.atan2(-dx, -dy)) % 360 + 90
+        original_image = player.original_image  # Store the original unrotated image in the Player class
+        rotated_image = pygame.transform.rotate(player.original_image, player_angle)
+        rotated_rect = rotated_image.get_rect(center=player.rect.center)
+
         for tear in player.tears[:]:
          if tear.update():
             if tear in player.tears:
@@ -172,7 +181,7 @@ while running:
             screen.blit(wall.image, camera.apply(wall))
         for enemy in enemies:
             screen.blit(enemy.image, camera.apply(enemy))        
-        screen.blit(player.image, camera.apply(player))
+        screen.blit(rotated_image, rotated_rect.topleft + pygame.math.Vector2(camera.camera.topleft))
         
         
         for tear in player.tears:
