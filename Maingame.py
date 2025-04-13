@@ -4,7 +4,7 @@ import math
 from player import Player
 from enemy import Enemy
 from camera import Camera
-from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room , generate_level_1
+from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
 from UI_components import draw_health_bar
 
 
@@ -173,7 +173,8 @@ while running:
         for enemy in enemies:
             screen.blit(enemy.image, camera.apply(enemy))        
         screen.blit(player.image, camera.apply(player))
-        # Draw tears with camera offset
+        
+        
         for tear in player.tears:
             adjusted_pos = tear.rect.topleft + pygame.math.Vector2(camera.camera.topleft)
             screen.blit(tear.image, adjusted_pos)

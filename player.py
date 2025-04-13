@@ -31,7 +31,7 @@ WHITE = (255, 255, 255)
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.orig = pygame.image.load('images/Soldier1.png').convert_alpha()
+        self.orig = pygame.image.load('images/player.png').convert_alpha()
         
         self.image = pygame.transform.scale(self.orig,(50,50))
       
