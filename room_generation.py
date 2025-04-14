@@ -193,11 +193,11 @@ def generate_room( x , y , form , type  ):
         walls.add(Wall(x, y+ROOM_HEIGHT-20, ROOM_WIDTH - 450, 20))  # Bottom
         walls.add(Wall(x - 50 + 500, y+ROOM_HEIGHT-20, ROOM_WIDTH - 450, 20)) 
 
-        walls.add(Wall(x + ROOM_WIDTH- 450,y + 20-(ROOM_HEIGHT-320)+640  ,20 , ROOM_HEIGHT-320))
-        walls.add(Wall(x + ROOM_WIDTH- 250,y+ 20-(ROOM_HEIGHT-320)+640  ,20 , ROOM_HEIGHT-320)) # - bottom 
+        walls.add( Wall( x + ROOM_WIDTH - 450, y + 20 - (ROOM_HEIGHT - 320) + 640  , 20 , ROOM_HEIGHT-320 ) )
+        walls.add( Wall( x + ROOM_WIDTH - 250, y + 20 - (ROOM_HEIGHT - 320) + 640  , 20 , ROOM_HEIGHT-320 ) ) # - bottom 
+         
         
-        
-        Gate4 = Gate(x -50 + ROOM_WIDTH-400 ,y-50+ 30+ROOM_HEIGHT, 220  , 20 ,   "images/Gate_Open.png", "images/Gate_Closed.png")
+        Gate4 = Gate( x  + ROOM_WIDTH - 450 , y - 50 + 30 + ROOM_HEIGHT,   220  ,  20  ,   "images/Gate_Open.png" , "images/Gate_Closed.png" ) 
     
         walls.add(Gate4)
     # Inner walls (random)

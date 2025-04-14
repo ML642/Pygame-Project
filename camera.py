@@ -20,3 +20,4 @@ class Camera:
         y = max(-(self.world_height - self.screen_height), y)  # Bottom
         
         self.camera = pygame.Rect(x, y, self.world_width, self.world_height)
+

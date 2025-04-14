@@ -8,7 +8,10 @@ from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway 
 from UI_components import draw_health_bar
 
 
+
 pygame.init()
+screen_width = 800 
+screen_height = 600
 screen = pygame.display.set_mode((800, 600))
 clock = pygame.time.Clock()
 
@@ -45,6 +48,7 @@ level_1data = [
 Rooms = pygame.sprite.Group()
 floors = pygame.sprite.Group()
 kills = 0
+
 camera = Camera(800,600 , 12000,12000)
 
 floors.add(Floor(50,50))
@@ -75,6 +79,8 @@ for room_data in level_1data:
     Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
 
 
+
+
 enemies = pygame.sprite.Group()
 enemies_counter = 0
 copy = walls.copy()
@@ -84,13 +90,30 @@ last_spawn_time = 0
 
 running = True
 stop = False
-
+Main_Menu = True 
 
     
 player.rect.center = ( -250 , 50 + ROOM_HEIGHT/2 )  # - move the player to the room 
 
-# Main game loop  
-
+# background = pygame.image.load('images/Background1.png').convert_alpha()
+# background = pygame.transform.scale(background,( screen_width,screen_height))
+# while Main_Menu :
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             pygame.quit()
+#             exit()
+#         elif event.type == pygame.KEYDOWN:
+#             if event.key == pygame.K_RETURN:  
+#                 Main_Menu = False
+    
+    
+#     screen.blit(background, (0, 0)) 
+    
+#     pygame.display.flip()
+#     clock.tick(60)
+#     pygame.mouse.set_visible(False)
+     
+running = False 
    
 while running:
     #print(enemies_counter)
@@ -156,6 +179,8 @@ while running:
         dy = mouse_world_y - player.rect.centery
         player_angle = math.degrees(math.atan2(-dx, -dy)) % 360 + 90
         original_image = player.original_image  # Store the original unrotated image in the Player class
+        player.angle = player_angle
+        
         rotated_image = pygame.transform.rotate(player.original_image, player_angle)
         rotated_rect = rotated_image.get_rect(center=player.rect.center)
 

@@ -81,5 +81,7 @@ class Player(pygame.sprite.Sprite):
     def shoot(self, direction):
         if self.shot_cooldown == 0:
             tear = Tear(self.rect.centerx, self.rect.centery, direction)
+            angle = math.degrees(math.atan2(-direction[1], direction[0]))
+            tear.image = pygame.transform.rotate(tear.image, angle)
             self.tears.append(tear)
             self.shot_cooldown = 15
