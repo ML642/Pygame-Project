@@ -9,5 +9,5 @@
               
               📊 Permadeath & progression (unlock new starting bonuses)
               
-              🎵 Atmospheric chiptune soundtrack
+              🎵 Atmospheric  soundtrack
 
