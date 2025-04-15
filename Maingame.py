@@ -5,8 +5,8 @@ from player import Player
 from enemy import Enemy
 from camera import Camera
 from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
-from UI_components import draw_health_bar
-
+from UI_components import draw_health_bar , Menu_option
+from stopmenu import pause_menu , draw_button , draw_slider
 
 
 pygame.init()
@@ -88,42 +88,103 @@ spawn_delay = 5000
 last_spawn_time = 0
 
 
-running = True
+running = False
 stop = False
 Main_Menu = True 
 
     
-player.rect.center = ( -250 , 50 + ROOM_HEIGHT/2 )  # - move the player to the room 
+player.rect.center = ( -250 , 50 + ROOM_HEIGHT / 2 )  # - move the player to the room 
 
-# background = pygame.image.load('images/Background1.png').convert_alpha()
-# background = pygame.transform.scale(background,( screen_width,screen_height))
-# while Main_Menu :
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             pygame.quit()
-#             exit()
-#         elif event.type == pygame.KEYDOWN:
-#             if event.key == pygame.K_RETURN:  
-#                 Main_Menu = False
-    
-    
-#     screen.blit(background, (0, 0)) 
-    
-#     pygame.display.flip()
-#     clock.tick(60)
-#     pygame.mouse.set_visible(False)
-     
-running = False 
+background = pygame.image.load('images/Background1.png').convert_alpha()
+background = pygame.transform.scale(background,( screen_width,screen_height))
+
+Option1 = Menu_option(80,300 - 100, 200, 50,  WHITE, BLUE , "Play")
+Option2 = Menu_option(80,370 - 100, 200, 50,  WHITE, BLUE , "Settings ")
+Option3 = Menu_option(80,440 - 100,200,50 ,  WHITE , BLUE , "Exit")
+
+Options = [Option1, Option2, Option3]
+active = 0
+Options[active].toogle()
+
+while Main_Menu :
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:  
+                Main_Menu = False
+        keys = pygame.key.get_pressed()
+        previous_active = active
+        if keys[pygame.K_LEFT]:
+            active -= 1
+        if keys[pygame.K_RIGHT]: 
+            active += 1
+        if keys[pygame.K_UP]: 
+            active -= 1
+        if keys[pygame.K_DOWN]:
+            active += 1
    
+    if active < 0: 
+        active = len(Options) - 1
+    if active >= len(Options): 
+        active = 0
+
+    for option in range(len(Options)):
+        if option != active and Options[option].active == True   :
+            Options[option].toogle()
+        if option == active and Options[option].active == False :
+            Options[option].toogle()
+  
+    title_font = pygame.font.SysFont("Bauhaus 93", 72)
+  
+    tittle = title_font.render(" Bullet  ", RED, WHITE)
+    tittle2 = title_font.render("  Born ", RED, BLACK)
+   
+    
+    
+    screen.blit(background, (0, 0)) 
+    screen.blit(tittle, (screen_width // 2 - tittle.get_width() // 2 - 30 , 50))
+    screen.blit(tittle2, (screen_width // 2 - tittle.get_width() // 2 + 180, 50))
+    
+    screen.blit(Option1.image , (Option1.rect.x , Option1.rect.y))    
+    Option1.update(80 , 300 -100, screen)
+    
+    screen.blit(Option2.image , (Option2.rect.x , Option2.rect.y))
+    Option2.update(80 , 370 -100, screen)
+    
+    screen.blit(Option3.image , (Option3.rect.x , Option3.rect.y))
+    Option3.update(80 , 440  - 100, screen)
+    
+    if keys[pygame.K_RETURN]:
+            if active == 0 :
+                Main_Menu = False
+                running = True
+                pygame.mouse.set_visible(True)
+            if active == 1 :
+                {}# here must be a settings menu
+            if active == 2 :
+                pygame.quit()
+                exit()
+    pygame.display.flip()
+    clock.tick(60)
+    pygame.mouse.set_visible(False)
+     
+
+pygame.mouse.set_visible(True)
 while running:
     #print(enemies_counter)
     if stop == False:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    running = False
+                    paused = True
+                    pause_menu()
+                    
+                    
         for room in Rooms :
             if player.rect.colliderect(room.rect) and room.active == False:
                 room.active = True
