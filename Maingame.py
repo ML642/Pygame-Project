@@ -5,7 +5,7 @@ from player import Player
 from enemy import Enemy
 from camera import Camera
 from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
-from UI_components import draw_health_bar , Menu_option
+from UI_components import draw_health_bar , Menu_option , DustParticle
 from stopmenu import pause_menu , draw_button , draw_slider
 
 
@@ -87,7 +87,7 @@ copy = walls.copy()
 spawn_delay = 5000 
 last_spawn_time = 0
 
-
+paused = False
 running = False
 stop = False
 Main_Menu = True 
@@ -105,8 +105,11 @@ Option3 = Menu_option(80,440 - 100,200,50 ,  WHITE , BLUE , "Exit")
 Options = [Option1, Option2, Option3]
 active = 0
 Options[active].toogle()
+dust_particles = []
 
 while Main_Menu :
+    screen.blit(background, (0, 0)) 
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -123,7 +126,22 @@ while Main_Menu :
         if keys[pygame.K_UP]: 
             active -= 1
         if keys[pygame.K_DOWN]:
-            active += 1
+            active += 1        
+            
+    if random.random() < 0.75:  # adjust spawn rate
+        x = random.randint(0, 800)
+        y = random.randint(400, 600)  # near bottom
+        dust_particles.append(DustParticle(x, y))
+
+
+
+    for particle in dust_particles:
+        particle.update()
+        particle.draw(screen)
+
+    # Remove dead particles
+    dust_particles = [p for p in dust_particles if not p.is_dead()]
+        
    
     if active < 0: 
         active = len(Options) - 1
@@ -143,7 +161,7 @@ while Main_Menu :
    
     
     
-    screen.blit(background, (0, 0)) 
+    
     screen.blit(tittle, (screen_width // 2 - tittle.get_width() // 2 - 30 , 50))
     screen.blit(tittle2, (screen_width // 2 - tittle.get_width() // 2 + 180, 50))
     
@@ -174,7 +192,7 @@ while Main_Menu :
 pygame.mouse.set_visible(True)
 while running:
     #print(enemies_counter)
-    if stop == False:
+        screen.fill(BLACK)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -233,7 +251,7 @@ while running:
         camera.update(player)
 
         
-        screen.fill(BLACK)
+        
         mouse_world_x = pygame.mouse.get_pos()[0] - camera.camera.x
         mouse_world_y = pygame.mouse.get_pos()[1] - camera.camera.y
         dx = mouse_world_x - player.rect.centerx
@@ -295,7 +313,7 @@ while running:
         if player.health <= 1:
             pygame.quit()
 
-    pygame.display.flip()
-    clock.tick(60)
+        pygame.display.flip()
+        clock.tick(60)
 
 pygame.quit()

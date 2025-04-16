@@ -1,6 +1,5 @@
 import pygame
 import os
-
 pygame.init()
 screen = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Pause Menu Test")
@@ -50,10 +49,13 @@ def draw_slider(x, y, width, height, value):
     return volume
 
 def pause_menu():
-    global paused, running
-
+    global paused 
+    paused= True
+    global running 
+    print("Paused")
     while paused:
-        screen.fill(BLUE)
+        print("In pause menu")
+        screen.fill(BLACK)
         title = font.render("PAUSED", True, WHITE)
         screen.blit(title, (330, 100))
 
@@ -64,6 +66,7 @@ def pause_menu():
         if draw_button("Quit", 300, 270, 200, 50, RED, (255, 100, 100)):
             if confirm_quit():
                 running = False
+                pygame.quit()
                 paused = False
 
         # Volume slider
@@ -82,6 +85,7 @@ def pause_menu():
 
 def confirm_quit():
     while True:
+        
         screen.fill(BLACK)
         message = font.render("Quit Game?", True, WHITE)
         screen.blit(message, (300, 200))
@@ -97,8 +101,8 @@ def confirm_quit():
             if event.type == pygame.QUIT:
                 return True
 
-#Main game loop
-clock = pygame.time.Clock()
+# #Main game loop
+# clock = pygame.time.Clock()
 
 # while running:
 #     screen.fill((30, 30, 30))

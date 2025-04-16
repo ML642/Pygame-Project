@@ -1,4 +1,6 @@
 import pygame 
+import random 
+
 
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -49,3 +51,31 @@ class Menu_option (pygame.sprite.Sprite):
          else : 
              self.active = True
              self.image.fill(self.hover_color)
+    
+class DustParticle:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+        self.radius = random.randint(1, 3)
+        self.speed_y = random.uniform(-0.2, -0.5)
+        self.alpha = random.randint(50, 100)
+        self.lifetime = random.randint(100, 200)
+        self.surface = pygame.Surface((self.radius * 4, self.radius * 4), pygame.SRCALPHA)
+
+    def update(self):
+        self.y += self.speed_y
+        self.alpha -= 0.2
+        self.lifetime -= 1
+
+    def draw(self, screen):
+        self.surface.fill((0, 0, 0, 0))  # Clear the surface with full transparency
+        pygame.draw.circle(
+            self.surface,
+            (255, 255, 255, max(0, int(self.alpha))),
+            (self.surface.get_width() // 2, self.surface.get_height() // 2),
+            self.radius
+        )
+        screen.blit(self.surface, (self.x, self.y))
+
+    def is_dead(self):
+        return self.lifetime <= 0 or self.alpha <= 0
