@@ -100,25 +100,25 @@ def confirm_quit():
 #Main game loop
 clock = pygame.time.Clock()
 
-while running:
-    screen.fill((30, 30, 30))
+# while running:
+#     screen.fill((30, 30, 30))
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                paused = True
-                pause_menu()
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             running = False
+#         elif event.type == pygame.KEYDOWN:
+#             if event.key == pygame.K_ESCAPE:
+#                 paused = True
+#                 pause_menu()
 
-    # Display the current volume
-    vol_display = font.render(f"Volume: {round(volume * 100)}%", True, WHITE)
-    screen.blit(vol_display, (250, 280))
+#     # Display the current volume
+#     vol_display = font.render(f"Volume: {round(volume * 100)}%", True, WHITE)
+#     screen.blit(vol_display, (250, 280))
 
-    info = font.render("Running game... Press ESC to pause", True, WHITE)
-    screen.blit(info, (120, 350))
+#     info = font.render("Running game... Press ESC to pause", True, WHITE)
+#     screen.blit(info, (120, 350))
 
-    pygame.display.flip()
-    clock.tick(60)
+#     pygame.display.flip()
+#     clock.tick(60)
 
-pygame.quit()
+# pygame.quit()
