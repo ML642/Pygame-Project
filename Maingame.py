@@ -8,7 +8,6 @@ from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway 
 from UI_components import draw_health_bar , Menu_option , DustParticle
 from stopmenu import pause_menu , draw_button , draw_slider
 
-
 pygame.init()
 screen_width = 800 
 screen_height = 600
@@ -106,6 +105,7 @@ Options = [Option1, Option2, Option3]
 active = 0
 Options[active].toogle()
 dust_particles = []
+drops = pygame.sprite.Group()
 
 while Main_Menu :
     screen.blit(background, (0, 0)) 
@@ -117,6 +117,7 @@ while Main_Menu :
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:  
                 Main_Menu = False
+          
         keys = pygame.key.get_pressed()
         previous_active = active
         if keys[pygame.K_LEFT]:
@@ -201,6 +202,10 @@ while running:
                 if event.key == pygame.K_ESCAPE:
                     paused = True
                     pause_menu()
+                elif event.key == pygame.K_e: # Added "E" hotkey to pick up items.
+                    for drop in drops:
+                        if player.rect.colliderect(drop.rect):
+                            drop.pickup(player)
                     
                     
         for room in Rooms :
@@ -228,7 +233,7 @@ while running:
                 x = random.randint(room.rect.x, room.rect.x  + ROOM_WIDTH - 160)
                 
                 y = random.randint(room.rect.y, room.rect.y  + ROOM_HEIGHT - 160)
-                enemy = Enemy(x, y)
+                enemy = Enemy(x, y,drops)
                 
                 if not any(enemy.rect.colliderect(wall.rect) for wall in walls):
                     enemies.add(enemy)
@@ -270,9 +275,10 @@ while running:
          else:
             for enemy in enemies:
                 if tear.rect.colliderect(enemy.rect):
-                    enemy.health -= 1
+                    enemy.take_damage()
                     if tear in player.tears:
                         player.tears.remove(tear)
+                        
                     if enemy.health <= 0:
                         enemies.remove(enemy)
                         kills +=1 
@@ -302,7 +308,9 @@ while running:
         for enemy in enemies:
           if player.rect.colliderect(enemy.rect):
             player.health -= 0.1 
-
+        for drop in drops:
+            
+            screen.blit(drop.image, camera.apply(drop))
         # Health and UI elements (drawn without camera offset)
         font = pygame.font.SysFont(None, 36)
         health_text = font.render(f"Hearts: {int(player.health)}", True, WHITE)
