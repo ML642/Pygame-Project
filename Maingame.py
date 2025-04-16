@@ -5,10 +5,7 @@ from player import Player
 from enemy import Enemy
 from camera import Camera
 from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
-from UI_components import draw_health_bar , Menu_option , DustParticle
-from stopmenu import pause_menu , draw_button , draw_slider
-
-
+from UI_components import draw_health_bar
 pygame.init()
 screen_width = 800 
 screen_height = 600
@@ -83,126 +80,52 @@ for room_data in level_1data:
 
 enemies = pygame.sprite.Group()
 enemies_counter = 0
+drops = pygame.sprite.Group()
 copy = walls.copy()
 spawn_delay = 5000 
 last_spawn_time = 0
 
-paused = False
-running = False
+
+running = True
 stop = False
 Main_Menu = True 
 
     
-player.rect.center = ( -250 , 50 + ROOM_HEIGHT / 2 )  # - move the player to the room 
+player.rect.center = ( -250 , 50 + ROOM_HEIGHT/2 )  # - move the player to the room 
 
-background = pygame.image.load('images/Background1.png').convert_alpha()
-background = pygame.transform.scale(background,( screen_width,screen_height))
-
-Option1 = Menu_option(80,300 - 100, 200, 50,  WHITE, BLUE , "Play")
-Option2 = Menu_option(80,370 - 100, 200, 50,  WHITE, BLUE , "Settings ")
-Option3 = Menu_option(80,440 - 100,200,50 ,  WHITE , BLUE , "Exit")
-
-Options = [Option1, Option2, Option3]
-active = 0
-Options[active].toogle()
-dust_particles = []
-
-while Main_Menu :
-    screen.blit(background, (0, 0)) 
-    
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            exit()
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:  
-                Main_Menu = False
-        keys = pygame.key.get_pressed()
-        previous_active = active
-        if keys[pygame.K_LEFT]:
-            active -= 1
-        if keys[pygame.K_RIGHT]: 
-            active += 1
-        if keys[pygame.K_UP]: 
-            active -= 1
-        if keys[pygame.K_DOWN]:
-            active += 1        
-            
-    if random.random() < 0.75:  # adjust spawn rate
-        x = random.randint(0, 800)
-        y = random.randint(400, 600)  # near bottom
-        dust_particles.append(DustParticle(x, y))
-
-
-
-    for particle in dust_particles:
-        particle.update()
-        particle.draw(screen)
-
-    # Remove dead particles
-    dust_particles = [p for p in dust_particles if not p.is_dead()]
-        
-   
-    if active < 0: 
-        active = len(Options) - 1
-    if active >= len(Options): 
-        active = 0
-
-    for option in range(len(Options)):
-        if option != active and Options[option].active == True   :
-            Options[option].toogle()
-        if option == active and Options[option].active == False :
-            Options[option].toogle()
-  
-    title_font = pygame.font.SysFont("Bauhaus 93", 72)
-  
-    tittle = title_font.render(" Bullet  ", RED, WHITE)
-    tittle2 = title_font.render("  Born ", RED, BLACK)
-   
+# background = pygame.image.load('images/Background1.png').convert_alpha()
+# background = pygame.transform.scale(background,( screen_width,screen_height))
+# while Main_Menu :
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             pygame.quit()
+#             exit()
+#         elif event.type == pygame.KEYDOWN:
+#             if event.key == pygame.K_RETURN:  
+#                 Main_Menu = False
     
     
+#     screen.blit(background, (0, 0)) 
     
-    screen.blit(tittle, (screen_width // 2 - tittle.get_width() // 2 - 30 , 50))
-    screen.blit(tittle2, (screen_width // 2 - tittle.get_width() // 2 + 180, 50))
-    
-    screen.blit(Option1.image , (Option1.rect.x , Option1.rect.y))    
-    Option1.update(80 , 300 -100, screen)
-    
-    screen.blit(Option2.image , (Option2.rect.x , Option2.rect.y))
-    Option2.update(80 , 370 -100, screen)
-    
-    screen.blit(Option3.image , (Option3.rect.x , Option3.rect.y))
-    Option3.update(80 , 440  - 100, screen)
-    
-    if keys[pygame.K_RETURN]:
-            if active == 0 :
-                Main_Menu = False
-                running = True
-                pygame.mouse.set_visible(True)
-            if active == 1 :
-                {}# here must be a settings menu
-            if active == 2 :
-                pygame.quit()
-                exit()
-    pygame.display.flip()
-    clock.tick(60)
-    pygame.mouse.set_visible(False)
+#     pygame.display.flip()
+#     clock.tick(60)
+#     pygame.mouse.set_visible(False)
      
-
-pygame.mouse.set_visible(True)
+# running = False 
+   
 while running:
     #print(enemies_counter)
-        screen.fill(BLACK)
+    if stop == False:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
-                    paused = True
-                    pause_menu()
-                    
-                    
+                    running = False
+                elif event.key == pygame.K_e: # Added "E" hotkey to pick up items.
+                    for drop in drops:
+                        if player.rect.colliderect(drop.rect):
+                            drop.pickup(player)
         for room in Rooms :
             if player.rect.colliderect(room.rect) and room.active == False:
                 room.active = True
@@ -228,7 +151,7 @@ while running:
                 x = random.randint(room.rect.x, room.rect.x  + ROOM_WIDTH - 160)
                 
                 y = random.randint(room.rect.y, room.rect.y  + ROOM_HEIGHT - 160)
-                enemy = Enemy(x, y)
+                enemy = Enemy(x, y, drops)
                 
                 if not any(enemy.rect.colliderect(wall.rect) for wall in walls):
                     enemies.add(enemy)
@@ -251,7 +174,7 @@ while running:
         camera.update(player)
 
         
-        
+        screen.fill(BLACK)
         mouse_world_x = pygame.mouse.get_pos()[0] - camera.camera.x
         mouse_world_y = pygame.mouse.get_pos()[1] - camera.camera.y
         dx = mouse_world_x - player.rect.centerx
@@ -270,21 +193,22 @@ while running:
          else:
             for enemy in enemies:
                 if tear.rect.colliderect(enemy.rect):
-                    enemy.health -= 1
+                    enemy.take_damage()
                     if tear in player.tears:
                         player.tears.remove(tear)
-                    if enemy.health <= 0:
-                        enemies.remove(enemy)
+                    if not enemy.alive():
                         kills +=1 
                         enemies_counter -=1
                     break
-        
+
         for floor in floors:
             screen.blit(floor.image, camera.apply(floor))
         for wall in walls:
             screen.blit(wall.image, camera.apply(wall))
         for enemy in enemies:
-            screen.blit(enemy.image, camera.apply(enemy))        
+            screen.blit(enemy.image, camera.apply(enemy))
+        for drop in drops:
+            screen.blit(drop.image, camera.apply(drop))
         screen.blit(rotated_image, rotated_rect.topleft + pygame.math.Vector2(camera.camera.topleft))
         
         
@@ -313,7 +237,7 @@ while running:
         if player.health <= 1:
             pygame.quit()
 
-        pygame.display.flip()
-        clock.tick(60)
+    pygame.display.flip()
+    clock.tick(60)
 
 pygame.quit()

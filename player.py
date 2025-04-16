@@ -1,16 +1,17 @@
 import pygame
 import random
 import math
+from drop import Drop
 
 class Tear(pygame.sprite.Sprite):
     def __init__(self, x, y, direction):
         super().__init__()
         self.orig = pygame.image.load('images/bullet.png').convert_alpha()
         
-        self.image = pygame.transform.scale(self.orig,(20,20)) 
+        self.image = pygame.transform.scale(self.orig,(20,20))
         
+
         self.rect = self.image.get_rect(center=(x, y))
-        
         self.speed = 7
         self.direction = direction
         self.lifetime = 50
