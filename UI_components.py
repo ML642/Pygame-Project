@@ -22,35 +22,69 @@ def draw_health_bar(surface, current_hp, max_hp):
 class Menu_option (pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, color, hover_color,text):
         super().__init__()
-        self.image = pygame.Surface((width, height))
+        self.image = pygame.Surface((width , height))
         
         self.image.fill(color)
         self.rect = self.image.get_rect(topleft=(x, y))
         self.color = color
         self.hover_color = hover_color
+        
+        self.original_width = width 
+        self.original_height = height
+        
+        self.hover_width = width + 220
+        self.hover_height = height  
+         
+        
+        
         self.active = False 
         self.text = text 
         self.width = width  
         self.height = height
-        
+    
+    
+    
     def update(self , x , y, screen):        
-        font = pygame.font.Font(None, 36)
-        if  self.active ==  False : 
-             text_surface = font.render(self.text, True, BLACK)
-        else :
-             text_surface = font.render (self.text , True , WHITE )
-             
-        text_rect = text_surface.get_rect(center=(x + self.width / 2, y + self.height / 2))
-        
-        screen.blit(text_surface, (text_rect))
+            font = pygame.font.SysFont("Bauhaus 93", 42)
+            shadow = font.render(self.text, True, BLACK)
+            shadow.set_alpha(150,150)
+            # Smoothly transition the size
+            target_width = self.hover_width if self.active else self.original_width
+            target_height = self.hover_height if self.active else self.original_height
+
+            self.width += (target_width - self.width) * 0.05
+            self.height += (target_height - self.height) * 0.2
+           
+            self.image = pygame.Surface((int(self.width), int(self.height)), pygame.SRCALPHA)  # Use SRCALPHA for transparency
+           
+            self.image.fill((0, 0, 0, 0))
+           
+            pygame.draw.rect(
+                    self.image,
+                    self.hover_color if self.active else self.color,
+                    (0, 0, int(self.width), int(self.height)),
+                    border_radius = 15  # Adjust the border radius for rounded corners
+                )
+            
+            # Update the button's image and rect
+            
+            
+            self.rect = self.image.get_rect(topleft=(x, y))
+
+            # Draw the text
+            text_surface = font.render(self.text, True, BLACK if not self.active else WHITE)
+            text_rect = text_surface.get_rect(center=(self.width / 2, self.height / 2))
+            
+            if self.active == True :
+                self.image.blit(shadow, (text_rect.x + 10, text_rect.y + 5))
+
+            self.image.blit(text_surface, text_rect)
+           
+            # Blit the button to the screen
+            screen.blit(self.image, self.rect.topleft)
         
     def toogle  (self): 
-         if self.active : 
-             self.active = False 
-             self.image.fill(self.color)
-         else : 
-             self.active = True
-             self.image.fill(self.hover_color)
+       self.active = not self.active
     
 class DustParticle:
     def __init__(self, x, y):

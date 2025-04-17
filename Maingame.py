@@ -7,7 +7,7 @@ from camera import Camera
 from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
 from UI_components import draw_health_bar , Menu_option , DustParticle
 from stopmenu import pause_menu , draw_button , draw_slider
-
+from Main_Menu import Main_menu
 pygame.init()
 screen_width = 800 
 screen_height = 600
@@ -20,7 +20,7 @@ RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
-
+YELLOW = (255, 255, 0)
 
 ROOM_WIDTH, ROOM_HEIGHT = 700, 500
 CELL_SIZE = 40
@@ -89,108 +89,12 @@ last_spawn_time = 0
 paused = False
 running = False
 stop = False
-Main_Menu = True 
-
+drops = pygame.sprite.Group()
     
 player.rect.center = ( -250 , 50 + ROOM_HEIGHT / 2 )  # - move the player to the room 
 
-background = pygame.image.load('images/Background1.png').convert_alpha()
-background = pygame.transform.scale(background,( screen_width,screen_height))
+Main_menu()
 
-Option1 = Menu_option(80,300 - 100, 200, 50,  WHITE, BLUE , "Play")
-Option2 = Menu_option(80,370 - 100, 200, 50,  WHITE, BLUE , "Settings ")
-Option3 = Menu_option(80,440 - 100,200,50 ,  WHITE , BLUE , "Exit")
-
-Options = [Option1, Option2, Option3]
-active = 0
-Options[active].toogle()
-dust_particles = []
-drops = pygame.sprite.Group()
-
-while Main_Menu :
-    screen.blit(background, (0, 0)) 
-    
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            exit()
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:  
-                Main_Menu = False
-          
-        keys = pygame.key.get_pressed()
-        previous_active = active
-        if keys[pygame.K_LEFT]:
-            active -= 1
-        if keys[pygame.K_RIGHT]: 
-            active += 1
-        if keys[pygame.K_UP]: 
-            active -= 1
-        if keys[pygame.K_DOWN]:
-            active += 1        
-            
-    if random.random() < 0.75:  # adjust spawn rate
-        x = random.randint(0, 800)
-        y = random.randint(400, 600)  # near bottom
-        dust_particles.append(DustParticle(x, y))
-
-
-
-    for particle in dust_particles:
-        particle.update()
-        particle.draw(screen)
-
-    # Remove dead particles
-    dust_particles = [p for p in dust_particles if not p.is_dead()]
-        
-   
-    if active < 0: 
-        active = len(Options) - 1
-    if active >= len(Options): 
-        active = 0
-
-    for option in range(len(Options)):
-        if option != active and Options[option].active == True   :
-            Options[option].toogle()
-        if option == active and Options[option].active == False :
-            Options[option].toogle()
-  
-    title_font = pygame.font.SysFont("Bauhaus 93", 72)
-  
-    tittle = title_font.render(" Bullet  ", RED, WHITE)
-    tittle2 = title_font.render("  Born ", RED, BLACK)
-   
-    
-    
-    
-    screen.blit(tittle, (screen_width // 2 - tittle.get_width() // 2 - 30 , 50))
-    screen.blit(tittle2, (screen_width // 2 - tittle.get_width() // 2 + 180, 50))
-    
-    screen.blit(Option1.image , (Option1.rect.x , Option1.rect.y))    
-    Option1.update(80 , 300 -100, screen)
-    
-    screen.blit(Option2.image , (Option2.rect.x , Option2.rect.y))
-    Option2.update(80 , 370 -100, screen)
-    
-    screen.blit(Option3.image , (Option3.rect.x , Option3.rect.y))
-    Option3.update(80 , 440  - 100, screen)
-    
-    if keys[pygame.K_RETURN]:
-            if active == 0 :
-                Main_Menu = False
-                running = True
-                pygame.mouse.set_visible(True)
-            if active == 1 :
-                {}# here must be a settings menu
-            if active == 2 :
-                pygame.quit()
-                exit()
-    pygame.display.flip()
-    clock.tick(60)
-    pygame.mouse.set_visible(False)
-     
-
-pygame.mouse.set_visible(True)
 while running:
     #print(enemies_counter)
         screen.fill(BLACK)
