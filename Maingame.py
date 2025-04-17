@@ -8,6 +8,8 @@ from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway 
 from UI_components import draw_health_bar , Menu_option , DustParticle
 from stopmenu import pause_menu , draw_button , draw_slider
 from Main_Menu import Main_menu
+
+
 pygame.init()
 screen_width = 800 
 screen_height = 600
@@ -24,6 +26,7 @@ YELLOW = (255, 255, 0)
 
 ROOM_WIDTH, ROOM_HEIGHT = 700, 500
 CELL_SIZE = 40
+
 level_1data = [
     {"x": 50, "y": 50, "form": 2, "type": 1, "enemies_counter": 3},
     {"x": ROOM_WIDTH + 50 + 240 + 100, "y": 50, "form": 9, "type": 1, "enemies_counter": 3},
@@ -90,11 +93,13 @@ paused = False
 running = False
 stop = False
 drops = pygame.sprite.Group()
+running = True  
     
 player.rect.center = ( -250 , 50 + ROOM_HEIGHT / 2 )  # - move the player to the room 
 
 Main_menu()
 
+pygame.mouse.set_visible(True)
 while running:
     #print(enemies_counter)
         screen.fill(BLACK)

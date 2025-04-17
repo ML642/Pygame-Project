@@ -4,7 +4,6 @@ from UI_components import Menu_option
 from UI_components import DustParticle
 pygame.init()
 
-
 def Main_menu ():
     screen_width = 800 
     screen_height = 600
