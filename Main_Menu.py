@@ -58,6 +58,7 @@ def Main_menu ():
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:  
                     Main_Menu = False
+                    pygame.quit()
             
             keys = pygame.key.get_pressed()
             previous_active = active

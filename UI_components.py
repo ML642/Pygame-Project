@@ -32,7 +32,7 @@ class Menu_option (pygame.sprite.Sprite):
         self.original_width = width 
         self.original_height = height
         
-        self.hover_width = width + 220
+        self.hover_width = width + 100
         self.hover_height = height  
          
         
