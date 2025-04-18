@@ -90,16 +90,16 @@ def Room_Create ( x , y  , form , type , enemies_counter ):
     if form == 1 or form == 3 or form ==4 or form == 5  or form == 7 : # top corridor , 
         floors.add(Floor_Hallway( (x + 250) *  scale_x , (y -  230)* scale_y   , 210 , 255  ,scale_x ,scale_y ))
 
-OFFSET3 = 473
-OFFSET2 = 1150
+OFFSET3 = 353
+OFFSET2 = 1000
 OFFSET = 700    
 OFFSETY = (scale_y-1) * 2
 player = Player (scale_x,scale_y)
 #############################
 
 walls = generate_room(int((-300 - ROOM_WIDTH) + int(OFFSET) * ( scale_x -1 ) )  ,int( 50 ), 7, 1, scale_x ,scale_y )  # initiate first room
-floors.add(Floor((-300 - 600) - int(OFFSET2) * (scale_x -1 ),  50 * scale_y  , scale_x , scale_y)) 
-floors.add(Floor_Hallway((-250 - 600 - 30 + 677) -  int(OFFSET3) *(scale_x -1), (50 + 195) * scale_y, 400 , 90  , scale_x , scale_y))
+floors.add(Floor((-300 - 700) - int(OFFSET2) * (scale_x -1 ),  50 * scale_y  , scale_x , scale_y)) 
+floors.add(Floor_Hallway((-300) -  int(OFFSET3) *(scale_x -1), (50 + 195) * scale_y, 400 , 90  , scale_x , scale_y))
 
 #############################
 
