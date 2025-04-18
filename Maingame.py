@@ -10,11 +10,26 @@ from stopmenu import pause_menu , draw_button , draw_slider
 from Main_Menu import Main_menu
 
 
+
 pygame.init()
 screen_width = 800 
 screen_height = 600
-screen = pygame.display.set_mode((800, 600))
+
+BASE_WIDTH = 800 
+BASE_HEIGHT = 600
+
+SELECTED_WIDTH = 800
+SELECTED_HEIGHT = 600
+
+scale_x = SELECTED_WIDTH / BASE_WIDTH
+scale_y = SELECTED_HEIGHT / BASE_HEIGHT
+
+
+
+
+screen = pygame.display.set_mode((800 * scale_x, 600 * scale_y))
 clock = pygame.time.Clock()
+
 
 
 BLACK = (0, 0, 0)
@@ -24,7 +39,9 @@ BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
 
-ROOM_WIDTH, ROOM_HEIGHT = 700, 500
+
+
+ROOM_WIDTH, ROOM_HEIGHT = 700 * scale_x, 500 * scale_y
 CELL_SIZE = 40
 
 level_1data = [
@@ -51,30 +68,31 @@ Rooms = pygame.sprite.Group()
 floors = pygame.sprite.Group()
 kills = 0
 
-camera = Camera(800,600 , 12000,12000)
+camera = Camera(800 * scale_x,600 * scale_y , 12000 * scale_x,12000 * scale_y)
 
-floors.add(Floor(50,50))
+# technical debt
+floors.add(Floor(50 * scale_x,50 * scale_y))
 def Room_Create ( x , y  , form , type , enemies_counter):
-    walls.add(generate_room(x,y,form,type))
-    floors.add(Floor(x,y))
+    walls.add(generate_room(int(x * scale_x),int(y * scale_y),form,type))
+    floors.add(Floor(x *  scale_x,y * scale_y))
     
     
-    Rooms.add(Room(x,y+50,enemies_counter))
+    Rooms.add(Room(x  * scale_x,(y+50) * scale_y , enemies_counter))
     if form == 1 or form == 2 or form ==9 or form == 8 or form == 11 or form ==7 :   # right corridor  
-         floors.add(Floor_Hallway(x + 677 , y + 195 , 300 , 90))
+         floors.add(Floor_Hallway((x + 677) * scale_x , (y + 195)* scale_y , 300 * scale_x , 90 * scale_y))
     if form == 1 or form == 2 or form == 3 or form == 4 or form == 5 or form ==8 : # bottom corridor 
-        floors.add(Floor_Hallway( x + 250 , y + 480 , 210 , 260 ))
+        floors.add(Floor_Hallway( (x + 250)*scale_x , (y + 480)*scale_y , 210 * scale_x , 260 * scale_y ))
     if form ==1 or form == 2 or form == 3 or form == 4 or form ==6 or form == 9  : # left corrior 
-        floors.add(Floor_Hallway( x  - 300 , y + 195 , 300 ,  90 ))	
+        floors.add(Floor_Hallway( (x  - 300) * scale_x , (y + 195)*scale_y , 300 * scale_x ,  90 * scale_y ))	
     if form == 1 or form == 3 or form ==4 or form == 5  or form == 7 : # top corridor , 
-        floors.add(Floor_Hallway( x + 250 , y -  230   , 210 , 255 ))
+        floors.add(Floor_Hallway( (x + 250)* scale_x , (y -  230)* scale_y   , 210* scale_x , 255 * scale_y ))
 
     
 player = Player()
 #############################
-walls = generate_room(-300- ROOM_WIDTH , 50 , 7 ,1) # initiate first room 
-floors.add(Floor(-300- ROOM_WIDTH , 50))
-floors.add(Floor_Hallway(-250- ROOM_WIDTH - 30 + 677 , 50 + 195 , 400 , 90))
+walls = generate_room(int((-300 - ROOM_WIDTH) * scale_x),int( 50 * scale_y), 7, 1 )  # initiate first room
+floors.add(Floor((-300 - ROOM_WIDTH) * scale_x, 50 * scale_y))
+floors.add(Floor_Hallway((-250 - ROOM_WIDTH - 30 + 677) * scale_x, (50 + 195) * scale_y, 400 * scale_x, 90 * scale_y))
 #############################
 
 for room_data in level_1data:
@@ -95,7 +113,7 @@ stop = False
 drops = pygame.sprite.Group()
 running = True  
     
-player.rect.center = ( -250 , 50 + ROOM_HEIGHT / 2 )  # - move the player to the room 
+player.rect.center = ( -250 * scale_x ,(50 + ROOM_HEIGHT / 2 )* scale_y )  # - move the player to the room 
 
 Main_menu()
 
@@ -139,9 +157,9 @@ while running:
             last_spawn_time = pygame.time.get_ticks()
             room.clear = True 
             while enemies_to_spawn > 0:
-                x = random.randint(room.rect.x, room.rect.x  + ROOM_WIDTH - 160)
+                x = random.randint(room.rect.x, room.rect.x  + int(ROOM_WIDTH - 160 * scale_x))
                 
-                y = random.randint(room.rect.y, room.rect.y  + ROOM_HEIGHT - 160)
+                y = random.randint(room.rect.y, room.rect.y  + int(ROOM_HEIGHT - (160)*scale_y))
                 enemy = Enemy(x, y,drops)
                 
                 if not any(enemy.rect.colliderect(wall.rect) for wall in walls):
@@ -153,8 +171,8 @@ while running:
         mouse_buttons = pygame.mouse.get_pressed()
         if mouse_buttons[0]:  # Left click
     # Get mouse position in WORLD coordinates
-          mouse_world_x = pygame.mouse.get_pos()[0] - camera.camera.x
-          mouse_world_y = pygame.mouse.get_pos()[1] - camera.camera.y
+          mouse_world_x = pygame.mouse.get_pos()[0] / scale_x - camera.camera.x # i am sceptical about this resolution fix 
+          mouse_world_y = pygame.mouse.get_pos()[1] /scale_y- camera.camera.y
     
     # Calculate direction relative to player's WORLD position
           dx = mouse_world_x - player.rect.centerx
@@ -221,12 +239,12 @@ while running:
             
             screen.blit(drop.image, camera.apply(drop))
         # Health and UI elements (drawn without camera offset)
-        font = pygame.font.SysFont(None, 36)
+        font = pygame.font.SysFont(None, int(36 * scale_x))
         health_text = font.render(f"Hearts: {int(player.health)}", True, WHITE)
         coordinates  = font.render(f"Player coordinates: X  {int(player.rect.x)} Y  {int(player.rect.y)}", True, WHITE)
         
         draw_health_bar(screen,player.health, player.max_health)
-        screen.blit(coordinates, (20, 50))
+        screen.blit(coordinates, (20 * scale_x, 50 * scale_y))
         if player.health <= 1:
             pygame.quit()
 
