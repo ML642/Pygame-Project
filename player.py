@@ -3,13 +3,13 @@ import random
 import math
 
 class Tear(pygame.sprite.Sprite):
-    def __init__(self, x, y, direction):
+    def __init__(self, x, y, direction , scale_x =1 ,scale_y = 1):
         super().__init__()
         self.orig = pygame.image.load('images/bullet.png').convert_alpha()
         
-        self.image = pygame.transform.scale(self.orig,(20,20)) 
+        self.image = pygame.transform.scale(self.orig,(20 * scale_x,20 * scale_y)) 
         
-        self.rect = self.image.get_rect(center=(x, y))
+        self.rect = self.image.get_rect(center=(x , y ))
         
         self.speed = 7
         self.direction = direction
@@ -29,14 +29,16 @@ BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self,scale_x = 1 ,scale_y = 1):
         super().__init__()
         self.orig = pygame.image.load('images/player.png').convert_alpha()
+        self.scale_x = scale_x
+        self.scale_y = scale_y
         
-        self.image = pygame.transform.scale(self.orig,(50,50))
-        self.original_image = self.image   
+        self.image = pygame.transform.scale(self.orig,(50 * scale_x,50 * scale_y))
+        self.original_image = self.image 
         self.rect = self.image.get_rect(center=(400, 300))
-        self.speed = 5
+        self.speed = 5 
         self.health = 300
         self.max_health = 300
         self.shot_cooldown = 0
@@ -46,14 +48,14 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
         dx, dy = 0, 0
         
-        if keys[pygame.K_LEFT]: dx -= self.speed
-        if keys[pygame.K_RIGHT]: dx += self.speed
-        if keys[pygame.K_UP]: dy -= self.speed
-        if keys[pygame.K_DOWN]: dy += self.speed
+        if keys[pygame.K_LEFT]: dx -= self.speed  * self.scale_x
+        if keys[pygame.K_RIGHT]: dx += self.speed * self.scale_x
+        if keys[pygame.K_UP]: dy -= self.speed *  self.scale_y
+        if keys[pygame.K_DOWN]: dy += self.speed * self.scale_y
         
         # Diagonal movement normalization
         if dx != 0 and dy != 0:
-            dx *= 0.7071  # 1/sqrt(2)
+            dx *= 0.7071    # 1/sqrt(2)
             dy *= 0.7071
         
         # Wall collision
@@ -71,7 +73,7 @@ class Player(pygame.sprite.Sprite):
                 dy = 0
                 break
                 
-        self.rect.x += dx
+        self.rect.x += dx 
         self.rect.y += dy
         
         # Shooting cooldown
@@ -80,7 +82,7 @@ class Player(pygame.sprite.Sprite):
             
     def shoot(self, direction):
         if self.shot_cooldown == 0:
-            tear = Tear(self.rect.centerx, self.rect.centery, direction)
+            tear = Tear(self.rect.centerx, self.rect.centery, direction,self.scale_x ,self.scale_y)
             angle = math.degrees(math.atan2(-direction[1], direction[0]))
             tear.image = pygame.transform.rotate(tear.image, angle)
             self.tears.append(tear)

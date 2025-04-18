@@ -1,6 +1,7 @@
 import pygame
 import random
 import math
+import os
 from player import Player
 from enemy import Enemy
 from camera import Camera
@@ -14,12 +15,12 @@ from Main_Menu import Main_menu
 pygame.init()
 screen_width = 800 
 screen_height = 600
-
+os.environ['SDL_VIDEO_CENTERED'] = "1"
 BASE_WIDTH = 800 
 BASE_HEIGHT = 600
 
-SELECTED_WIDTH = 800
-SELECTED_HEIGHT = 600
+SELECTED_WIDTH = 1360
+SELECTED_HEIGHT = 750
 
 scale_x = SELECTED_WIDTH / BASE_WIDTH
 scale_y = SELECTED_HEIGHT / BASE_HEIGHT
@@ -68,7 +69,7 @@ Rooms = pygame.sprite.Group()
 floors = pygame.sprite.Group()
 kills = 0
 
-camera = Camera(800 * scale_x,600 * scale_y , 12000 * scale_x,12000 * scale_y)
+camera = Camera(800 * scale_x,600 * scale_y , 12000 * scale_x,12000 * scale_y, scale_x , scale_y)
 
 # technical debt
 floors.add(Floor(50 * scale_x,50 * scale_y))
@@ -88,7 +89,7 @@ def Room_Create ( x , y  , form , type , enemies_counter):
         floors.add(Floor_Hallway( (x + 250)* scale_x , (y -  230)* scale_y   , 210* scale_x , 255 * scale_y ))
 
     
-player = Player()
+player = Player(scale_x,scale_y)
 #############################
 walls = generate_room(int((-300 - ROOM_WIDTH) * scale_x),int( 50 * scale_y), 7, 1 )  # initiate first room
 floors.add(Floor((-300 - ROOM_WIDTH) * scale_x, 50 * scale_y))
@@ -115,10 +116,11 @@ running = True
     
 player.rect.center = ( -250 * scale_x ,(50 + ROOM_HEIGHT / 2 )* scale_y )  # - move the player to the room 
 
-Main_menu()
+Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT)
 
 pygame.mouse.set_visible(True)
 while running:
+    
     #print(enemies_counter)
         screen.fill(BLACK)
         for event in pygame.event.get():
@@ -128,7 +130,7 @@ while running:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     paused = True
-                    pause_menu()
+                    pause_menu(scale_x , scale_y)
                 elif event.key == pygame.K_e: # Added "E" hotkey to pick up items.
                     for drop in drops:
                         if player.rect.colliderect(drop.rect):
@@ -160,7 +162,7 @@ while running:
                 x = random.randint(room.rect.x, room.rect.x  + int(ROOM_WIDTH - 160 * scale_x))
                 
                 y = random.randint(room.rect.y, room.rect.y  + int(ROOM_HEIGHT - (160)*scale_y))
-                enemy = Enemy(x, y,drops)
+                enemy = Enemy(x, y,drops,scale_x , scale_y)
                 
                 if not any(enemy.rect.colliderect(wall.rect) for wall in walls):
                     enemies.add(enemy)
@@ -171,17 +173,17 @@ while running:
         mouse_buttons = pygame.mouse.get_pressed()
         if mouse_buttons[0]:  # Left click
     # Get mouse position in WORLD coordinates
-          mouse_world_x = pygame.mouse.get_pos()[0] / scale_x - camera.camera.x # i am sceptical about this resolution fix 
-          mouse_world_y = pygame.mouse.get_pos()[1] /scale_y- camera.camera.y
+          mouse_world_x = pygame.mouse.get_pos()[0]  - camera.camera.x # i am sceptical about this resolution fix 
+          mouse_world_y = pygame.mouse.get_pos()[1] - camera.camera.y
     
     # Calculate direction relative to player's WORLD position
-          dx = mouse_world_x - player.rect.centerx
-          dy = mouse_world_y - player.rect.centery
+          dx = mouse_world_x - player.rect.centerx 
+          dy = mouse_world_y - player.rect.centery 
           dist = max(1, math.sqrt(dx*dx + dy*dy))
           player.shoot((dx/dist, dy/dist))
         player.update(walls)
         camera.update(player)
-
+     
         
         
         mouse_world_x = pygame.mouse.get_pos()[0] - camera.camera.x
@@ -243,11 +245,21 @@ while running:
         health_text = font.render(f"Hearts: {int(player.health)}", True, WHITE)
         coordinates  = font.render(f"Player coordinates: X  {int(player.rect.x)} Y  {int(player.rect.y)}", True, WHITE)
         
-        draw_health_bar(screen,player.health, player.max_health)
+        draw_health_bar(screen,player.health, player.max_health,scale_x , scale_y)
         screen.blit(coordinates, (20 * scale_x, 50 * scale_y))
         if player.health <= 1:
             pygame.quit()
+        # Debugging information
+        font_debug = pygame.font.SysFont(None, int(24 * scale_x))  # Smaller font for debugging
+        mouse_world_text = font_debug.render(f"Mouse World: ({int(mouse_world_x)}, {int(mouse_world_y)})", True, WHITE)
+        player_position_text = font_debug.render(f"Player Position: ({int(player.rect.centerx)}, {int(player.rect.centery)})", True, WHITE)
+        direction_text = font_debug.render(f"Direction: ({round(dx, 2)}, {round(dy, 2)})", True, WHITE)
 
+        # Display debugging information on the screen
+        screen.blit(mouse_world_text, (20 * scale_x, 100 * scale_y))
+        screen.blit(player_position_text, (20 * scale_x, 130 * scale_y))
+        screen.blit(direction_text, (20 * scale_x, 160 * scale_y))
+                
         pygame.display.flip()
         clock.tick(60)
 

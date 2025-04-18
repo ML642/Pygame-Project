@@ -1,7 +1,7 @@
 import pygame 
 import random 
 
-ROOM_WIDTH, ROOM_HEIGHT = 700, 500
+ROOM_WIDTH, ROOM_HEIGHT = 700 , 500
 
 
 #ROOMS FORM 
@@ -17,7 +17,7 @@ ROOM_WIDTH, ROOM_HEIGHT = 700, 500
 #10 : top only 
 #11 : top and right 
 class Room (pygame.sprite.Sprite) : 
-    def __init__ (self, x , y , enemies_counter): 
+    def __init__ (self, x , y , enemies_counter, scale_x =1 , scale_y =1): 
         super().__init__()        
         
         self.clear = False 
