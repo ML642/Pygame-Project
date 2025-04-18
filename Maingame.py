@@ -18,9 +18,9 @@ screen_height = 600
 os.environ['SDL_VIDEO_CENTERED'] = "1"
 BASE_WIDTH = 800 
 BASE_HEIGHT = 600
-
-SELECTED_WIDTH = 1360
-SELECTED_HEIGHT = 750
+# 1350 x 800
+SELECTED_WIDTH = 800
+SELECTED_HEIGHT = 600   
 
 scale_x = SELECTED_WIDTH / BASE_WIDTH
 scale_y = SELECTED_HEIGHT / BASE_HEIGHT
@@ -29,6 +29,8 @@ scale_y = SELECTED_HEIGHT / BASE_HEIGHT
 
 
 screen = pygame.display.set_mode((800 * scale_x, 600 * scale_y))
+
+
 clock = pygame.time.Clock()
 
 
@@ -47,20 +49,20 @@ CELL_SIZE = 40
 
 level_1data = [
     {"x": 50, "y": 50, "form": 2, "type": 1, "enemies_counter": 3},
-    {"x": ROOM_WIDTH + 50 + 240 + 100, "y": 50, "form": 9, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 2, "y": 50, "form": 3, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 2, "y": 50 - (ROOM_HEIGHT + 260), "form": 8, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 2, "y": -50 + ROOM_HEIGHT + 260, "form": 10, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 3, "y": 50 - (ROOM_HEIGHT + 260), "form": 9, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 4, "y": 50 - (ROOM_HEIGHT + 260), "form": 6, "type": 1, "enemies_counter": 3},
-    {"x": 50, "y": ROOM_HEIGHT + 50 + 260, "form": 5, "type": 1, "enemies_counter": 3},
-    {"x": 50, "y": 30 + (ROOM_HEIGHT + 260) * 2, "form": 11, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (ROOM_WIDTH + 240 + 100), "y": 30 + (ROOM_HEIGHT + 260) * 2, "form": 2, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 2, "y": 30 + (ROOM_HEIGHT + 260) * 2, "form": 6, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (ROOM_WIDTH + 240 + 100), "y": 10 + (ROOM_HEIGHT + 260) * 4, "form": 11, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (ROOM_WIDTH + 240 + 100) , "y": 30 + (ROOM_HEIGHT + 260) * 3, "form": 5, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 2, "y": 10 + (ROOM_HEIGHT + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (ROOM_WIDTH + 240 + 100) * 3, "y": 10 + (ROOM_HEIGHT + 260) * 4, "form": 6, "type": 1, "enemies_counter": 3}
+    {"x": 700 + 50 + 240 + 100, "y": 50, "form": 9, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100) * 2, "y": 50, "form": 3, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100) * 2, "y": 50 - (500 + 260), "form": 8, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100) * 2, "y": -50 + 500 + 260, "form": 10, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100) * 3, "y": 50 - (500 + 260), "form": 9, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100) * 4, "y": 50 - (500 + 260), "form": 6, "type": 1, "enemies_counter": 3},
+    {"x": 50, "y": 500 + 50 + 260, "form": 5, "type": 1, "enemies_counter": 3},
+    {"x": 50, "y": 30 + (500 + 260) * 2, "form": 11, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100), "y": 30 + (500 + 260) * 2, "form": 2, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100) * 2, "y": 30 + (500 + 260) * 2, "form": 6, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100), "y": 10 + (500 + 260) * 4, "form": 11, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100), "y": 30 + (500 + 260) * 3, "form": 5, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100) * 2, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100) * 3, "y": 10 + (500 + 260) * 4, "form": 6, "type": 1, "enemies_counter": 3}
 ]
 
 
@@ -73,27 +75,32 @@ camera = Camera(800 * scale_x,600 * scale_y , 12000 * scale_x,12000 * scale_y, s
 
 # technical debt
 floors.add(Floor(50 * scale_x,50 * scale_y))
-def Room_Create ( x , y  , form , type , enemies_counter):
-    walls.add(generate_room(int(x * scale_x),int(y * scale_y),form,type))
-    floors.add(Floor(x *  scale_x,y * scale_y))
+def Room_Create ( x , y  , form , type , enemies_counter ):
+    walls.add(generate_room(int(x ),int(y ),form,type , scale_x , scale_y))
+    floors.add(Floor(x *  scale_x, y * scale_y,scale_x , scale_y))
     
     
-    Rooms.add(Room(x  * scale_x,(y+50) * scale_y , enemies_counter))
+    Rooms.add(Room(x  * scale_x,(y+50) * scale_y , enemies_counter,scale_x , scale_y))
     if form == 1 or form == 2 or form ==9 or form == 8 or form == 11 or form ==7 :   # right corridor  
-         floors.add(Floor_Hallway((x + 677) * scale_x , (y + 195)* scale_y , 300 * scale_x , 90 * scale_y))
+         floors.add(Floor_Hallway((x + 677) * scale_x , (y + 195)* scale_y , 300  , 90  ,scale_x,scale_y))
     if form == 1 or form == 2 or form == 3 or form == 4 or form == 5 or form ==8 : # bottom corridor 
-        floors.add(Floor_Hallway( (x + 250)*scale_x , (y + 480)*scale_y , 210 * scale_x , 260 * scale_y ))
+        floors.add(Floor_Hallway( (x + 250)*scale_x , (y + 480)*scale_y , 210  , 260 , scale_x ,  scale_y ))
     if form ==1 or form == 2 or form == 3 or form == 4 or form ==6 or form == 9  : # left corrior 
-        floors.add(Floor_Hallway( (x  - 300) * scale_x , (y + 195)*scale_y , 300 * scale_x ,  90 * scale_y ))	
+        floors.add(Floor_Hallway( (x  - 300) * scale_x , (y + 195)*scale_y , 300  ,  90  , scale_x , scale_y))	
     if form == 1 or form == 3 or form ==4 or form == 5  or form == 7 : # top corridor , 
-        floors.add(Floor_Hallway( (x + 250)* scale_x , (y -  230)* scale_y   , 210* scale_x , 255 * scale_y ))
+        floors.add(Floor_Hallway( (x + 250) *  scale_x , (y -  230)* scale_y   , 210 , 255  ,scale_x ,scale_y ))
 
-    
-player = Player(scale_x,scale_y)
+OFFSET3 = 473
+OFFSET2 = 1150
+OFFSET = 700    
+OFFSETY = (scale_y-1) * 2
+player = Player (scale_x,scale_y)
 #############################
-walls = generate_room(int((-300 - ROOM_WIDTH) * scale_x),int( 50 * scale_y), 7, 1 )  # initiate first room
-floors.add(Floor((-300 - ROOM_WIDTH) * scale_x, 50 * scale_y))
-floors.add(Floor_Hallway((-250 - ROOM_WIDTH - 30 + 677) * scale_x, (50 + 195) * scale_y, 400 * scale_x, 90 * scale_y))
+
+walls = generate_room(int((-300 - ROOM_WIDTH) + int(OFFSET) * ( scale_x -1 ) )  ,int( 50 ), 7, 1, scale_x ,scale_y )  # initiate first room
+floors.add(Floor((-300 - 600) - int(OFFSET2) * (scale_x -1 ),  50 * scale_y  , scale_x , scale_y)) 
+floors.add(Floor_Hallway((-250 - 600 - 30 + 677) -  int(OFFSET3) *(scale_x -1), (50 + 195) * scale_y, 400 , 90  , scale_x , scale_y))
+
 #############################
 
 for room_data in level_1data:
@@ -113,13 +120,16 @@ running = False
 stop = False
 drops = pygame.sprite.Group()
 running = True  
+OFFSET = 700
+OFFSETY = (scale_y-1) * 200    
     
-player.rect.center = ( -250 * scale_x ,(50 + ROOM_HEIGHT / 2 )* scale_y )  # - move the player to the room 
+player.rect.center = ( -500 +(1-scale_x) * OFFSET ,50 + ( 700 / 2 )* scale_y - OFFSETY  )  # - move the player to the room 
 
 Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT)
 
 pygame.mouse.set_visible(True)
 while running:
+    # print(scale_x ,scale_y)
     
     #print(enemies_counter)
         screen.fill(BLACK)

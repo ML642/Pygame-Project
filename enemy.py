@@ -16,7 +16,7 @@ class Enemy(pygame.sprite.Sprite):
         self.orig = pygame.image.load('images/Soldier1.png').convert_alpha()
         self.image = pygame.transform.scale(self.orig, (50 * scale_x, 50 * scale_y))
         self.rect = self.image.get_rect(center=(x, y))
-        self.speed = (random.uniform(1,2))
+        self.speed = (random.uniform(1,2)) * scale_x
         self.health = 3
         self.drops = drops
         

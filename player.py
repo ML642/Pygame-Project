@@ -11,9 +11,9 @@ class Tear(pygame.sprite.Sprite):
         
         self.rect = self.image.get_rect(center=(x , y ))
         
-        self.speed = 7
+        self.speed = 7 
         self.direction = direction
-        self.lifetime = 50
+        self.lifetime = 50 * scale_x
         
     def update(self):
         self.rect.x += self.direction[0] * self.speed
