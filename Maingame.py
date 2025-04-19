@@ -47,6 +47,9 @@ YELLOW = (255, 255, 0)
 ROOM_WIDTH, ROOM_HEIGHT = 700 * scale_x, 500 * scale_y
 CELL_SIZE = 40
 
+
+
+
 level_1data = [
     {"x": 50, "y": 50, "form": 2, "type": 1, "enemies_counter": 3},
     {"x": 700 + 50 + 240 + 100, "y": 50, "form": 9, "type": 1, "enemies_counter": 3},
