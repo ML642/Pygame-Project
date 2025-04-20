@@ -23,11 +23,13 @@ class SettingsMenu:
         self.back_button = pygame.Rect(300, 400, 200, 50)
         
         self.volume  = 50 
+        
         self.music = 50 
         self.difficult = ["easy","medium" , "hard" , "extreme"]
+        self.difficult_n = 1
         
         self.resolution = ["600x800" , "1350x750" , "Full Screen"]
-        
+        self.resolution_n = 1
     
     def draw_triangle(self,surface, x, y, size=40, color=(255, 0, 0), direction="up"):
         if direction == "up":
@@ -93,22 +95,22 @@ class SettingsMenu:
         
         
         if self.active_button == 1:
-         self.draw_option(screen , 150 , 150 , 500 , 75 , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult , True  )
+         self.draw_option(screen , 150 , 150 , 500 , 75 , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult[self.difficult_n] , True  )
         else :
-         self.draw_option(screen , 150 , 150 , 500 , 75 , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult , False  )
+         self.draw_option(screen , 150 , 150 , 500 , 75 , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult[self.difficult_n] , False  )
         if self.active_button == 2:
-            self.draw_option(screen , 150 , 250 , 500 , 75 , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution, True )
+            self.draw_option(screen , 150 , 250 , 500 , 75 , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution[self.resolution_n], True )
         else:
-            self.draw_option(screen , 150 , 250 , 500 , 75 , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution, False )
+            self.draw_option(screen , 150 , 250 , 500 , 75 , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution[self.resolution_n], False )
 
         if self.active_button == 3 :   
-         self.draw_option(screen , 150 , 350 , 500 , 75 , "MUSIC" , (0,0,0) , (255,255,255),self.resolution, True )
+         self.draw_option(screen , 150 , 350 , 500 , 75 , "MUSIC" , (0,0,0) , (255,255,255),self.music, True )
         else :
-         self.draw_option(screen , 150 , 350 , 500 , 75 , "MUSIC" , (0,0,0) , (255,255,255),self.resolution , False )
+         self.draw_option(screen , 150 , 350 , 500 , 75 , "MUSIC" , (0,0,0) , (255,255,255),self.music , False )
         if self.active_button == 4 :
-         self.draw_option(screen , 150 , 450, 500 , 75 ,  "SOUND" , (0,0,0), (255,255,255) , 0 ,  True  )
+         self.draw_option(screen , 150 , 450, 500 , 75 ,  "SOUND" , (0,0,0), (255,255,255) , self.volume ,  True  )
         else :
-          self.draw_option(screen , 150 , 450, 500 , 75 ,  "SOUND" , (0,0,0), (255,255,255) , 0 ,  False  )
+          self.draw_option(screen , 150 , 450, 500 , 75 ,  "SOUND" , (0,0,0), (255,255,255) , self.volume  ,  False  )
  
            
         title = self.font_large.render("SETTINGS", True, (255, 255, 255))
@@ -148,8 +150,7 @@ class SettingsMenu:
         # # Back button
         # pygame.draw.rect(screen, (70, 70, 70), self.back_button, border_radius=10)
         # back_text = self.font_medium.render("BACK", True, (255, 255, 255))
-        # screen.blit(back_text, (self.back_button.centerx - back_text.get_width()//2, 
-        #                        self.back_button.centery - back_text.get_height()//2))
+        # screen.blit(back_text, (450 , 750))
 
     def handle_event( self, event ):
         print(self.active_button)
@@ -162,10 +163,37 @@ class SettingsMenu:
                 self.active_button += 1
                 if self.active_button > 4 :
                     self.active_button  = 1
+            print(self.active)
             if event.key == pygame.K_RIGHT :
-                {}
+                 if self.active_button == 1 :
+                     self.difficult_n +=1
+                     if self.difficult_n > 2 :
+                         self.difficult_n = 0 
+                 if self.active_button == 2 : 
+                     self.resolution_n +=1
+                     if self.resolution_n > 2 :
+                         self.resolution_n = 0
+                 if self.active_button == 3 :
+                     if self.music != 100 :
+                          self.music +=1
+                 if self.active_button ==4 :
+                     if self.volume !=100 :
+                      self.volume += 1     
             if event.key == pygame.K_LEFT :
-                {}
+                 if self.active_button == 1 :
+                     self.difficult_n -=1
+                     if self.difficult_n < 0  :
+                         self.difficult_n = 2 
+                 if self.active_button == 2 : 
+                     self.resolution_n -=1
+                     if self.resolution_n < 0 :
+                         self.resolution_n = 2
+                 if self.active_button == 3 :
+                     if self.music != 0 :
+                          self.music -=1
+                 if self.active_button ==4 :
+                     if self.volume !=0 :
+                      self.volume -= 1  
                
     
     def run(self, screen):
