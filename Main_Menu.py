@@ -3,7 +3,7 @@ import random
 from UI_components import Menu_option 
 from UI_components import DustParticle
 import os 
-
+from setting_menu import SettingsMenu
 pygame.init()
 
 def Main_menu (actual_screen_width = 1300, actual_screen_height =800):
@@ -144,7 +144,9 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height =800):
                     running = True
                     pygame.mouse.set_visible(True)
                 if active == 1 :
-                    {}# here must be a settings menu
+                    settings_menu = SettingsMenu(actual_screen_width, actual_screen_height) 
+                    settings_menu.run(screen)  
+                    # here must be a settings menu
                 if active == 2 :
                     pygame.quit()
                     exit()

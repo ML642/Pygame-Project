@@ -9,7 +9,7 @@ from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway 
 from UI_components import draw_health_bar , Menu_option , DustParticle
 from stopmenu import pause_menu , draw_button , draw_slider
 from Main_Menu import Main_menu
-
+from setting_menu import SettingsMenu
 
 
 pygame.init()
@@ -129,6 +129,8 @@ OFFSETY = (scale_y-1) * 200
 player.rect.center = ( -500 +(1-scale_x) * OFFSET ,50 + ( 700 / 2 )* scale_y - OFFSETY  )  # - move the player to the room 
 
 Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT)
+
+
 
 pygame.mouse.set_visible(True)
 while running:
