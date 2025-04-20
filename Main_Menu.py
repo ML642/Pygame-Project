@@ -67,7 +67,20 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height =800):
                 if event.key == pygame.K_ESCAPE:  
                     Main_Menu = False
                     pygame.quit()
-            
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                if active == 0:
+                    Main_Menu = False
+                    running = True
+                    pygame.mouse.set_visible(True)
+                elif active == 1:
+                    print("Opening settings...")
+                    settings_menu = SettingsMenu(actual_screen_width, actual_screen_height) 
+                    should_continue = settings_menu.run(screen, Main_menu)  
+                    if not should_continue:
+                        Main_Menu = False
+                elif active == 2:
+                    pygame.quit()
+                    exit()
             keys = pygame.key.get_pressed()
             previous_active = active
             if keys[pygame.K_LEFT]:
@@ -138,18 +151,8 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height =800):
                 elif active == 2:
                     draw_arrow(screen, arrow_x, (440 - 75)* scale_y) 
         
-        if keys[pygame.K_RETURN]:
-                if active == 0 :
-                    Main_Menu = False
-                    running = True
-                    pygame.mouse.set_visible(True)
-                if active == 1 :
-                    settings_menu = SettingsMenu(actual_screen_width, actual_screen_height) 
-                    settings_menu.run(screen)  
-                    # here must be a settings menu
-                if active == 2 :
-                    pygame.quit()
-                    exit()
+        
+            
         pygame.display.flip()
         clock.tick(60)
         pygame.mouse.set_visible(False)

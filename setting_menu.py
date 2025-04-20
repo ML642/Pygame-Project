@@ -15,7 +15,7 @@ class SettingsMenu:
         self.music_slider_rect = pygame.Rect(300, 200, 200, 20)
         self.sfx_slider_rect = pygame.Rect(300, 300, 200, 20)
         
-        self.active  = True 
+         
         self.active_button = 1
         
         
@@ -55,13 +55,13 @@ class SettingsMenu:
           
             title = self.font_medium.render(text, True, (0, 0, 0))
           
-            value  = self.font_large.render(f"{value}", True, (0, 0, 0))
+            value  = self.font_medium.render(f"{value}", True, (0, 0, 0))
           
             screen.blit(title ,( x + 50 , y + 20) )
             
             self.draw_triangle(screen , x +325, y + 40 , 20 , (0,0,0) ,  "left")
             
-            screen.blit(value , ( x  + 400 , y + 20   ))  
+            screen.blit(value , ( x  + 400 -25 , y + 20   ))  
             
             self.draw_triangle(screen , x + 470, y + 40 , 20 , (0,0,0) ,  "right")
             
@@ -70,13 +70,13 @@ class SettingsMenu:
             
             title = self.font_medium.render(text, True, (255, 255, 255))
           
-            value  = self.font_large.render(f"{value}", True, (255, 255, 255))
+            value  = self.font_medium.render(f"{value}", True, (255, 255, 255))
           
             screen.blit(title ,( x + 50 , y + 20) )
             
             self.draw_triangle(screen , x +325, y + 40 , 20 , (255,255,255) ,  "left")
             
-            screen.blit(value , ( x  + 400 , y + 20   ))  
+            screen.blit(value , ( x  + 400 -25  , y + 20   ))  
             
             self.draw_triangle(screen , x + 470, y + 40 , 20 , (255,255,255) ,  "right")
             
@@ -196,9 +196,11 @@ class SettingsMenu:
                       self.volume -= 1  
                
     
-    def run(self, screen):
+    def run(self, screen , Mainmenu):
         self.active = True
+        
         while self.active:
+            print(self.active)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -207,8 +209,11 @@ class SettingsMenu:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.active = False
-                
+                        
+                        return True  
                 self.handle_event(event)
+            if not self.active:
+                return True 
             
             screen.fill((0, 0, 0))  # Clear screen
             self.draw(screen)
