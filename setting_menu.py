@@ -18,6 +18,13 @@ class SettingsMenu:
          
         self.active_button = 1
         
+        self.pass_difficulty = 0
+        self.resolution2 = [(800,600) , (1350,700) , (1500,750)]
+        self.pass_resolution = 0
+        self.pass_volume = 0.5
+        self.pass_music = 0
+        
+        
         
         # Button rects
         self.back_button = pygame.Rect(300, 400, 200, 50)
@@ -28,12 +35,12 @@ class SettingsMenu:
         self.difficult = ["easy","medium" , "hard" ]
         self.difficult_n = 1
         
-        self.resolution = ["600x800" , "1350x750" , "Full Screen"]
-        self.resolution_n = 1
+        self.resolution = ["800x600" , "1350x750" , "Full Screen"]
+        self.resolution_n = 0
         mixer.init()
-        pygame.mixer.music.load("path_to_your_music_file.mp3")  # Replace with your music file
+        #pygame.mixer.music.load("path_to_your_music_file.mp3")  # Replace with your music file
         
-        pygame.mixer.music.play(-1)
+        #pygame.mixer.music.play(-1)
     def draw_triangle(self,surface, x, y, size=40, color=(255, 0, 0), direction="up"):
         if direction == "up":
             points = [(x, y), (x - size // 2, y + size), (x + size // 2, y + size)]
@@ -53,11 +60,11 @@ class SettingsMenu:
         if active == True :
             pygame.draw.rect(screen, ( 255,255,255) ,button_rect , 0 , 10 )
             title = self.font_medium.render(text, True, (0, 0, 0))            
-            screen.blit(title ,( x + 200 , y + 20) )
+            screen.blit(title ,( x + 75 , y + 20) )
         if active == False :
             pygame.draw.rect(screen, (0,0,0) , button_rect , 0 , 10   )
             title = self.font_medium.render(text, True, (255, 255, 255))
-            screen.blit(title ,( x + 200  , y + 20) )
+            screen.blit(title ,( x + 75  , y + 20) )
       
             
         
@@ -139,10 +146,17 @@ class SettingsMenu:
          self.draw_option(screen , 150 , 450 -50, 500 , 75 ,  "SOUND" , (0,0,0), (255,255,255) , self.volume ,  True ,32 )
         else :
           self.draw_option(screen , 150 , 450-50, 500 , 75 ,  "SOUND" , (0,0,0), (255,255,255) , self.volume  ,  False ,32 )
+        
         if self.active_button == 5:
-          self.draw_back(screen,150,500 ,500,75 , "BACK" , (0,0,0),(255,255,255), 0 , True)
+          self.draw_back(screen,170,500 ,225,75 , "BACK" , (0,0,0),(255,255,255), 0 , True)
         else :
-          self.draw_back(screen,150,500 ,500,75 , "BACK" , (0,0,0),(255,255,255), 0 , False) 
+          self.draw_back(screen,170,500 ,225,75 , "BACK" , (0,0,0),(255,255,255), 0 , False) 
+        
+        
+        if self.active_button == 6 : 
+            self.draw_back(screen,190 + 225,500 ,225,75 , "APPLY" , (0,0,0),(255,255,255), 0 , True)
+        else :
+            self.draw_back(screen,190 + 225,500 ,225,75 , "APPLY" , (0,0,0),(255,255,255), 0 , False)
            
         title = self.font_large.render("SETTINGS", True, (255, 255, 255))
         
@@ -171,12 +185,16 @@ class SettingsMenu:
                      self.resolution_n +=1
                      if self.resolution_n > 2 :
                          self.resolution_n = 0
+          
+                         
                  if self.active_button == 3 :
                      if self.music != 100 :
                           self.music +=1
                  if self.active_button ==4 :
                      if self.volume !=100 :
-                      self.volume += 1     
+                      self.volume += 1    
+                 if self.active_button ==5 :
+                    self.active_button =6  
             if event.key == pygame.K_LEFT :
                  if self.active_button == 1 :
                      self.difficult_n -=1
@@ -192,14 +210,28 @@ class SettingsMenu:
                  if self.active_button ==4 :
                      if self.volume !=0 :
                       self.volume -= 1  
+                 if self.active_button == 6 :
+                     self.active_button = 5
             if event.key == pygame.K_RETURN and self.active_button == 5:
                 self.active = False 
-    
+            if event.key == pygame.K_RETURN and self.active_button == 6:
+                self.pass_resolution = self.resolution_n 
+                self.pass_music = self.music
+                self.pass_difficulty = self.difficult
+                self.pass_volume = self.volume 
+                
+                if self.resolution_n == 0 :               
+                 screen = pygame.display.set_mode((800,600))
+                if self.resolution_n == 1 :
+                 screen = pygame.display.set_mode((1350,750))
+                if self.resolution_n ==2 :
+                 screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
+                    
     def run(self, screen , Mainmenu):
         self.active = True
-        pygame.mixer.music.set_volume(self.music /100)
+        #pygame.mixer.music.set_volume(self.music /100)
         while self.active:
-            print(self.active)
+            data = [self.pass_difficulty,self.resolution2[self.pass_resolution] , self.pass_music , self.pass_volume ]
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -209,10 +241,10 @@ class SettingsMenu:
                     if event.key == pygame.K_ESCAPE:
                         self.active = False
                         
-                        return True  
+                        return data
                 self.handle_event(event)
             if not self.active:
-                return True 
+                return data
             
             screen.fill((0, 0, 0))  # Clear screen
             self.draw(screen)

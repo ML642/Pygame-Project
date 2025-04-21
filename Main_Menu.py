@@ -17,8 +17,8 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height =800):
         
     screen = pygame.display.set_mode((800 * scale_x, 600 * scale_y))
     clock = pygame.time.Clock()
-
-   
+    
+     
     Main_Menu = True 
     BLACK = (0, 0, 0)
     RED = (255, 0, 0)
@@ -75,9 +75,15 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height =800):
                 elif active == 1:
                     print("Opening settings...")
                     settings_menu = SettingsMenu(actual_screen_width, actual_screen_height) 
-                    should_continue = settings_menu.run(screen, Main_menu)  
-                    if not should_continue:
-                        Main_Menu = False
+                    data = settings_menu.run(screen, Main_menu)  
+                    if data :
+                        resolution_data = data[1]
+                        screen = pygame.display.set_mode(resolution_data)
+                        width_x = resolution_data[0]
+                        width_y = resolution_data[1]
+                        
+                        Main_Menu = False 
+                        Main_menu(width_x,width_y)
                 elif active == 2:
                     pygame.quit()
                     exit()
