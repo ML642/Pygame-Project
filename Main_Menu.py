@@ -8,7 +8,7 @@ pygame.init()
 
 def Main_menu (actual_screen_width = 1300, actual_screen_height =800):
     os.environ['SDL_VIDEO_CENTERED'] = "1"
-  
+    data = [0 , (800,600) ,300]
     screen_width = 800 
     screen_height = 600
  
@@ -67,11 +67,16 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height =800):
                 if event.key == pygame.K_ESCAPE:  
                     Main_Menu = False
                     pygame.quit()
+                    
+                    
+                    
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                 if active == 0:
                     Main_Menu = False
+                    
                     running = True
                     pygame.mouse.set_visible(True)
+                    return data 
                 elif active == 1:
                     print("Opening settings...")
                     settings_menu = SettingsMenu(actual_screen_width, actual_screen_height) 
@@ -84,6 +89,7 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height =800):
                         
                         Main_Menu = False 
                         Main_menu(width_x,width_y)
+                        return data
                 elif active == 2:
                     pygame.quit()
                     exit()

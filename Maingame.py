@@ -9,6 +9,9 @@ from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway 
 from UI_components import draw_health_bar , Menu_option , DustParticle
 from stopmenu import pause_menu , draw_button , draw_slider
 from Main_Menu import Main_menu
+from interactive_objects import  DestructibleObject , SpikeTrap , ExplosiveBarrel
+
+
 from setting_menu import SettingsMenu
 
 
@@ -41,8 +44,13 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
+data = [ 0 , (800,600) ]
+# data = 
+# SELECTED_WIDTH,SELECTED_HEIGHT = data[1] 
 
 
+scale_x = SELECTED_WIDTH / BASE_WIDTH
+scale_y = SELECTED_HEIGHT / BASE_HEIGHT
 
 ROOM_WIDTH, ROOM_HEIGHT = 700 * scale_x, 500 * scale_y
 CELL_SIZE = 40
@@ -67,6 +75,7 @@ level_1data = [
     {"x": 50 + (700 + 240 + 100) * 2, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
     {"x": 50 + (700 + 240 + 100) * 3, "y": 10 + (500 + 260) * 4, "form": 6, "type": 1, "enemies_counter": 3}
 ]
+
 
 
 
@@ -100,11 +109,17 @@ OFFSETY = (scale_y-1) * 2
 player = Player (scale_x,scale_y)
 #############################
 
+
+
 walls = generate_room(int((-300 - ROOM_WIDTH) + int(OFFSET) * ( scale_x -1 ) )  ,int( 50 ), 7, 1, scale_x ,scale_y )  # initiate first room
 floors.add(Floor((-300 - 700) - int(OFFSET2) * (scale_x -1 ),  50 * scale_y  , scale_x , scale_y)) 
 floors.add(Floor_Hallway((-300) -  int(OFFSET3) *(scale_x -1), (50 + 195) * scale_y, 400 , 90  , scale_x , scale_y))
 
+
+
 #############################
+
+
 
 for room_data in level_1data:
     Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
@@ -128,9 +143,9 @@ OFFSETY = (scale_y-1) * 200
     
 player.rect.center = ( -500 +(1-scale_x) * OFFSET ,50 + ( 700 / 2 )* scale_y - OFFSETY  )  # - move the player to the room 
 
+
+
 Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT)
-
-
 
 pygame.mouse.set_visible(True)
 while running:
@@ -237,6 +252,8 @@ while running:
             screen.blit(enemy.image, camera.apply(enemy))        
         screen.blit(rotated_image, rotated_rect.topleft + pygame.math.Vector2(camera.camera.topleft))
         
+        # test1 = DestructibleObject(250,250,50,50,23)
+        # test1.draw(screen)
         
         for tear in player.tears:
             adjusted_pos = tear.rect.topleft + pygame.math.Vector2(camera.camera.topleft)
