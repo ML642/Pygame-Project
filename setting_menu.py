@@ -8,7 +8,7 @@ class SettingsMenu:
         self.active = False
         self.font_large = pygame.font.SysFont("Arial", 48)
         self.font_medium = pygame.font.SysFont("Arial", 32)
-        
+        self.font_low = pygame.font.SysFont("Arial" , 24 )
         # Slider values (0.0 to 1.0)
         self.music_volume = 0.7
         self.sfx_volume = 0.8
@@ -25,12 +25,15 @@ class SettingsMenu:
         self.volume  = 50 
         
         self.music = 50 
-        self.difficult = ["easy","medium" , "hard" , "extreme"]
+        self.difficult = ["easy","medium" , "hard" ]
         self.difficult_n = 1
         
         self.resolution = ["600x800" , "1350x750" , "Full Screen"]
         self.resolution_n = 1
-    
+        mixer.init()
+        pygame.mixer.music.load("path_to_your_music_file.mp3")  # Replace with your music file
+        
+        pygame.mixer.music.play(-1)
     def draw_triangle(self,surface, x, y, size=40, color=(255, 0, 0), direction="up"):
         if direction == "up":
             points = [(x, y), (x - size // 2, y + size), (x + size // 2, y + size)]
@@ -44,7 +47,26 @@ class SettingsMenu:
             raise ValueError("Invalid direction. Use 'up', 'down', 'left', or 'right'.")
 
         pygame.draw.polygon(surface, color, points)
-    def draw_option(self, screen, x, y, width, height, text, color, hover_color,value , active ):
+    def draw_back(self,screen ,x,y,width,height,text,color,hover_color ,value , active ):
+        button_rect = pygame.Rect(x, y, width, height)
+
+        if active == True :
+            pygame.draw.rect(screen, ( 255,255,255) ,button_rect , 0 , 10 )
+            title = self.font_medium.render(text, True, (0, 0, 0))            
+            screen.blit(title ,( x + 200 , y + 20) )
+        if active == False :
+            pygame.draw.rect(screen, (0,0,0) , button_rect , 0 , 10   )
+            title = self.font_medium.render(text, True, (255, 255, 255))
+            screen.blit(title ,( x + 200  , y + 20) )
+      
+            
+        
+        
+        
+        
+        
+        
+    def draw_option(self, screen, x, y, width, height, text, color, hover_color,value , active ,font_size, paddingX = 0 , paddingY = 0 ):
         
         
         button_rect = pygame.Rect(x, y, width, height)
@@ -55,13 +77,18 @@ class SettingsMenu:
           
             title = self.font_medium.render(text, True, (0, 0, 0))
           
-            value  = self.font_medium.render(f"{value}", True, (0, 0, 0))
-          
+            font = pygame.font.SysFont("Arial", font_size)
+            value  = font.render(f"{value}", True, (0, 0, 0))
+           
+            value_width,value_height =  value.get_size()
+            
+            
+            
             screen.blit(title ,( x + 50 , y + 20) )
             
             self.draw_triangle(screen , x +325, y + 40 , 20 , (0,0,0) ,  "left")
             
-            screen.blit(value , ( x  + 400 -25 , y + 20   ))  
+            screen.blit(value , ( x  + 400 -25 - paddingX , y + 20 + paddingY   ))  
             
             self.draw_triangle(screen , x + 470, y + 40 , 20 , (0,0,0) ,  "right")
             
@@ -69,14 +96,15 @@ class SettingsMenu:
             pygame.draw.rect(screen, (0,0,0) , button_rect , 0 , 10   )
             
             title = self.font_medium.render(text, True, (255, 255, 255))
+            font = pygame.font.SysFont("Arial", font_size)
+
+            value  = font.render(f"{value}", True, (255, 255, 255))
           
-            value  = self.font_medium.render(f"{value}", True, (255, 255, 255))
-          
-            screen.blit(title ,( x + 50 , y + 20) )
+            screen.blit(title ,( x + 50  , y + 20) )
             
             self.draw_triangle(screen , x +325, y + 40 , 20 , (255,255,255) ,  "left")
             
-            screen.blit(value , ( x  + 400 -25  , y + 20   ))  
+            screen.blit(value , ( x  + 400 -25 - paddingX  , y + 20 + paddingY   ))  
             
             self.draw_triangle(screen , x + 470, y + 40 , 20 , (255,255,255) ,  "right")
             
@@ -90,67 +118,37 @@ class SettingsMenu:
         overlay.fill((0, 0, 0, 200))
         screen.blit(overlay, (0, 0))
         
-        rect = pygame.Rect(100, 50, self.screen_width - 200, self.screen_height - 100 )
+        rect = pygame.Rect(100, 10, self.screen_width - 200, self.screen_height - 20 )
         pygame.draw.rect(screen, (50, 50, 50), rect, border_radius=20)
         
         
         if self.active_button == 1:
-         self.draw_option(screen , 150 , 150 , 500 , 75 , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult[self.difficult_n] , True  )
+         self.draw_option(screen , 150 , 150-50 , 500 , 75 , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult[self.difficult_n] , True ,  22 ,15 , 5 )
         else :
-         self.draw_option(screen , 150 , 150 , 500 , 75 , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult[self.difficult_n] , False  )
+         self.draw_option(screen , 150 , 150 -50, 500 , 75 , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult[self.difficult_n] , False  ,22 , 15,5)
         if self.active_button == 2:
-            self.draw_option(screen , 150 , 250 , 500 , 75 , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution[self.resolution_n], True )
+            self.draw_option(screen , 150 , 250 -50 , 500 , 75 , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution[self.resolution_n], True ,22 ,20 , 7)
         else:
-            self.draw_option(screen , 150 , 250 , 500 , 75 , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution[self.resolution_n], False )
+            self.draw_option(screen , 150 , 250 -50, 500 , 75 , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution[self.resolution_n], False ,22,20 , 7)
 
         if self.active_button == 3 :   
-         self.draw_option(screen , 150 , 350 , 500 , 75 , "MUSIC" , (0,0,0) , (255,255,255),self.music, True )
+         self.draw_option(screen , 150 , 350 -50, 500 , 75 , "MUSIC" , (0,0,0) , (255,255,255),self.music, True ,32)
         else :
-         self.draw_option(screen , 150 , 350 , 500 , 75 , "MUSIC" , (0,0,0) , (255,255,255),self.music , False )
+         self.draw_option(screen , 150 , 350 -50, 500 , 75 , "MUSIC" , (0,0,0) , (255,255,255),self.music , False ,32)
         if self.active_button == 4 :
-         self.draw_option(screen , 150 , 450, 500 , 75 ,  "SOUND" , (0,0,0), (255,255,255) , self.volume ,  True  )
+         self.draw_option(screen , 150 , 450 -50, 500 , 75 ,  "SOUND" , (0,0,0), (255,255,255) , self.volume ,  True ,32 )
         else :
-          self.draw_option(screen , 150 , 450, 500 , 75 ,  "SOUND" , (0,0,0), (255,255,255) , self.volume  ,  False  )
- 
+          self.draw_option(screen , 150 , 450-50, 500 , 75 ,  "SOUND" , (0,0,0), (255,255,255) , self.volume  ,  False ,32 )
+        if self.active_button == 5:
+          self.draw_back(screen,150,500 ,500,75 , "BACK" , (0,0,0),(255,255,255), 0 , True)
+        else :
+          self.draw_back(screen,150,500 ,500,75 , "BACK" , (0,0,0),(255,255,255), 0 , False) 
            
         title = self.font_large.render("SETTINGS", True, (255, 255, 255))
         
         
         screen.blit(title, (self.screen_width//2 - title.get_width()//2, 50))
         
-        
-        
-        
-        
-        # screen.blit(self.music_icon, (200, 190))
-        # music_text = self.font_medium.render("Music:", True, (255, 255, 255))
-        # screen.blit(music_text, (250, 190))
-        
-        # # Music slider
-        # pygame.draw.rect(screen, (100, 100, 100), self.music_slider_rect)
-        # pygame.draw.rect(screen, (0, 200, 0), 
-        #                 (self.music_slider_rect.x, 
-        #                  self.music_slider_rect.y, 
-        #                  self.music_slider_rect.width * self.music_volume, 
-        #                  self.music_slider_rect.height))
-        
-        # # SFX Volume
-        # screen.blit(self.sfx_icon, (200, 290))
-        # sfx_text = self.font_medium.render("SFX:", True, (255, 255, 255))
-        # screen.blit(sfx_text, (250, 290))
-        
-        # # SFX slider
-        # pygame.draw.rect(screen, (100, 100, 100), self.sfx_slider_rect)
-        # pygame.draw.rect(screen, (0, 150, 200), 
-        #                 (self.sfx_slider_rect.x, 
-        #                  self.sfx_slider_rect.y, 
-        #                  self.sfx_slider_rect.width * self.sfx_volume, 
-        #                  self.sfx_slider_rect.height))
-        
-        # # Back button
-        # pygame.draw.rect(screen, (70, 70, 70), self.back_button, border_radius=10)
-        # back_text = self.font_medium.render("BACK", True, (255, 255, 255))
-        # screen.blit(back_text, (450 , 750))
 
     def handle_event( self, event ):
         print(self.active_button)
@@ -158,10 +156,10 @@ class SettingsMenu:
             if event.key == pygame.K_UP  or event.key == pygame.K_w: 
                 self.active_button -= 1
                 if self.active_button < 1 :
-                    self.active_button  = 4 
+                    self.active_button  = 5 
             if event.key == pygame.K_DOWN or event.key == pygame.K_s :
                 self.active_button += 1
-                if self.active_button > 4 :
+                if self.active_button > 5 :
                     self.active_button  = 1
             print(self.active)
             if event.key == pygame.K_RIGHT :
@@ -194,11 +192,12 @@ class SettingsMenu:
                  if self.active_button ==4 :
                      if self.volume !=0 :
                       self.volume -= 1  
-               
+            if event.key == pygame.K_RETURN and self.active_button == 5:
+                self.active = False 
     
     def run(self, screen , Mainmenu):
         self.active = True
-        
+        pygame.mixer.music.set_volume(self.music /100)
         while self.active:
             print(self.active)
             for event in pygame.event.get():

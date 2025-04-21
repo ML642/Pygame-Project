@@ -20,6 +20,8 @@ class Enemy(pygame.sprite.Sprite):
         self.health = 3
         self.drops = drops
         
+        
+        
         self.flag_X1 = 1
         self.flag_Y1 = 1
          

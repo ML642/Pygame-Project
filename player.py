@@ -2,6 +2,7 @@ import pygame
 import random
 import math
 
+
 class Tear(pygame.sprite.Sprite):
     def __init__(self, x, y, direction , scale_x =1 ,scale_y = 1):
         super().__init__()
@@ -39,8 +40,8 @@ class Player(pygame.sprite.Sprite):
         self.original_image = self.image 
         self.rect = self.image.get_rect(center=(400, 300))
         self.speed = 5 
-        self.health = 300
-        self.max_health = 300
+        self.health = 30
+        self.max_health = 30
         self.shot_cooldown = 0
         self.tears = []  # Projectiles
         self.angle = 0

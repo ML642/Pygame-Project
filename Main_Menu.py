@@ -18,7 +18,7 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height =800):
     screen = pygame.display.set_mode((800 * scale_x, 600 * scale_y))
     clock = pygame.time.Clock()
 
-
+   
     Main_Menu = True 
     BLACK = (0, 0, 0)
     RED = (255, 0, 0)
