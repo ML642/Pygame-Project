@@ -11,13 +11,20 @@ WHITE = (255, 255, 255)
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, x, y, drops , scale_x = 1, scale_y = 1): 
+    def __init__(self, x, y, drops , scale_x = 1, scale_y = 1,difficulty = 1): 
         super().__init__()
+        if difficulty == "easy": 
+          self.multiplier = 0.5 
+        elif difficulty == "medium":
+            self.multiplier = 1
+        elif difficulty == "hard":
+            self.multiplier = 1.75
+        
         self.orig = pygame.image.load('images/player.png').convert_alpha()
         self.image = pygame.transform.scale(self.orig, (50 * scale_x, 50 * scale_y))
         self.rect = self.image.get_rect(center=(x, y))
-        self.speed = (random.uniform(1,2)) * scale_x
-        self.health = 3
+        self.speed = (random.uniform(1,2)) * scale_x * self.multiplier
+        self.health = 3* self.multiplier
         self.drops = drops
         
         

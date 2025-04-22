@@ -28,6 +28,13 @@ SELECTED_HEIGHT = 600
 scale_x = SELECTED_WIDTH / BASE_WIDTH
 scale_y = SELECTED_HEIGHT / BASE_HEIGHT
 
+current_settings = {
+    'resolution': (800, 600),
+    'music_volume': 50,
+    'sfx_volume': 50,
+    'difficulty': 'medium'
+}
+
 
 
 
@@ -47,10 +54,10 @@ YELLOW = (255, 255, 0)
 data = [ 0 , (800,600) ]
 # data = 
 # SELECTED_WIDTH,SELECTED_HEIGHT = data[1] 
+current_settings = Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT)
 
-
-scale_x = SELECTED_WIDTH / BASE_WIDTH
-scale_y = SELECTED_HEIGHT / BASE_HEIGHT
+scale_x = current_settings["resolution"][0] / BASE_WIDTH
+scale_y = current_settings["resolution"][1] / BASE_HEIGHT
 
 ROOM_WIDTH, ROOM_HEIGHT = 700 * scale_x, 500 * scale_y
 CELL_SIZE = 40
@@ -106,7 +113,7 @@ OFFSET3 = 353
 OFFSET2 = 1000
 OFFSET = 700    
 OFFSETY = (scale_y-1) * 2
-player = Player (scale_x,scale_y)
+player = Player (scale_x,scale_y , current_settings["difficulty"])  
 #############################
 
 
@@ -145,9 +152,11 @@ player.rect.center = ( -500 +(1-scale_x) * OFFSET ,50 + ( 700 / 2 )* scale_y - O
 
 
 
-Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT)
+
 
 pygame.mouse.set_visible(True)
+print(current_settings)
+
 while running:
     # print(scale_x ,scale_y)
     
@@ -194,7 +203,7 @@ while running:
                 x = random.randint(room.rect.x, room.rect.x  + int(ROOM_WIDTH - 160 * scale_x))
                 
                 y = random.randint(room.rect.y, room.rect.y  + int(ROOM_HEIGHT - (160)*scale_y))
-                enemy = Enemy(x, y,drops,scale_x , scale_y)
+                enemy = Enemy(x, y,drops,scale_x , scale_y, current_settings ["difficulty"])
                 
                 if not any(enemy.rect.colliderect(wall.rect) for wall in walls):
                     enemies.add(enemy)

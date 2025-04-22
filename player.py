@@ -30,8 +30,14 @@ BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self,scale_x = 1 ,scale_y = 1):
+    def __init__(self,scale_x = 1 ,scale_y = 1 , difficulty = "medium"):
         super().__init__()
+        if difficulty == "easy": 
+            self.multiplier = 1.5
+        elif difficulty == "medium":
+            self.multiplier = 1
+        elif difficulty == "hard":
+            self.multiplier = 0.75
         self.orig = pygame.image.load('images/player.png').convert_alpha()
         self.scale_x = scale_x
         self.scale_y = scale_y
@@ -39,9 +45,9 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.orig,(50 * scale_x,50 * scale_y))
         self.original_image = self.image 
         self.rect = self.image.get_rect(center=(400, 300))
-        self.speed = 5 
-        self.health = 30
-        self.max_health = 30
+        self.speed = 5 *  self.multiplier
+        self.health = 30 * self.multiplier
+        self.max_health = 30 * self.multiplier
         self.shot_cooldown = 0
         self.tears = []  # Projectiles
         self.angle = 0

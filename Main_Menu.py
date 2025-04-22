@@ -6,14 +6,23 @@ import os
 from setting_menu import SettingsMenu
 pygame.init()
 
-def Main_menu (actual_screen_width = 1300, actual_screen_height =800):
+def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings_data =  None  ):
     os.environ['SDL_VIDEO_CENTERED'] = "1"
-  
+    default_settings = {
+        'resolution': (800, 600),
+        'music_volume': 50,
+        'sfx_volume': 50,
+        'difficulty': 'medium'
+    }
+    current_settings = settings_data if settings_data else default_settings
+   
     screen_width = 800 
     screen_height = 600
- 
-    scale_x = actual_screen_width / screen_width
-    scale_y = actual_screen_height / screen_height
+    
+    
+    
+    scale_x = current_settings['resolution'][0] / screen_width
+    scale_y = current_settings['resolution'][1]/ screen_height
         
     screen = pygame.display.set_mode((800 * scale_x, 600 * scale_y))
     clock = pygame.time.Clock()
@@ -75,15 +84,17 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height =800):
                 elif active == 1:
                     print("Opening settings...")
                     settings_menu = SettingsMenu(actual_screen_width, actual_screen_height) 
-                    data = settings_menu.run(screen, Main_menu)  
-                    if data :
-                        resolution_data = data[1]
-                        screen = pygame.display.set_mode(resolution_data)
-                        width_x = resolution_data[0]
-                        width_y = resolution_data[1]
-                        
-                        Main_Menu = False 
-                        Main_menu(width_x,width_y)
+                    new_settings = settings_menu.run(screen, Main_menu)  
+                    print("New settings:", new_settings)
+                    if new_settings:
+                            # Update settings with new values
+                            current_settings.update(new_settings)
+                            Main_menu(
+                                new_settings['resolution'][0], 
+                                new_settings['resolution'][1],
+                                settings_data=current_settings
+                            )
+                            return current_settings
                 elif active == 2:
                     pygame.quit()
                     exit()
@@ -163,3 +174,4 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height =800):
         clock.tick(60)
         pygame.mouse.set_visible(False)
         
+    return current_settings

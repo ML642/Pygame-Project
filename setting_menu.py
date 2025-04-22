@@ -165,7 +165,7 @@ class SettingsMenu:
         
 
     def handle_event( self, event ):
-        print(self.active_button)
+        #print(self.active_button)
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_UP  or event.key == pygame.K_w: 
                 self.active_button -= 1
@@ -175,7 +175,7 @@ class SettingsMenu:
                 self.active_button += 1
                 if self.active_button > 5 :
                     self.active_button  = 1
-            print(self.active)
+        #    print(self.active)
             if event.key == pygame.K_RIGHT :
                  if self.active_button == 1 :
                      self.difficult_n +=1
@@ -230,22 +230,28 @@ class SettingsMenu:
     def run(self, screen , Mainmenu):
         self.active = True
         #pygame.mixer.music.set_volume(self.music /100)
+        
         while self.active:
-            data = [self.pass_difficulty,self.resolution2[self.pass_resolution] , self.pass_music , self.pass_volume ]
+            data = {
+            "difficulty": self.difficult[self.difficult_n],
+            "resolution": self.resolution2[self.pass_resolution],
+            "music_volume": self.music,
+            "sfx_volume": self.volume
+            }
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
-                    return
+                    return data
                 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.active = False
                         
-                        return data
+                        
                 self.handle_event(event)
-            if not self.active:
-                return data
+            
             
             screen.fill((0, 0, 0))  # Clear screen
             self.draw(screen)
             pygame.display.flip()
+        return data    
