@@ -16,6 +16,15 @@ from setting_menu import SettingsMenu
 
 
 pygame.init()
+
+from interactive_objects import DestructibleObject, SpikeTrap, ExplosiveBarrel
+
+interactive_objects = pygame.sprite.Group()
+wall = DestructibleObject(x=5, y=5, width=32, height=32, hp=100, k=2)
+spike = SpikeTrap(x=10, y=5, width=32, height=10, damage=15, k=2)
+barrel = ExplosiveBarrel(x=15, y=5, width=32, height=32, hp=50, explosion_radius=64, explosion_damage=30, k=2)
+interactive_objects.add(wall, spike, barrel)
+
 screen_width = 800 
 screen_height = 600
 os.environ['SDL_VIDEO_CENTERED'] = "1"
@@ -296,8 +305,13 @@ while running:
           if player.rect.colliderect(enemy.rect) and not player.invincible:
             player.health -= 0.1 
         for drop in drops:
-            
             screen.blit(drop.image, camera.apply(drop))
+            for obj in interactive_objects:
+                if hasattr(obj, "draw"):
+                    obj.draw(screen)
+                else:
+                    screen.blit(obj.image, camera.apply(obj))
+        
         # Health and UI elements (drawn without camera offset)
         font = pygame.font.SysFont(None, int(36 * scale_x))
         health_text = font.render(f"Hearts: {int(player.health)}", True, WHITE)
