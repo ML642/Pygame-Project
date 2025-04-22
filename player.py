@@ -45,20 +45,47 @@ class Player(pygame.sprite.Sprite):
         self.shot_cooldown = 0
         self.tears = []  # Projectiles
         self.angle = 0
+        
+        #dash mechanics
+        self.dash_speed_multiplier = 3
+        self.dash_duration = 10  # frames
+        self.dash_cooldown = 60  # frames
+        self.dash_timer = 0
+        self.dash_cooldown_timer = 0
+        self.is_dashing = False
+        self.dash_direction = (0, 0)
+        self.invincible = False
+        
+        self.dash_trail = []
+        self.max_trail_points = 8
+        
     def update(self, walls):
         keys = pygame.key.get_pressed()
         dx, dy = 0, 0
         
-        if keys[pygame.K_LEFT]: dx -= self.speed  * self.scale_x
-        if keys[pygame.K_RIGHT]: dx += self.speed * self.scale_x
-        if keys[pygame.K_UP]: dy -= self.speed *  self.scale_y
-        if keys[pygame.K_DOWN]: dy += self.speed * self.scale_y
         
+        if self.dash_cooldown_timer > 0:
+            self.dash_cooldown_timer -= 1
+            
+        if self.is_dashing:
+            self.dash_timer -= 1
+            if self.dash_timer <= 0:
+                self.is_dashing = False
+                self.invincible = False
+        if not self.is_dashing:
+            if keys[pygame.K_LEFT] or keys[pygame.K_a]: dx -= self.speed  * self.scale_x
+            if keys[pygame.K_RIGHT] or keys[pygame.K_d]: dx += self.speed * self.scale_x
+            if keys[pygame.K_UP] or keys[pygame.K_w]: dy -= self.speed *  self.scale_y
+            if keys[pygame.K_DOWN] or keys[pygame.K_s]: dy += self.speed * self.scale_y
+            
         # Diagonal movement normalization
-        if dx != 0 and dy != 0:
-            dx *= 0.7071    # 1/sqrt(2)
-            dy *= 0.7071
-        
+            if dx != 0 and dy != 0:
+                dx *= 0.7071    # 1/sqrt(2)
+                dy *= 0.7071
+        else:
+            # Dash movement
+            dx = self.dash_direction[0] * self.speed * self.dash_speed_multiplier * self.scale_x
+            dy = self.dash_direction[1] * self.speed * self.dash_speed_multiplier * self.scale_y    
         # Wall collision
         new_rect = self.rect.copy()
         new_rect.x += dx
@@ -73,7 +100,10 @@ class Player(pygame.sprite.Sprite):
             if new_rect.colliderect(wall.rect):
                 dy = 0
                 break
-                
+        if self.is_dashing:
+            self.dash_trail.append((self.rect.centerx, self.rect.centery))
+            if len(self.dash_trail) > self.max_trail_points:
+                self.dash_trail.pop(0)        
         self.rect.x += dx 
         self.rect.y += dy
         
@@ -88,3 +118,26 @@ class Player(pygame.sprite.Sprite):
             tear.image = pygame.transform.rotate(tear.image, angle)
             self.tears.append(tear)
             self.shot_cooldown = 15
+    def dash(self):
+        if self.dash_cooldown_timer <= 0 and not self.is_dashing:
+            # Get movement direction
+            dx, dy = 0, 0
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT] or keys[pygame.K_a]: dx -= 1
+            if keys[pygame.K_RIGHT] or keys[pygame.K_d]: dx += 1
+            if keys[pygame.K_UP] or keys[pygame.K_w]: dy -= 1
+            if keys[pygame.K_DOWN] or keys[pygame.K_s]: dy += 1
+
+            if dx == 0 and dy == 0:  # No movement input
+                return
+            
+            # Normalize direction
+            length = math.hypot(dx, dy)
+            self.dash_direction = (dx/length, dy/length)
+            
+            # Activate dash
+            self.is_dashing = True
+            self.invincible = True
+            self.dash_timer = self.dash_duration
+            self.dash_cooldown_timer = self.dash_cooldown
+            self.dash_trail = []
