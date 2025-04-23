@@ -306,7 +306,7 @@ while running:
             player.health -= 0.1 
         for drop in drops:
             screen.blit(drop.image, camera.apply(drop))
-            for obj in interactive_objects:
+        for obj in interactive_objects:
                 if hasattr(obj, "draw"):
                     obj.draw(screen)
                 else:
