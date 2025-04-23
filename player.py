@@ -50,6 +50,9 @@ class Player(pygame.sprite.Sprite):
         self.last_shot_time = 0
         self.current_mode = 1  # режим стрельбы по умолчанию
         
+        self.is_reloading = False
+        self.reload_start_time = 0
+
         
 
     def update(self, walls):
@@ -89,7 +92,8 @@ class Player(pygame.sprite.Sprite):
     def shoot(self, direction, Fire_mode):
         import time
         FIRE_MODES = Fire_mode 
-
+        if self.is_reloading:
+          return Fire_mode
         mode = FIRE_MODES[self.current_mode]
         current_time = time.time()
 
