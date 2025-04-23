@@ -2,6 +2,7 @@ import pygame
 import random 
 
 
+
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -10,14 +11,17 @@ WHITE = (255, 255, 255)
 
 
 def draw_health_bar(surface, current_hp, max_hp, scale_x = 2 , scale_y = 2):
-    bg_rect = pygame.Rect(20* scale_x, 20 * scale_y, 200 * scale_x , 20 * scale_y)
+    bg_rect = pygame.Rect(140* scale_x, 5 * scale_y, 300 * scale_x , 30 * scale_y)
     pygame.draw.rect(surface, WHITE, bg_rect)
 
-    health_width = int((current_hp / max_hp) * 200 * scale_x)
-    health_rect = pygame.Rect(20 * scale_x, 20 * scale_y, health_width, 20 * scale_y )
+    health_width = int((current_hp / max_hp) * 300 * scale_x)
+    health_rect = pygame.Rect(140 * scale_x, 5* scale_y, health_width, 30 * scale_y )
     
     pygame.draw.rect(surface, RED, health_rect)
     pygame.draw.rect(surface, BLACK, bg_rect, 2) 
+
+
+
 
 class Menu_option (pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, color, hover_color,text):
@@ -113,3 +117,66 @@ class DustParticle:
 
     def is_dead(self):
         return self.lifetime <= 0 or self.alpha <= 0
+    
+def draw_reload_bar(screen, x, y, scale_x, scale_y, reload_progress, 
+                   bg_color=(50, 50, 50), fill_color=(255, 150, 0),
+                   glow_color=(255, 223, 0), text_color=(255, 255, 200)):
+    """
+    Draws an animated reload progress bar
+    Parameters:
+    - screen: Target surface to draw on
+    - x, y: Top-left position (base coordinates before scaling)
+    - scale_x, scale_y: Scaling factors
+    - reload_progress: 0.0-1.0 value indicating reload completion
+    - colors: Optional color overrides
+    """
+    # Calculate scaled dimensions
+    bar_width = int(200 * scale_x)
+    bar_height = int(24 * scale_y)
+    pos_x = int(x * scale_x)
+    pos_y = int(y * scale_y)
+    border_radius = int(5 * scale_x)
+    
+    # Animated glow background
+    glow_alpha = abs(pygame.time.get_ticks() % 1000 - 500) / 5
+    glow_surface = pygame.Surface((bar_width, bar_height), pygame.SRCALPHA)
+    pygame.draw.rect(glow_surface, (*glow_color, int(glow_alpha)), 
+                    glow_surface.get_rect(), border_radius=border_radius)
+    screen.blit(glow_surface, (pos_x, pos_y))
+    
+    # Background container
+    pygame.draw.rect(screen, bg_color, (pos_x, pos_y, bar_width, bar_height), 
+                    border_radius=border_radius)
+    pygame.draw.rect(screen, (100, 100, 100), (pos_x, pos_y, bar_width, bar_height), 
+                    2, border_radius=border_radius)
+    
+    # Progress bar
+    current_width = bar_width * reload_progress
+    gradient = pygame.Surface((current_width, bar_height))
+    for i in range(int(current_width)):
+        alpha = int(255 * (i/current_width)) if current_width > 0 else 0
+        pygame.draw.line(gradient, (fill_color[0], fill_color[1] + alpha//4, fill_color[2]), 
+                        (i, 0), (i, bar_height))
+    
+    # Clip the gradient to rounded rectangle
+    mask = pygame.Surface((current_width, bar_height), pygame.SRCALPHA)
+    pygame.draw.rect(mask, (255,255,255,255), (0, 0, current_width, bar_height), 
+                    border_radius=border_radius)
+    gradient.blit(mask, (0, 0), special_flags=pygame.BLEND_RGBA_MULT)
+    
+    screen.blit(gradient, (pos_x, pos_y))
+    
+    # Percentage text
+    font = pygame.font.SysFont("Arial Bold", int(14 * scale_x))
+    text = font.render(f"{int(reload_progress*100)}%", True, text_color)
+    text_rect = text.get_rect(center=(pos_x + bar_width//2, pos_y + bar_height + 10 * scale_y))
+    screen.blit(text, text_rect)
+    
+    # Reload icon (optional - needs image file)
+    try:
+        icon_size = int(20 * scale_x)
+        reload_icon = pygame.transform.scale(pygame.image.load("images/reload_icon.png"), 
+                                            (icon_size, icon_size))
+        screen.blit(reload_icon, (pos_x + bar_width + 5 * scale_x, pos_y - 2 * scale_y))
+    except FileNotFoundError:
+        pass

@@ -103,8 +103,8 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x += dx * self.speed
         self.rect.y += dy * self.speed
         # Minor stuff cheking if enemy is done. Needed for droping items.
-    def take_damage(self):
-        self.health -= 1
+    def take_damage(self , amount ):
+        self.health -=  amount 
         if self.health <= 0:
             self.drop_item()
             self.kill()

@@ -4,23 +4,27 @@ import math
 
 
 class Tear(pygame.sprite.Sprite):
-    def __init__(self, x, y, direction , scale_x =1 ,scale_y = 1):
+    def __init__(self, x, y, direction, speed=7, damage=10, scale_x=1, scale_y=1):
         super().__init__()
         self.orig = pygame.image.load('images/bullet.png').convert_alpha()
-        
-        self.image = pygame.transform.scale(self.orig,(20 * scale_x,20 * scale_y)) 
-        
-        self.rect = self.image.get_rect(center=(x , y ))
-        
-        self.speed = 7 
+        self.image = pygame.transform.scale(self.orig, (20 * scale_x, 20 * scale_y))
+        self.rect = self.image.get_rect(center=(x, y))
+        self.speed = speed
         self.direction = direction
-        self.lifetime = 50 * scale_x
-        
+        self.lifetime = 50
+        self.damage = damage
+        self.trail_positions = []  # Store positions for trail
+        self.max_trail_length = 5 
     def update(self):
         self.rect.x += self.direction[0] * self.speed
         self.rect.y += self.direction[1] * self.speed
         self.lifetime -= 1
+        self.trail_positions.append((self.rect.centerx, self.rect.centery))
+        if len(self.trail_positions) > self.max_trail_length:
+            self.trail_positions.pop(0)
         return self.lifetime <= 0
+    
+
 
 
 BLACK = (0, 0, 0)
@@ -41,8 +45,7 @@ class Player(pygame.sprite.Sprite):
         self.orig = pygame.image.load('images/player.png').convert_alpha()
         self.scale_x = scale_x
         self.scale_y = scale_y
-        
-        self.image = pygame.transform.scale(self.orig,(50 * scale_x,50 * scale_y))
+        self.image = pygame.transform.scale(self.orig, (50 * scale_x, 50 * scale_y))
         self.original_image = self.image 
         self.rect = self.image.get_rect(center=(400, 300))
         self.speed = 5 *  self.multiplier
@@ -65,6 +68,20 @@ class Player(pygame.sprite.Sprite):
         self.dash_trail = []
         self.max_trail_points = 8
         
+        self.speed = 5 
+        self.health = 300
+        self.max_health = 300
+        self.tears = []  
+        self.angle = 0
+
+        self.last_shot_time = 0
+        self.current_mode = 1  # режим стрельбы по умолчанию
+        
+        self.is_reloading = False
+        self.reload_start_time = 0
+
+        
+
     def update(self, walls):
         keys = pygame.key.get_pressed()
         dx, dy = 0, 0
@@ -113,17 +130,31 @@ class Player(pygame.sprite.Sprite):
         self.rect.x += dx 
         self.rect.y += dy
         
-        # Shooting cooldown
-        if self.shot_cooldown > 0:
-            self.shot_cooldown -= 1
-            
-    def shoot(self, direction):
-        if self.shot_cooldown == 0:
-            tear = Tear(self.rect.centerx, self.rect.centery, direction,self.scale_x ,self.scale_y)
+    def shoot(self, direction, Fire_mode):
+        import time
+        
+        FIRE_MODES = Fire_mode 
+        if self.is_reloading:
+          return Fire_mode
+        mode = FIRE_MODES[self.current_mode]
+        current_time = time.time()
+
+        if current_time - self.last_shot_time >= mode["fire_rate"]:
+            FIRE_MODES [self.current_mode]["bullets"] -=1
+            tear = Tear(
+                self.rect.centerx,
+                self.rect.centery,
+                direction,
+                speed=mode["speed"],
+                damage=mode["damage"],
+                scale_x=self.scale_x,
+                scale_y=self.scale_y
+            )
             angle = math.degrees(math.atan2(-direction[1], direction[0]))
             tear.image = pygame.transform.rotate(tear.image, angle)
             self.tears.append(tear)
-            self.shot_cooldown = 15
+            self.last_shot_time = current_time            
+        return Fire_mode
     def dash(self):
         if self.dash_cooldown_timer <= 0 and not self.is_dashing:
             # Get movement direction
@@ -147,3 +178,4 @@ class Player(pygame.sprite.Sprite):
             self.dash_timer = self.dash_duration
             self.dash_cooldown_timer = self.dash_cooldown
             self.dash_trail = []
+            

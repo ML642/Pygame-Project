@@ -2,11 +2,12 @@ import pygame
 import random
 import math
 import os
+import time 
 from player import Player
 from enemy import Enemy
 from camera import Camera
 from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
-from UI_components import draw_health_bar , Menu_option , DustParticle
+from UI_components import draw_health_bar , Menu_option , DustParticle , draw_reload_bar
 from stopmenu import pause_menu , draw_button , draw_slider
 from Main_Menu import Main_menu
 from interactive_objects import  DestructibleObject , SpikeTrap , ExplosiveBarrel
@@ -67,6 +68,12 @@ current_settings = Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT)
 
 scale_x = current_settings["resolution"][0] / BASE_WIDTH
 scale_y = current_settings["resolution"][1] / BASE_HEIGHT
+FIRE_MODES = {
+            1: {"speed": 7, "damage": 10, "fire_rate": 0.6 ,"url": "images/pistol.png","bullets" : 10 , "ammo" :9  , "full" : 10 , "reload_time" :2 },
+            2: {"speed": 12, "damage": 5, "fire_rate": 0.3 , "url": "images/shotgun.png" ,"bullets" : 10 , "ammo" : 2 , "full": 30 , "reload_time" :1.5 }, 
+            3: {"speed": 20, "damage": 20, "fire_rate": 1 , "url": "images/sniper.png" , "bullets" : 10 ,   "ammo" : 3, "full":10 , "reload_time" : 2.5 },
+        }
+
 
 ROOM_WIDTH, ROOM_HEIGHT = 700 * scale_x, 500 * scale_y
 CELL_SIZE = 40
@@ -185,8 +192,31 @@ while running:
                             drop.pickup(player)
                 if event.key == pygame.K_SPACE:
                     player.dash()
-                    
-                    
+                elif event.key == pygame.K_1:
+                     player.is_reloading = False 
+                     player.current_mode = 1
+                elif event.key == pygame.K_2:
+                    player.current_mode = 2
+                    player.is_reloading = False 
+                elif event.key == pygame.K_3:
+                    player.current_mode = 3
+                    player.is_reloading = False 
+                elif event.key == pygame.K_r:
+                     if not player.is_reloading and FIRE_MODES[player.current_mode]["ammo"] > 0 and FIRE_MODES[player.current_mode]["full"] != FIRE_MODES[player.current_mode]["bullets"]:
+                            player.is_reloading = True
+                            player.reload_start_time = time.time()
+        if player.is_reloading and FIRE_MODES[player.current_mode]["full"] != FIRE_MODES[player.current_mode]["bullets"]: 
+            current_time = time.time()
+            reload_duration = FIRE_MODES[player.current_mode]["reload_time"]
+            
+            if current_time - player.reload_start_time >= reload_duration:
+                # Complete reload
+                max_reload = FIRE_MODES[player.current_mode]["full"] - FIRE_MODES[player.current_mode]["bullets"]
+                reload_amount = min(FIRE_MODES[player.current_mode]["ammo"], max_reload)
+                
+                FIRE_MODES[player.current_mode]["bullets"] += reload_amount
+                FIRE_MODES[player.current_mode]["ammo"] -= reload_amount
+                player.is_reloading = False
         for room in Rooms :
             if player.rect.colliderect(room.rect) and room.active == False:
                 room.active = True
@@ -230,8 +260,15 @@ while running:
           dx = mouse_world_x - player.rect.centerx 
           dy = mouse_world_y - player.rect.centery 
           dist = max(1, math.sqrt(dx*dx + dy*dy))
-          player.shoot((dx/dist, dy/dist))
-        player.update(walls)
+          if FIRE_MODES[player.current_mode]["bullets"] > 0:
+            FIRE_MODES = player.shoot((dx/dist, dy/dist), FIRE_MODES)
+            
+            #print(FIRE_MODES[player.current_mode]["bullets"])
+          elif not player.is_reloading and FIRE_MODES[player.current_mode]["ammo"] > 0:
+                            player.is_reloading = True
+                            player.reload_start_time = time.time()
+            
+        player.update(walls)    
         camera.update(player)
   
         mouse_world_x = pygame.mouse.get_pos()[0] - camera.camera.x
@@ -252,7 +289,7 @@ while running:
          else:
             for enemy in enemies:
                 if tear.rect.colliderect(enemy.rect):
-                    enemy.take_damage()
+                    enemy.take_damage(FIRE_MODES[player.current_mode]["damage"])
                     if tear in player.tears:
                         player.tears.remove(tear)
                         
@@ -293,6 +330,15 @@ while running:
         for tear in player.tears:
             adjusted_pos = tear.rect.topleft + pygame.math.Vector2(camera.camera.topleft)
             screen.blit(tear.image, adjusted_pos)
+            
+            if player.current_mode == 3:
+             if len(tear.trail_positions) > 1:
+        # Convert positions to screen coordinates
+                    trail_points = [
+                        (x + camera.camera.x, y + camera.camera.y)
+                        for (x, y) in tear.trail_positions
+                    ]
+                    pygame.draw.lines(screen, (255, 200, 100), False, trail_points, 2)  
         enemies.update(player, walls)
         
         for tear in player.tears[:]:
@@ -315,23 +361,44 @@ while running:
         # Health and UI elements (drawn without camera offset)
         font = pygame.font.SysFont(None, int(36 * scale_x))
         health_text = font.render(f"Hearts: {int(player.health)}", True, WHITE)
-        coordinates  = font.render(f"Player coordinates: X  {int(player.rect.x)} Y  {int(player.rect.y)}", True, WHITE)
+        # coordinates  = font.render(f"Player coordinates: X  {int(player.rect.x)} Y  {int(player.rect.y)}", True, WHITE)
         
         draw_health_bar(screen,player.health, player.max_health,scale_x , scale_y)
-        screen.blit(coordinates, (20 * scale_x, 50 * scale_y))
+        #screen.blit(coordinates, (20 * scale_x, 50 * scale_y))
         if player.health <= 1:
             pygame.quit()
         # Debugging information
-        font_debug = pygame.font.SysFont(None, int(24 * scale_x))  # Smaller font for debugging
-        mouse_world_text = font_debug.render(f"Mouse World: ({int(mouse_world_x)}, {int(mouse_world_y)})", True, WHITE)
-        player_position_text = font_debug.render(f"Player Position: ({int(player.rect.centerx)}, {int(player.rect.centery)})", True, WHITE)
-        direction_text = font_debug.render(f"Direction: ({round(dx, 2)}, {round(dy, 2)})", True, WHITE)
-
-        # Display debugging information on the screen
-        screen.blit(mouse_world_text, (20 * scale_x, 100 * scale_y))
-        screen.blit(player_position_text, (20 * scale_x, 130 * scale_y))
-        screen.blit(direction_text, (20 * scale_x, 160 * scale_y))
-                
+        # font_debug = pygame.font.SysFont(None, int(24 * scale_x))  # Smaller font for debugging
+        # mouse_world_text = font_debug.render(f"Mouse World: ({int(mouse_world_x)}, {int(mouse_world_y)})", True, WHITE)
+        # player_position_text = font_debug.render(f"Player Position: ({int(player.rect.centerx)}, {int(player.rect.centery)})", True, WHITE)
+        # direction_text = font_debug.render(f"Direction: ({round(dx, 2)}, {round(dy, 2)})", True, WHITE)
+        
+        # screen.blit(mouse_world_text, (20 * scale_x, 100 * scale_y))
+        # screen.blit(player_position_text, (20 * scale_x, 130 * scale_y))
+        # screen.blit(direction_text, (20 * scale_x, 160 * scale_y))
+        
+        pygame.draw.circle(screen, (192,192,192), (0, 0) , 150 , 0)
+        weapon_image = pygame.image.load(FIRE_MODES[player.current_mode]["url"]).convert_alpha()
+        weapon_image = pygame.transform.scale(weapon_image, (100 * scale_x, 100 * scale_y))
+        
+        weapon_rect = weapon_image.get_rect(center=(0, 0))
+        if player.is_reloading:
+    # Calculate progress
+               reload_progress = (time.time() - player.reload_start_time) / FIRE_MODES[player.current_mode]["reload_time"]
+               draw_reload_bar(
+                    screen=screen,
+                    x=130 , # base X position (before scaling)
+                    y=37, # base Y position (before scaling)
+                    scale_x=scale_x,
+                    scale_y=scale_y,
+                    reload_progress=min(reload_progress, 1.0)  # ensure never exceeds 1.0
+    )
+        pygame.draw.circle(screen, (192,192,192), (0, 0) , 150 , 0)
+        screen.blit(weapon_image, (0, 0))
+        font = pygame.font.SysFont(None, int(24 * scale_x))
+        ammo_text = font.render(f"{FIRE_MODES[player.current_mode]['bullets']}/{FIRE_MODES[player.current_mode]["ammo"]}", True, BLACK)
+        ammo_rect = ammo_text.get_rect(center=(0, 0))
+        screen.blit(ammo_text, ( 10 , 100 ) )        
         pygame.display.flip()
         clock.tick(60)
 
