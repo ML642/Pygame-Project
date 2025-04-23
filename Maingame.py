@@ -276,9 +276,9 @@ while running:
         direction_text = font_debug.render(f"Direction: ({round(dx, 2)}, {round(dy, 2)})", True, WHITE)
 
         # Display debugging information on the screen
-        screen.blit(mouse_world_text, (20 * scale_x, 100 * scale_y))
-        screen.blit(player_position_text, (20 * scale_x, 130 * scale_y))
-        screen.blit(direction_text, (20 * scale_x, 160 * scale_y))
+        #screen.blit(mouse_world_text, (20 * scale_x, 100 * scale_y))
+        #screen.blit(player_position_text, (20 * scale_x, 130 * scale_y))
+        #screen.blit(direction_text, (20 * scale_x, 160 * scale_y))
                 
         pygame.display.flip()
         clock.tick(60)
