@@ -12,11 +12,15 @@ class Tear(pygame.sprite.Sprite):
         self.direction = direction
         self.lifetime = 50
         self.damage = damage
-
+        self.trail_positions = []  # Store positions for trail
+        self.max_trail_length = 5 
     def update(self):
         self.rect.x += self.direction[0] * self.speed
         self.rect.y += self.direction[1] * self.speed
         self.lifetime -= 1
+        self.trail_positions.append((self.rect.centerx, self.rect.centery))
+        if len(self.trail_positions) > self.max_trail_length:
+            self.trail_positions.pop(0)
         return self.lifetime <= 0
     
 
@@ -45,10 +49,14 @@ class Player(pygame.sprite.Sprite):
 
         self.last_shot_time = 0
         self.current_mode = 1  # режим стрельбы по умолчанию
+        
+        
 
     def update(self, walls):
         keys = pygame.key.get_pressed()
         dx, dy = 0, 0
+        
+        
         
         if keys[pygame.K_LEFT]: dx -= self.speed * self.scale_x
         if keys[pygame.K_RIGHT]: dx += self.speed * self.scale_x
@@ -77,7 +85,7 @@ class Player(pygame.sprite.Sprite):
                 
         self.rect.x += dx 
         self.rect.y += dy
-
+        
     def shoot(self, direction, Fire_mode):
         import time
         FIRE_MODES = Fire_mode 

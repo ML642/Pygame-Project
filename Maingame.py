@@ -263,6 +263,15 @@ while running:
         for tear in player.tears:
             adjusted_pos = tear.rect.topleft + pygame.math.Vector2(camera.camera.topleft)
             screen.blit(tear.image, adjusted_pos)
+            
+            if player.current_mode == 3:
+             if len(tear.trail_positions) > 1:
+        # Convert positions to screen coordinates
+                    trail_points = [
+                        (x + camera.camera.x, y + camera.camera.y)
+                        for (x, y) in tear.trail_positions
+                    ]
+                    pygame.draw.lines(screen, (255, 200, 100), False, trail_points, 2)  
         enemies.update(player, walls)
         
         for tear in player.tears[:]:
