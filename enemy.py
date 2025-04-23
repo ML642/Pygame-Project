@@ -17,7 +17,7 @@ class Enemy(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.orig, (50 * scale_x, 50 * scale_y))
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = (random.uniform(1,2)) * scale_x
-        self.health = 3
+        self.health = 30
         self.drops = drops
         
         self.flag_X1 = 1
@@ -94,8 +94,8 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.x += dx * self.speed
         self.rect.y += dy * self.speed
         # Minor stuff cheking if enemy is done. Needed for droping items.
-    def take_damage(self):
-        self.health -= 1
+    def take_damage(self , amount ):
+        self.health -=  amount 
         if self.health <= 0:
             self.drop_item()
             self.kill()

@@ -11,11 +11,11 @@ WHITE = (255, 255, 255)
 
 
 def draw_health_bar(surface, current_hp, max_hp, scale_x = 2 , scale_y = 2):
-    bg_rect = pygame.Rect(20* scale_x, 20 * scale_y, 200 * scale_x , 20 * scale_y)
+    bg_rect = pygame.Rect(140* scale_x, 5 * scale_y, 300 * scale_x , 30 * scale_y)
     pygame.draw.rect(surface, WHITE, bg_rect)
 
-    health_width = int((current_hp / max_hp) * 200 * scale_x)
-    health_rect = pygame.Rect(20 * scale_x, 20 * scale_y, health_width, 20 * scale_y )
+    health_width = int((current_hp / max_hp) * 300 * scale_x)
+    health_rect = pygame.Rect(140 * scale_x, 5* scale_y, health_width, 30 * scale_y )
     
     pygame.draw.rect(surface, RED, health_rect)
     pygame.draw.rect(surface, BLACK, bg_rect, 2) 

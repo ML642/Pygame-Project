@@ -78,18 +78,15 @@ class Player(pygame.sprite.Sprite):
         self.rect.x += dx 
         self.rect.y += dy
 
-    def shoot(self, direction):
+    def shoot(self, direction, Fire_mode):
         import time
-        FIRE_MODES = {
-            1: {"speed": 7, "damage": 10, "fire_rate": 0.6},
-            2: {"speed": 12, "damage": 5, "fire_rate": 0.3},
-            3: {"speed": 5, "damage": 20, "fire_rate": 1},
-        }
+        FIRE_MODES = Fire_mode 
 
         mode = FIRE_MODES[self.current_mode]
         current_time = time.time()
 
         if current_time - self.last_shot_time >= mode["fire_rate"]:
+            FIRE_MODES [self.current_mode]["bullets"] -=1
             tear = Tear(
                 self.rect.centerx,
                 self.rect.centery,
@@ -103,3 +100,4 @@ class Player(pygame.sprite.Sprite):
             tear.image = pygame.transform.rotate(tear.image, angle)
             self.tears.append(tear)
             self.last_shot_time = current_time
+        return FIRE_MODES

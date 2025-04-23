@@ -45,6 +45,12 @@ WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
 
 
+FIRE_MODES = {
+            1: {"speed": 7, "damage": 10, "fire_rate": 0.6 ,"url": "images/pistol.png","bullets" : 10 , "ammo" :9  , "full" : 10},
+            2: {"speed": 12, "damage": 5, "fire_rate": 0.3 , "url": "images/shotgun.png" ,"bullets" : 10 , "ammo" : 2 , "full": 30}, 
+            3: {"speed": 20, "damage": 20, "fire_rate": 1 , "url": "images/sniper.png" , "bullets" : 10 ,   "ammo" : 3, "full":10},
+        }
+
 
 ROOM_WIDTH, ROOM_HEIGHT = 700 * scale_x, 500 * scale_y
 CELL_SIZE = 40
@@ -200,8 +206,19 @@ while running:
           dx = mouse_world_x - player.rect.centerx 
           dy = mouse_world_y - player.rect.centery 
           dist = max(1, math.sqrt(dx*dx + dy*dy))
-          player.shoot((dx/dist, dy/dist))
-        player.update(walls)
+          if FIRE_MODES[player.current_mode]["bullets"] > 0:
+            FIRE_MODES = player.shoot((dx/dist, dy/dist), FIRE_MODES)
+            
+            print(FIRE_MODES[player.current_mode]["bullets"])
+          elif FIRE_MODES[player.current_mode]["ammo"] > 0:   
+            if FIRE_MODES[player.current_mode]["ammo"]  > FIRE_MODES[player.current_mode]["full"] - FIRE_MODES[player.current_mode]["bullets"]:
+                FIRE_MODES[player.current_mode]["ammo"] -= FIRE_MODES[player.current_mode]["full"] - FIRE_MODES[player.current_mode]["bullets"]
+                FIRE_MODES[player.current_mode]["bullets"] = FIRE_MODES[player.current_mode]["full"]
+            else :
+                FIRE_MODES[player.current_mode]["bullets"] += FIRE_MODES[player.current_mode]["ammo"]
+                FIRE_MODES[player.current_mode]["ammo"] = 0
+            
+        player.update(walls)    
         camera.update(player)
      
         
@@ -224,7 +241,7 @@ while running:
          else:
             for enemy in enemies:
                 if tear.rect.colliderect(enemy.rect):
-                    enemy.take_damage()
+                    enemy.take_damage(FIRE_MODES[player.current_mode]["damage"])
                     if tear in player.tears:
                         player.tears.remove(tear)
                         
@@ -263,23 +280,33 @@ while running:
         # Health and UI elements (drawn without camera offset)
         font = pygame.font.SysFont(None, int(36 * scale_x))
         health_text = font.render(f"Hearts: {int(player.health)}", True, WHITE)
-        coordinates  = font.render(f"Player coordinates: X  {int(player.rect.x)} Y  {int(player.rect.y)}", True, WHITE)
+        # coordinates  = font.render(f"Player coordinates: X  {int(player.rect.x)} Y  {int(player.rect.y)}", True, WHITE)
         
         draw_health_bar(screen,player.health, player.max_health,scale_x , scale_y)
-        screen.blit(coordinates, (20 * scale_x, 50 * scale_y))
+        #screen.blit(coordinates, (20 * scale_x, 50 * scale_y))
         if player.health <= 1:
             pygame.quit()
         # Debugging information
-        font_debug = pygame.font.SysFont(None, int(24 * scale_x))  # Smaller font for debugging
-        mouse_world_text = font_debug.render(f"Mouse World: ({int(mouse_world_x)}, {int(mouse_world_y)})", True, WHITE)
-        player_position_text = font_debug.render(f"Player Position: ({int(player.rect.centerx)}, {int(player.rect.centery)})", True, WHITE)
-        direction_text = font_debug.render(f"Direction: ({round(dx, 2)}, {round(dy, 2)})", True, WHITE)
-
-        # Display debugging information on the screen
-        screen.blit(mouse_world_text, (20 * scale_x, 100 * scale_y))
-        screen.blit(player_position_text, (20 * scale_x, 130 * scale_y))
-        screen.blit(direction_text, (20 * scale_x, 160 * scale_y))
-                
+        # font_debug = pygame.font.SysFont(None, int(24 * scale_x))  # Smaller font for debugging
+        # mouse_world_text = font_debug.render(f"Mouse World: ({int(mouse_world_x)}, {int(mouse_world_y)})", True, WHITE)
+        # player_position_text = font_debug.render(f"Player Position: ({int(player.rect.centerx)}, {int(player.rect.centery)})", True, WHITE)
+        # direction_text = font_debug.render(f"Direction: ({round(dx, 2)}, {round(dy, 2)})", True, WHITE)
+        
+        # screen.blit(mouse_world_text, (20 * scale_x, 100 * scale_y))
+        # screen.blit(player_position_text, (20 * scale_x, 130 * scale_y))
+        # screen.blit(direction_text, (20 * scale_x, 160 * scale_y))
+        
+        pygame.draw.circle(screen, (192,192,192), (0, 0) , 150 , 0)
+        weapon_image = pygame.image.load(FIRE_MODES[player.current_mode]["url"]).convert_alpha()
+        weapon_image = pygame.transform.scale(weapon_image, (100 * scale_x, 100 * scale_y))
+        
+        weapon_rect = weapon_image.get_rect(center=(0, 0))
+        
+        screen.blit(weapon_image, (0, 0))
+        font = pygame.font.SysFont(None, int(24 * scale_x))
+        ammo_text = font.render(f"{FIRE_MODES[player.current_mode]['bullets']}/{FIRE_MODES[player.current_mode]["ammo"]}", True, BLACK)
+        ammo_rect = ammo_text.get_rect(center=(0, 0))
+        screen.blit(ammo_text, ( 10 , 100 ) )        
         pygame.display.flip()
         clock.tick(60)
 
