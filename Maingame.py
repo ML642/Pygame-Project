@@ -12,6 +12,8 @@ from Main_Menu import Main_menu
 
 
 
+
+
 pygame.init()
 screen_width = 800 
 screen_height = 600
@@ -148,7 +150,12 @@ while running:
                     for drop in drops:
                         if player.rect.colliderect(drop.rect):
                             drop.pickup(player)
-                    
+                elif event.key == pygame.K_1:
+                     player.current_mode = 1
+                elif event.key == pygame.K_2:
+                    player.current_mode = 2
+                elif event.key == pygame.K_3:
+                    player.current_mode = 3
                     
         for room in Rooms :
             if player.rect.colliderect(room.rect) and room.active == False:

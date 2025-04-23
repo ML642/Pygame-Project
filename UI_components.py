@@ -2,6 +2,7 @@ import pygame
 import random 
 
 
+
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
@@ -18,6 +19,9 @@ def draw_health_bar(surface, current_hp, max_hp, scale_x = 2 , scale_y = 2):
     
     pygame.draw.rect(surface, RED, health_rect)
     pygame.draw.rect(surface, BLACK, bg_rect, 2) 
+
+
+
 
 class Menu_option (pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, color, hover_color,text):
