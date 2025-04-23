@@ -24,7 +24,7 @@ class Enemy(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.orig, (50 * scale_x, 50 * scale_y))
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = (random.uniform(1,2)) * scale_x * self.multiplier
-        self.health = 3* self.multiplier
+        self.health = 30* self.multiplier
         self.drops = drops
         
         

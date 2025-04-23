@@ -189,7 +189,7 @@ while running:
                 elif event.key == pygame.K_e: # Added "E" hotkey to pick up items.
                     for drop in drops:
                         if player.rect.colliderect(drop.rect):
-                            drop.pickup(player)
+                            FIRE_MODES =  drop.pickup(player , FIRE_MODES )
                 if event.key == pygame.K_SPACE:
                     player.dash()
                 elif event.key == pygame.K_1:
