@@ -7,13 +7,16 @@ from setting_menu import SettingsMenu
 pygame.init()
 
 def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings_data =  None  ):
+    
     os.environ['SDL_VIDEO_CENTERED'] = "1"
+    
     default_settings = {
         'resolution': (800, 600),
         'music_volume': 50,
         'sfx_volume': 50,
         'difficulty': 'medium'
     }
+    
     current_settings = settings_data if settings_data else default_settings
    
     screen_width = 800 
@@ -27,7 +30,8 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
     screen = pygame.display.set_mode((800 * scale_x, 600 * scale_y))
     clock = pygame.time.Clock()
     
-     
+    
+    
     Main_Menu = True 
     BLACK = (0, 0, 0)
     RED = (255, 0, 0)
@@ -83,7 +87,8 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
                     pygame.mouse.set_visible(True)
                 elif active == 1:
                     print("Opening settings...")
-                    settings_menu = SettingsMenu(actual_screen_width, actual_screen_height) 
+                    settings_menu = SettingsMenu(actual_screen_width, actual_screen_height, current_settings) 
+                    settings_menu.update()
                     new_settings = settings_menu.run(screen, Main_menu)  
                     print("New settings:", new_settings)
                     if new_settings:

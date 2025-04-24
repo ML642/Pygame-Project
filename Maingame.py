@@ -19,7 +19,7 @@ from setting_menu import SettingsMenu
 
 pygame.init()
 
-from interactive_objects import DestructibleObject, SpikeTrap, ExplosiveBarrel
+
 
 interactive_objects = pygame.sprite.Group()
 wall = DestructibleObject(x=5, y=5, width=32, height=32, hp=100, k=2)
@@ -65,7 +65,7 @@ YELLOW = (255, 255, 0)
 data = [ 0 , (800,600) ]
 # data = 
 # SELECTED_WIDTH,SELECTED_HEIGHT = data[1] 
-current_settings = Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT)
+current_settings = Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT , current_settings)
 
 scale_x = current_settings["resolution"][0] / BASE_WIDTH
 scale_y = current_settings["resolution"][1] / BASE_HEIGHT

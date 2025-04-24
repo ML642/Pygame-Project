@@ -2,14 +2,15 @@ import pygame
 from pygame import mixer
 
 class SettingsMenu:
-    def __init__(self, screen_width, screen_height):
+    def __init__(self, screen_width, screen_height , settings_data=None):
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.active = False
         self.font_large = pygame.font.SysFont("Arial", 48)
         self.font_medium = pygame.font.SysFont("Arial", 32)
         self.font_low = pygame.font.SysFont("Arial" , 24 )
-        # Slider values (0.0 to 1.0)
+        self.setting_data = settings_data
+
         self.music_volume = 0.7
         self.sfx_volume = 0.8
         self.music_slider_rect = pygame.Rect(300, 200, 200, 20)
@@ -24,7 +25,8 @@ class SettingsMenu:
         self.pass_volume = 0.5
         self.pass_music = 0
         
-        
+        print(settings_data)
+
         
         # Button rects
         self.back_button = pygame.Rect(300, 400, 200, 50)
@@ -32,14 +34,49 @@ class SettingsMenu:
         self.volume  = 50 
         
         self.music = 50 
-        self.difficult = ["easy","medium" , "hard" ]
-        self.difficult_n = 1
         
-        self.resolution = ["800x600" , "1350x750" , "Full Screen"]
-        self.resolution_n = 0
+        
+        self.difficult = ["easy","medium" , "hard" ]
+        
+        
+        self.resolution = ["800x600" , "1350x700" , "Full Screen"]
+        self.resolution_n =0 
+        
+      
+        
         mixer.init()
         #pygame.mixer.music.load("path_to_your_music_file.mp3")  # Replace with your music file
-        
+    def update (self):
+        if self.setting_data :
+            self.music = self.setting_data["music_volume"]
+            self.pass_music = self.setting_data["music_volume"]
+            self.pass_volume = self.setting_data["sfx_volume"]
+            self.volume = self.setting_data["sfx_volume"]
+            if self.setting_data["difficulty"] == "easy":
+                self.difficult_n = 0
+                self.pass_difficulty = 0
+                print("easy")
+            elif self.setting_data["difficulty"] == "medium":
+                self.difficult_n = 1
+                self.pass_difficulty = 1
+                print("medium")
+            elif self.setting_data["difficulty"] == "hard":
+                self.difficult_n = 2
+                self.pass_difficulty = 2
+                print("hard")
+        if self.setting_data["resolution"] == (800, 600):
+            self.resolution_n = 0
+            self.pass_resolution = 0
+            print("800x600")
+        elif self.setting_data["resolution"] == (1350, 700):
+            self.resolution_n = 1
+            self.pass_resolution = 1
+            print("1350x750")
+            
+        elif self.setting_data["resolution"] == (0, 0):
+            self.resolution_n = 2
+            self.pass_resolution = 2
+                
         #pygame.mixer.music.play(-1)
     def draw_triangle(self,surface, x, y, size=40, color=(255, 0, 0), direction="up"):
         if direction == "up":
@@ -226,18 +263,21 @@ class SettingsMenu:
                  screen = pygame.display.set_mode((1350,750))
                 if self.resolution_n ==2 :
                  screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
+                
                     
     def run(self, screen , Mainmenu):
         self.active = True
         #pygame.mixer.music.set_volume(self.music /100)
         
         while self.active:
+            
             data = {
             "difficulty": self.difficult[self.difficult_n],
             "resolution": self.resolution2[self.pass_resolution],
             "music_volume": self.music,
             "sfx_volume": self.volume
             }
+      
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
