@@ -3,6 +3,7 @@ import random
 import math
 import os
 import time 
+import copy 
 from player import Player
 from enemy import Enemy
 from camera import Camera
@@ -11,7 +12,7 @@ from UI_components import draw_health_bar , Menu_option , DustParticle , draw_re
 from stopmenu import pause_menu , draw_button , draw_slider
 from Main_Menu import Main_menu
 from interactive_objects import  DestructibleObject , SpikeTrap , ExplosiveBarrel
-
+from game_over import GameOver , game_over_screen ,  Restart
 
 from setting_menu import SettingsMenu
 
@@ -45,7 +46,7 @@ current_settings = {
     'difficulty': 'medium'
 }
 
-
+    
 
 
 screen = pygame.display.set_mode((800 * scale_x, 600 * scale_y))
@@ -73,11 +74,10 @@ FIRE_MODES = {
             2: {"speed": 12, "damage": 5, "fire_rate": 0.3 , "url": "images/shotgun.png" ,"bullets" : 10 , "ammo" : 2 , "full": 30 , "reload_time" :1.5 }, 
             3: {"speed": 20, "damage": 20, "fire_rate": 1 , "url": "images/sniper.png" , "bullets" : 10 ,   "ammo" : 3, "full":10 , "reload_time" : 2.5 },
         }
-
+FIRE_MODES_COPY = copy.deepcopy(FIRE_MODES)
 
 ROOM_WIDTH, ROOM_HEIGHT = 700 * scale_x, 500 * scale_y
 CELL_SIZE = 40
-
 
 
 
@@ -125,6 +125,11 @@ def Room_Create ( x , y  , form , type , enemies_counter ):
     if form == 1 or form == 3 or form ==4 or form == 5  or form == 7 : # top corridor , 
         floors.add(Floor_Hallway( (x + 250) *  scale_x , (y -  230)* scale_y   , 210 , 255  ,scale_x ,scale_y ))
 
+    
+
+    
+    return 0
+    
 OFFSET3 = 353
 OFFSET2 = 1000
 OFFSET = 700    
@@ -150,9 +155,10 @@ for room_data in level_1data:
 
 
 
+
 enemies = pygame.sprite.Group()
 enemies_counter = 0
-copy = walls.copy()
+copy1 = walls.copy()
 spawn_delay = 5000 
 last_spawn_time = 0
 
@@ -171,11 +177,12 @@ player.rect.center = ( -500 +(1-scale_x) * OFFSET ,50 + ( 700 / 2 )* scale_y - O
 
 
 pygame.mouse.set_visible(True)
-print(current_settings)
+
+start_time = pygame.time.get_ticks()  # Record the start time
 
 while running:
     # print(scale_x ,scale_y)
-    
+        start_time = pygame.time.get_ticks()  # Record the start time
     #print(enemies_counter)
         screen.fill(BLACK)
         for event in pygame.event.get():
@@ -205,6 +212,11 @@ while running:
                      if not player.is_reloading and FIRE_MODES[player.current_mode]["ammo"] > 0 and FIRE_MODES[player.current_mode]["full"] != FIRE_MODES[player.current_mode]["bullets"]:
                             player.is_reloading = True
                             player.reload_start_time = time.time()
+                elif event.key == pygame.K_TAB:
+                     Restart(Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY)
+                     enemies_counter = 0 
+                     FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
+                
         if player.is_reloading and FIRE_MODES[player.current_mode]["full"] != FIRE_MODES[player.current_mode]["bullets"]: 
             current_time = time.time()
             reload_duration = FIRE_MODES[player.current_mode]["reload_time"]
@@ -349,7 +361,7 @@ while running:
                     break
         for enemy in enemies:
           if player.rect.colliderect(enemy.rect) and not player.invincible:
-            player.health -= 0.1 
+            player.health -= 1
         for drop in drops:
             screen.blit(drop.image, camera.apply(drop))
         for obj in interactive_objects:
@@ -366,7 +378,18 @@ while running:
         draw_health_bar(screen,player.health, player.max_health,scale_x , scale_y)
         #screen.blit(coordinates, (20 * scale_x, 50 * scale_y))
         if player.health <= 1:
-            pygame.quit()
+            result =   game_over_screen(screen,kills , time , 1  , start_time)
+            if result == "restart":
+                Restart(Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY)
+                enemies_counter = 0
+                FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
+                
+            elif result == "menu":
+                Restart(Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY)
+                enemies_counter = 0
+                FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
+                Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT)
+                pygame.mouse.set_visible(True)
         # Debugging information
         # font_debug = pygame.font.SysFont(None, int(24 * scale_x))  # Smaller font for debugging
         # mouse_world_text = font_debug.render(f"Mouse World: ({int(mouse_world_x)}, {int(mouse_world_y)})", True, WHITE)
@@ -396,7 +419,7 @@ while running:
         pygame.draw.circle(screen, (192,192,192), (0, 0) , 150 , 0)
         screen.blit(weapon_image, (0, 0))
         font = pygame.font.SysFont(None, int(24 * scale_x))
-        ammo_text = font.render(f"{FIRE_MODES[player.current_mode]['bullets']}/{FIRE_MODES[player.current_mode]["ammo"]}", True, BLACK)
+        ammo_text = font.render(f"{FIRE_MODES[player.current_mode]['bullets']}/{FIRE_MODES[player.current_mode]['ammo']}", True, BLACK)
         ammo_rect = ammo_text.get_rect(center=(0, 0))
         screen.blit(ammo_text, ( 10 , 100 ) )        
         pygame.display.flip()
