@@ -110,18 +110,18 @@ class SettingsMenu:
         
         
         
-    def draw_option(self, screen, x, y, width, height, text, color, hover_color,value , active ,font_size, paddingX = 0 , paddingY = 0 ):
+    def draw_option(self, screen, x, y, width, height, text, color, hover_color,value , active ,font_size, paddingX = 0 , paddingY = 0 ,scalex = 1 ,scaley=1):
         
         
         button_rect = pygame.Rect(x, y, width, height)
 
         if active == True :
             pygame.draw.rect(screen, ( 255,255,255) ,button_rect , 0 , 10 )
-            
+            font_medium = pygame.font.SysFont("Arial",int(32 * scalex))
           
-            title = self.font_medium.render(text, True, (0, 0, 0))
+            title = font_medium.render(text, True, (0, 0, 0))
           
-            font = pygame.font.SysFont("Arial", font_size)
+            font = pygame.font.SysFont("Arial", int(font_size * scalex))
             value  = font.render(f"{value}", True, (0, 0, 0))
            
             value_width,value_height =  value.get_size()
@@ -130,27 +130,29 @@ class SettingsMenu:
             
             screen.blit(title ,( x + 50 , y + 20) )
             
-            self.draw_triangle(screen , x +325, y + 40 , 20 , (0,0,0) ,  "left")
+            self.draw_triangle(screen , x +325* scalex, y + 40* scaley , 20 * scalex , (0,0,0) ,  "left")
             
-            screen.blit(value , ( x  + 400 -25 - paddingX , y + 20 + paddingY   ))  
+            screen.blit(value , ( x  + (400 -25 - paddingX)* scalex ,y + 20* scaley + paddingY   ))  
             
-            self.draw_triangle(screen , x + 470, y + 40 , 20 , (0,0,0) ,  "right")
+            self.draw_triangle(screen , x + (470)* scalex, y + 40 * scaley , 20  * scalex, (0,0,0) ,  "right")
             
         if active == False :
             pygame.draw.rect(screen, (0,0,0) , button_rect , 0 , 10   )
             
-            title = self.font_medium.render(text, True, (255, 255, 255))
-            font = pygame.font.SysFont("Arial", font_size)
+            font_medium = pygame.font.SysFont("Arial",int(32 * scalex))
+
+            title = font_medium.render(text, True, (255, 255, 255))
+            font = pygame.font.SysFont("Arial", int(font_size * scalex))
 
             value  = font.render(f"{value}", True, (255, 255, 255))
           
             screen.blit(title ,( x + 50  , y + 20) )
             
-            self.draw_triangle(screen , x +325, y + 40 , 20 , (255,255,255) ,  "left")
+            self.draw_triangle(screen , x +325* scalex, y + 40 * scaley , 20 * scalex , (255,255,255) ,  "left")
             
-            screen.blit(value , ( x  + 400 -25 - paddingX  , y + 20 + paddingY   ))  
+            screen.blit(value , ( x  +(400 -25 - paddingX)* scalex  , y + (20 + paddingY)* scaley   ))  
             
-            self.draw_triangle(screen , x + 470, y + 40 , 20 , (255,255,255) ,  "right")
+            self.draw_triangle(screen , x + 470 * scalex, y + 40  * scaley, 20 * scalex , (255,255,255) ,  "right")
             
 
         
@@ -158,6 +160,8 @@ class SettingsMenu:
      
     def draw(self, screen, scalex, scaley):
         # Semi-transparent background
+        self.screen_width = self.resolution2[self.pass_resolution][0]
+        self.screen_height = self.resolution2[self.pass_resolution][1]
         overlay = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 200))
         screen.blit(overlay, (0, 0))
@@ -167,22 +171,22 @@ class SettingsMenu:
         
         
         if self.active_button == 1:
-         self.draw_option(screen , 150  * scalex, (150-50) * scaley , 500 * scalex , 75 * scaley , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult[self.difficult_n] , True ,  22 ,15 , 5 )
+         self.draw_option(screen , 150  * scalex, (150-50) * scaley , 500 * scalex , 75 * scaley , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult[self.difficult_n] , True ,  22 ,15  , 5 ,  scalex , scaley)
         else :
-         self.draw_option(screen , 150 * scalex,(150 -50) * scaley, 500 * scalex , 75 * scaley , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult[self.difficult_n] , False  ,22 , 15,5)
+         self.draw_option(screen , 150 * scalex,(150 -50) * scaley, 500 * scalex , 75 * scaley , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult[self.difficult_n] , False  ,22 , 15 , 5 , scalex , scaley)
         if self.active_button == 2:
-            self.draw_option(screen , 150 * scalex, (250 -50 ) * scaley , 500 * scalex , 75 * scaley , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution[self.resolution_n], True ,22 ,20 , 7)
+            self.draw_option(screen , 150 * scalex, (250 -50 ) * scaley , 500 * scalex , 75 * scaley , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution[self.resolution_n], True ,22 ,20  , 7 , scalex , scaley)
         else:
-            self.draw_option(screen , 150 * scalex, (250 -50)* scaley, 500 * scalex , 75 * scaley , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution[self.resolution_n], False ,22,20 , 7)
+            self.draw_option(screen , 150 * scalex, (250 -50)* scaley, 500 * scalex , 75 * scaley , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution[self.resolution_n], False ,22,20  , 7 , scalex , scaley)
 
         if self.active_button == 3 :   
-         self.draw_option(screen , 150 * scalex, (350 -50)*scaley, 500 * scalex, 75 * scaley , "MUSIC" , (0,0,0) , (255,255,255),self.music, True ,32)
+         self.draw_option(screen , 150 * scalex, (350 -50)*scaley, 500 * scalex, 75 * scaley , "MUSIC" , (0,0,0) , (255,255,255),self.music, True ,32,0 ,0 , scalex , scaley)
         else :
-         self.draw_option(screen , 150  * scalex, (350 -50) * scaley, 500 * scalex, 75 * scaley , "MUSIC" , (0,0,0) , (255,255,255),self.music , False ,32)
+         self.draw_option(screen , 150  * scalex, (350 -50) * scaley, 500 * scalex, 75 * scaley , "MUSIC" , (0,0,0) , (255,255,255),self.music , False ,32,0 ,0 , scalex , scaley)
         if self.active_button == 4 :
-         self.draw_option(screen , 150 * scalex , (450 -50)* scaley, 500 * scalex, 75 * scaley ,  "SOUND" , (0,0,0), (255,255,255) , self.volume ,  True ,32 )
+         self.draw_option(screen , 150 * scalex , (450 -50)* scaley, 500 * scalex, 75 * scaley ,  "SOUND" , (0,0,0), (255,255,255) , self.volume ,  True ,32 ,0 ,0 , scalex , scaley)
         else :
-          self.draw_option(screen , (150)* scalex , (450-50)* scaley, 500 * scalex, 75 * scaley ,  "SOUND" , (0,0,0), (255,255,255) , self.volume  ,  False ,32 )
+          self.draw_option(screen , (150)* scalex , (450-50)* scaley, 500 * scalex, 75 * scaley ,  "SOUND" , (0,0,0), (255,255,255) , self.volume  ,  False ,32 ,0 ,0 , scalex , scaley)
         
         if self.active_button == 5:
           self.draw_back(screen,170* scalex,500* scaley ,225 * scalex,75 * scaley , "BACK" , (0,0,0),(255,255,255), 0 , True)
