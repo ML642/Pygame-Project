@@ -182,7 +182,7 @@ start_time = pygame.time.get_ticks()  # Record the start time
 
 while running:
     # print(scale_x ,scale_y)
-        start_time = pygame.time.get_ticks()  # Record the start time
+        current_time = pygame.time.get_ticks()  # Record the start time
     #print(enemies_counter)
         screen.fill(BLACK)
         for event in pygame.event.get():
@@ -378,15 +378,18 @@ while running:
         draw_health_bar(screen,player.health, player.max_health,scale_x , scale_y)
         #screen.blit(coordinates, (20 * scale_x, 50 * scale_y))
         if player.health <= 1:
-            result =   game_over_screen(screen,kills , time , 1  , start_time)
+            result =   game_over_screen(screen,kills , time , 1  , current_time - start_time)
             if result == "restart":
                 Restart(Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY)
                 enemies_counter = 0
+                kills = 0
                 FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
-                
+                start_time = current_time
             elif result == "menu":
                 Restart(Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY)
                 enemies_counter = 0
+                kills = 0
+                start_time = 0
                 FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
                 Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT)
                 pygame.mouse.set_visible(True)
@@ -416,12 +419,12 @@ while running:
                     scale_y=scale_y,
                     reload_progress=min(reload_progress, 1.0)  # ensure never exceeds 1.0
     )
-        pygame.draw.circle(screen, (192,192,192), (0, 0) , 150 , 0)
+        pygame.draw.circle(screen, (192,192,192), (0, 0) , 150 * scale_x , 0)
         screen.blit(weapon_image, (0, 0))
         font = pygame.font.SysFont(None, int(24 * scale_x))
         ammo_text = font.render(f"{FIRE_MODES[player.current_mode]['bullets']}/{FIRE_MODES[player.current_mode]['ammo']}", True, BLACK)
         ammo_rect = ammo_text.get_rect(center=(0, 0))
-        screen.blit(ammo_text, ( 10 , 100 ) )        
+        screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )        
         pygame.display.flip()
         clock.tick(60)
 
