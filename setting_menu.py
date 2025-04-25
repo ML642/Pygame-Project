@@ -156,7 +156,7 @@ class SettingsMenu:
         
 
      
-    def draw(self, screen):
+    def draw(self, screen, scalex, scaley):
         # Semi-transparent background
         overlay = pygame.Surface((self.screen_width, self.screen_height), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 200))
@@ -167,33 +167,33 @@ class SettingsMenu:
         
         
         if self.active_button == 1:
-         self.draw_option(screen , 150 , 150-50 , 500 , 75 , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult[self.difficult_n] , True ,  22 ,15 , 5 )
+         self.draw_option(screen , 150  * scalex, (150-50) * scaley , 500 * scalex , 75 * scaley , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult[self.difficult_n] , True ,  22 ,15 , 5 )
         else :
-         self.draw_option(screen , 150 , 150 -50, 500 , 75 , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult[self.difficult_n] , False  ,22 , 15,5)
+         self.draw_option(screen , 150 * scalex,(150 -50) * scaley, 500 * scalex , 75 * scaley , "DIFFICULTY", (0,0,0) , (255,255,255) , self.difficult[self.difficult_n] , False  ,22 , 15,5)
         if self.active_button == 2:
-            self.draw_option(screen , 150 , 250 -50 , 500 , 75 , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution[self.resolution_n], True ,22 ,20 , 7)
+            self.draw_option(screen , 150 * scalex, (250 -50 ) * scaley , 500 * scalex , 75 * scaley , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution[self.resolution_n], True ,22 ,20 , 7)
         else:
-            self.draw_option(screen , 150 , 250 -50, 500 , 75 , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution[self.resolution_n], False ,22,20 , 7)
+            self.draw_option(screen , 150 * scalex, (250 -50)* scaley, 500 * scalex , 75 * scaley , "RESOLUTION" , (0,0,0) , (255,255,255),self.resolution[self.resolution_n], False ,22,20 , 7)
 
         if self.active_button == 3 :   
-         self.draw_option(screen , 150 , 350 -50, 500 , 75 , "MUSIC" , (0,0,0) , (255,255,255),self.music, True ,32)
+         self.draw_option(screen , 150 * scalex, (350 -50)*scaley, 500 * scalex, 75 * scaley , "MUSIC" , (0,0,0) , (255,255,255),self.music, True ,32)
         else :
-         self.draw_option(screen , 150 , 350 -50, 500 , 75 , "MUSIC" , (0,0,0) , (255,255,255),self.music , False ,32)
+         self.draw_option(screen , 150  * scalex, (350 -50) * scaley, 500 * scalex, 75 * scaley , "MUSIC" , (0,0,0) , (255,255,255),self.music , False ,32)
         if self.active_button == 4 :
-         self.draw_option(screen , 150 , 450 -50, 500 , 75 ,  "SOUND" , (0,0,0), (255,255,255) , self.volume ,  True ,32 )
+         self.draw_option(screen , 150 * scalex , (450 -50)* scaley, 500 * scalex, 75 * scaley ,  "SOUND" , (0,0,0), (255,255,255) , self.volume ,  True ,32 )
         else :
-          self.draw_option(screen , 150 , 450-50, 500 , 75 ,  "SOUND" , (0,0,0), (255,255,255) , self.volume  ,  False ,32 )
+          self.draw_option(screen , (150)* scalex , (450-50)* scaley, 500 * scalex, 75 * scaley ,  "SOUND" , (0,0,0), (255,255,255) , self.volume  ,  False ,32 )
         
         if self.active_button == 5:
-          self.draw_back(screen,170,500 ,225,75 , "BACK" , (0,0,0),(255,255,255), 0 , True)
+          self.draw_back(screen,170* scalex,500* scaley ,225 * scalex,75 * scaley , "BACK" , (0,0,0),(255,255,255), 0 , True)
         else :
-          self.draw_back(screen,170,500 ,225,75 , "BACK" , (0,0,0),(255,255,255), 0 , False) 
+          self.draw_back(screen,170 * scalex,500 * scaley ,225 * scalex,75 * scaley , "BACK" , (0,0,0),(255,255,255), 0 , False) 
         
         
         if self.active_button == 6 : 
-            self.draw_back(screen,190 + 225,500 ,225,75 , "APPLY" , (0,0,0),(255,255,255), 0 , True)
+            self.draw_back(screen, (190 + 225) * scalex ,500* scaley ,225 * scalex,75 * scaley , "APPLY" , (0,0,0),(255,255,255), 0 , True)
         else :
-            self.draw_back(screen,190 + 225,500 ,225,75 , "APPLY" , (0,0,0),(255,255,255), 0 , False)
+            self.draw_back(screen,(190 + 225)* scalex,500* scaley ,225 * scalex,75 * scaley , "APPLY" , (0,0,0),(255,255,255), 0 , False)
            
         title = self.font_large.render("SETTINGS", True, (255, 255, 255))
         
@@ -277,6 +277,9 @@ class SettingsMenu:
             "music_volume": self.music,
             "sfx_volume": self.volume
             }
+            scalex  = self.resolution2[self.pass_resolution][0] / 800
+            scaley  = self.resolution2[self.pass_resolution][1] / 600
+            print(scalex , scaley)
       
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -292,6 +295,6 @@ class SettingsMenu:
             
             
             screen.fill((0, 0, 0))  # Clear screen
-            self.draw(screen)
+            self.draw(screen,scalex,scaley)
             pygame.display.flip()
         return data    
