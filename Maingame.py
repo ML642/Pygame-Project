@@ -172,7 +172,8 @@ player.rect.center = ( -500 +(1-scale_x) * OFFSET ,50 + ( 700 / 2 )* scale_y - O
 
 
 
-
+cursor = pygame.image.load("images/cursor.png").convert_alpha()
+cursor = pygame.transform.scale(cursor, (50 * scale_x, 50 * scale_y))
 pygame.mouse.set_visible(True)
 
 start_time = pygame.time.get_ticks()  # Record the start time
@@ -282,6 +283,7 @@ while running:
   
         mouse_world_x = pygame.mouse.get_pos()[0] - camera.camera.x
         mouse_world_y = pygame.mouse.get_pos()[1] - camera.camera.y
+        
         dx = mouse_world_x - player.rect.centerx
         dy = mouse_world_y - player.rect.centery
         player_angle = math.degrees(math.atan2(-dx, -dy)) % 360 + 90
@@ -423,7 +425,11 @@ while running:
         font = pygame.font.SysFont(None, int(24 * scale_x))
         ammo_text = font.render(f"{FIRE_MODES[player.current_mode]['bullets']}/{FIRE_MODES[player.current_mode]['ammo']}", True, BLACK)
         ammo_rect = ammo_text.get_rect(center=(0, 0))
-        screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )        
+        screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )   
+        
+        cursor_rect = cursor.get_rect(center=(mouse_world_x + camera.camera.x, mouse_world_y + camera.camera.y))
+        screen.blit(cursor, cursor_rect.topleft)
+        pygame.mouse.set_visible(False)     
         pygame.display.flip()
         clock.tick(60)
 

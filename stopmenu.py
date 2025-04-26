@@ -125,8 +125,7 @@ def pause_menu( scale_x = 13/8, scale_y = 4/3  , current_settings = None):
             y = random.randint(int(400* scale_y), int (600* scale_y))  # near bottom
             dust_particles.append(DustParticle(x, y))
 
-
-
+            
         for particle in dust_particles:
             particle.update()
             particle.draw(screen)

@@ -4,9 +4,12 @@ from UI_components import Menu_option
 from UI_components import DustParticle
 import os 
 from setting_menu import SettingsMenu
+
+
 pygame.init()
 
 def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings_data =  None  ):
+   
     
     os.environ['SDL_VIDEO_CENTERED'] = "1"
     
@@ -18,6 +21,9 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
     }
     
     current_settings = settings_data if settings_data else default_settings
+   
+    pygame.mixer.init()
+    pygame.mixer.music.load("sound/music.mp3")  # Relative path
    
     screen_width = 800 
     screen_height = 600
@@ -61,10 +67,13 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
     blink_interval = 500  # Time in milliseconds for each blink (on/off)
     last_blink_time = 0   # Track the last time the arrow blinked
     arrow_visible = True 
-     
+    pygame.mixer.music.play(-1)  # Loop forever
     while Main_Menu :
         screen.blit(background, (0, 0)) 
         current_time = pygame.time.get_ticks()
+        pygame.mixer.music.set_volume(current_settings["music_volume"]/100) # volume: 0.0 (mute) to 1.0 (full)
+        
+    
 
         # Handle blinking logic
         if current_time - last_blink_time > blink_interval:
@@ -79,13 +88,18 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:  
                     Main_Menu = False
+                    pygame.mixer.music.stop()
                     pygame.quit()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                 if active == 0:
+                    pygame.mixer.music.stop()
+
                     Main_Menu = False
                     running = True
                     pygame.mouse.set_visible(True)
                 elif active == 1:
+                    pygame.mixer.music.stop()
+
                     print("Opening settings...")
                     settings_menu = SettingsMenu(actual_screen_width, actual_screen_height, current_settings) 
                     settings_menu.update()
@@ -101,6 +115,7 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
                             )
                             return current_settings
                 elif active == 2:
+                    
                     pygame.quit()
                     exit()
             keys = pygame.key.get_pressed()

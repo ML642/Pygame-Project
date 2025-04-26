@@ -6,7 +6,7 @@ import ctypes
 class SettingsMenu:
     def __init__(self, screen_width, screen_height , settings_data=None):
         user32 = ctypes.windll.user32
-
+        
         self.max_resolution = (user32.GetSystemMetrics(0), user32.GetSystemMetrics(1))
         
         
@@ -255,6 +255,7 @@ class SettingsMenu:
                  if self.active_button == 3 :
                      if self.music != 0 :
                           self.music -=1
+                          
                  if self.active_button ==4 :
                      if self.volume !=0 :
                       self.volume -= 1  
@@ -279,9 +280,11 @@ class SettingsMenu:
     def run(self, screen , Mainmenu):
         self.active = True
         #pygame.mixer.music.set_volume(self.music /100)
-        
+        pygame.mixer.init()
+        pygame.mixer.music.load("sound/music.mp3")  # Relative path
+        pygame.mixer.music.play(-1)
         while self.active:
-            
+            pygame.mixer.music.set_volume(self.music / 100)
             data = {
             "difficulty": self.difficult[self.difficult_n],
             "resolution": self.resolution2[self.pass_resolution],
@@ -290,6 +293,7 @@ class SettingsMenu:
             }
             scalex  = self.resolution2[self.pass_resolution][0] / 800
             scaley  = self.resolution2[self.pass_resolution][1] / 600
+            
             print(scalex , scaley)
       
             for event in pygame.event.get():
