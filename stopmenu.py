@@ -17,6 +17,7 @@ WHITE = (255, 255, 255)
 GRAY = (200, 200, 200)
 DARK_GRAY = (100, 100, 100)
 
+
 running = True
 paused = False
 volume = 0.5
@@ -108,12 +109,15 @@ def pause_menu( scale_x = 13/8, scale_y = 4/3  , current_settings = None):
     dust_particles = []
     paused = True
     global running 
+    
     # print("Paused")
     while paused:
-        
-        
-        #print("In pause menu")
        
+        music = current_settings['music_volume'] / 100
+        volume = current_settings['sfx_volume'] / 100
+        #print("In pause menu")
+        # print(music)
+        # print(volume)
         screen.fill(BLACK)
         
         if random.random() < 0.85:  # adjust spawn rate
@@ -131,8 +135,8 @@ def pause_menu( scale_x = 13/8, scale_y = 4/3  , current_settings = None):
         dust_particles = [p for p in dust_particles if not p.is_dead()]
         
         
-        React = pygame.Rect(220 * scale_x,140 * scale_y,360 * scale_x,400 * scale_y)
         
+        React = pygame.Rect(220 * scale_x,140 * scale_y,360 * scale_x,400 * scale_y)
         
         
         pygame.draw.rect(screen, WHITE , React  , int(10* scale_x) )
@@ -170,13 +174,13 @@ def pause_menu( scale_x = 13/8, scale_y = 4/3  , current_settings = None):
         sound_icon = pygame.transform.scale(image_sound , (50* scale_x, 50 * scale_y))
         
         screen.blit(sound_icon , (240 * scale_x, (190 - 20) * scale_y))
-        draw_slider(300 * scale_x, (200 - 20) * scale_y, 200 * scale_x, 30 * scale_y, volume)
+        current_settings["sfx_volume"] = draw_slider(300 * scale_x, (200 - 20) * scale_y, 200 * scale_x, 30 * scale_y, volume) * 100
 
         music_sound = pygame.image.load('images/music.png').convert_alpha()
         music_icon = pygame.transform.scale(music_sound , (40 * scale_x, 40 * scale_y))
    
         screen.blit(music_icon, (240 * scale_x, (240 - 20) * scale_y))
-        draw_slider_music(300 * scale_x, (250 - 20) * scale_y , 200* scale_x, 30 * scale_x, music )
+        current_settings["music_volume"] = draw_slider_music(300 * scale_x, (250 - 20) * scale_y , 200* scale_x, 30 * scale_x, music ) * 100
         pygame.display.flip()
 
         for event in pygame.event.get():
