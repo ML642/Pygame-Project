@@ -7,12 +7,13 @@ import copy
 from player import Player
 from enemy import Enemy
 from camera import Camera
-from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
-from UI_components import draw_health_bar , Menu_option , DustParticle , draw_reload_bar
+from room_generation import generate_boss_room, generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
+from UI_components import draw_health_bar , Menu_option , DustParticle , draw_reload_bar , draw_minimap
 from stopmenu import pause_menu , draw_button , draw_slider
 from Main_Menu import Main_menu
 from interactive_objects import  DestructibleObject , SpikeTrap , ExplosiveBarrel
 from game_over import GameOver , game_over_screen ,  Restart
+from boss import Boss
 
 from setting_menu import SettingsMenu
 
@@ -151,7 +152,39 @@ floors.add(Floor_Hallway((-300) -  int(OFFSET3) *(scale_x -1), (50 + 195) * scal
 
 for room_data in level_1data:
     Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
+last_room_x = level_1data[-1]["x"]
+last_room_y = level_1data[-1]["y"]
 
+for wall in walls:
+    if wall.rect.collidepoint(last_room_x + 680, last_room_y + 200):
+        walls.remove(wall)
+        break
+
+walls.add(Wall(last_room_x + 680, last_room_y, 20, 190 - last_room_y, scale_x, scale_y))
+walls.add(Wall(last_room_x + 680, last_room_y + 310, 20, (500 - 310), scale_x, scale_y))
+
+corridor_start_x = last_room_x + 800
+corridor_start_y = last_room_y + 300
+
+for i in range(0, 240, 40):
+    walls.add(Wall(corridor_start_x + i, corridor_start_y - 40, 40, 40, scale_x, scale_y))
+    walls.add(Wall(corridor_start_x + i, corridor_start_y + 80, 40, 40, scale_x, scale_y))
+    floors.add(Floor(corridor_start_x + i, corridor_start_y, scale_x, scale_y))
+
+boss_room_x = last_room_x + (700 + 240)
+boss_room_y = last_room_y
+
+boss_walls = generate_boss_room(boss_room_x, boss_room_y, scale_x, scale_y)
+walls.add(boss_walls)
+floors.add(Floor(boss_room_x, boss_room_y, scale_x, scale_y))
+
+for wall in walls:
+    if wall.rect.collidepoint(boss_room_x, boss_room_y + 200):
+        walls.remove(wall)
+        break
+
+boss_spawned = False
+boss = None
 
 
 
@@ -233,7 +266,16 @@ while running:
             if player.rect.colliderect(room.rect) and room.active == False:
                 room.active = True
                 #enemies_counter = room.enemies_counter
-        
+        #boss room check
+        if boss_room_x <= player.rect.centerx <= boss_room_x + 700 * scale_x and \
+           boss_room_y <= player.rect.centery <= boss_room_y + 500 * scale_y and not boss_spawned:
+            boss = Boss(boss_room_x + 350 * scale_x, boss_room_y + 250 * scale_y, player, scale_x, scale_y)
+            enemies.add(boss)
+            boss_spawned = True
+
+
+
+
         # Game logic updates
         if enemies_counter > 0:
             for wall in walls:
@@ -351,6 +393,19 @@ while running:
                         for (x, y) in tear.trail_positions
                     ]
                     pygame.draw.lines(screen, (255, 200, 100), False, trail_points, 2)  
+
+        if boss and boss.alive():
+            for tear in boss.tears:
+                adjusted_pos = tear.rect.topleft + pygame.math.Vector2(camera.camera.topleft)
+                screen.blit(tear.image, adjusted_pos)
+                if player.rect.colliderect(tear.rect) and not player.invincible:
+                    player.health -= 1
+                    if tear in boss.tears:
+                        boss.tears.remove(tear)
+
+        if boss and boss.alive():
+            boss.draw_health_bar(screen, scale_x, scale_y)
+
         enemies.update(player, walls)
         
         for tear in player.tears[:]:
@@ -424,7 +479,8 @@ while running:
         font = pygame.font.SysFont(None, int(24 * scale_x))
         ammo_text = font.render(f"{FIRE_MODES[player.current_mode]['bullets']}/{FIRE_MODES[player.current_mode]['ammo']}", True, BLACK)
         ammo_rect = ammo_text.get_rect(center=(0, 0))
-        screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )        
+        screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )     
+        draw_minimap(screen, player, Rooms, boss_room_rect=pygame.Rect(boss_room_x, boss_room_y, 700 * scale_x, 500 * scale_y))
         pygame.display.flip()
         clock.tick(60)
 

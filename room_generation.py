@@ -62,6 +62,10 @@ class Wall(pygame.sprite.Sprite):
         super().__init__()
         
         self.image_orig = pygame.image.load("images/Wall.jpg").convert_alpha()
+
+        w = max(w, 0)
+        h = max(h, 0)
+
         self.image = pygame.transform.scale(self.image_orig,(w * scale_x,h * scale_y))
         
         self.rect = self.image.get_rect( topleft=(x * scale_x, y * scale_y) )
@@ -388,4 +392,28 @@ def generate_room( x , y , form , type ,scale_x = 1 , scale_y = 1 ):
                 walls.add(Wall(q, w, random.randint(50, 150), 20, scale_x , scale_y))
             else:
                 walls.add(Wall(q, w, 20, random.randint(50, 150), scale_x , scale_y) )
+    return walls
+
+# First boss
+def generate_boss_room(x, y, scale_x=1, scale_y=1):
+    walls = pygame.sprite.Group()
+
+    room_width = 900
+    room_height = 700
+    wall_thickness = 20
+
+    corridor_height = 120
+
+    corridor_top = y + (room_height - corridor_height) // 2
+    corridor_bottom = corridor_top + corridor_height
+
+    walls.add(Wall(x, y, room_width, wall_thickness, scale_x, scale_y))
+
+    walls.add(Wall(x, y + room_height - wall_thickness, room_width, wall_thickness, scale_x, scale_y))
+
+    walls.add(Wall(x + room_width - wall_thickness, y, wall_thickness, room_height, scale_x, scale_y))
+
+    walls.add(Wall(x, y, wall_thickness, corridor_top - y, scale_x, scale_y))
+    walls.add(Wall(x, corridor_bottom, wall_thickness, (y + room_height - corridor_bottom), scale_x, scale_y))
+
     return walls
