@@ -105,6 +105,7 @@ def draw_slider_music (x, y, width, height, value  ):
     return music 
 
 def pause_menu( scale_x = 13/8, scale_y = 4/3  , current_settings = None):
+    pygame.mouse.set_visible(True)
     global paused 
     dust_particles = []
     paused = True

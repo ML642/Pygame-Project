@@ -125,6 +125,7 @@ class GameOver:
 # Example usage in your game loop:
 
 def game_over_screen(screen, kills, time, level,start_time):
+    pygame.mouse.set_visible(True)
     game_over = GameOver(screen, kills, time, level ,start_time)
     
     while True:
