@@ -1,8 +1,15 @@
 import pygame
 from pygame import mixer
+import ctypes
+
 
 class SettingsMenu:
     def __init__(self, screen_width, screen_height , settings_data=None):
+        user32 = ctypes.windll.user32
+
+        self.max_resolution = (user32.GetSystemMetrics(0), user32.GetSystemMetrics(1))
+        
+        
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.active = False
@@ -20,7 +27,7 @@ class SettingsMenu:
         self.active_button = 1
         
         self.pass_difficulty = 0
-        self.resolution2 = [(800,600) , (1350,700) , (1500,750)]
+        self.resolution2 = [(800,600) , (1350,700) , self.max_resolution]
         self.pass_resolution = 0
         self.pass_volume = 0.5
         self.pass_music = 0
@@ -73,7 +80,7 @@ class SettingsMenu:
             self.pass_resolution = 1
             print("1350x750")
             
-        elif self.setting_data["resolution"] == (0, 0):
+        elif self.setting_data["resolution"] == self.max_resolution:
             self.resolution_n = 2
             self.pass_resolution = 2
                 
@@ -265,8 +272,8 @@ class SettingsMenu:
                  screen = pygame.display.set_mode((800,600))
                 if self.resolution_n == 1 :
                  screen = pygame.display.set_mode((1350,750))
-                if self.resolution_n ==2 :
-                 screen = pygame.display.set_mode((0,0),pygame.FULLSCREEN)
+                if self.resolution_n == 2 :
+                 screen = pygame.display.set_mode(self.max_resolution)
                 
                     
     def run(self, screen , Mainmenu):

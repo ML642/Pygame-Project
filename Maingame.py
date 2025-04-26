@@ -153,9 +153,6 @@ for room_data in level_1data:
     Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
 
 
-
-
-
 enemies = pygame.sprite.Group()
 enemies_counter = 0
 copy1 = walls.copy()
@@ -192,7 +189,7 @@ while running:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     paused = True
-                    pause_menu(scale_x , scale_y)
+                    pause_menu(scale_x , scale_y ,  current_settings )
                 elif event.key == pygame.K_e: # Added "E" hotkey to pick up items.
                     for drop in drops:
                         if player.rect.colliderect(drop.rect):
@@ -391,7 +388,9 @@ while running:
                 kills = 0
                 start_time = 0
                 FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
-                Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT)
+                current_settings =  Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT , current_settings)
+                scale_x = current_settings["resolution"][0] / BASE_WIDTH
+                scale_y = current_settings["resolution"][1] / BASE_HEIGHT
                 pygame.mouse.set_visible(True)
         # Debugging information
         # font_debug = pygame.font.SysFont(None, int(24 * scale_x))  # Smaller font for debugging

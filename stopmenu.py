@@ -1,6 +1,10 @@
 import pygame
 import os
 import random 
+from UI_components import Menu_option
+from Main_Menu import Main_menu
+from setting_menu import SettingsMenu
+
 pygame.init()
 
 pygame.display.set_caption("Pause Menu Test")
@@ -99,7 +103,7 @@ def draw_slider_music (x, y, width, height, value  ):
             music  = min(1.0, max(0.0, (mouse_x - x) / width))
     return music 
 
-def pause_menu( scale_x = 13/8, scale_y = 4/3  ):
+def pause_menu( scale_x = 13/8, scale_y = 4/3  , current_settings = None):
     global paused 
     dust_particles = []
     paused = True
@@ -146,8 +150,14 @@ def pause_menu( scale_x = 13/8, scale_y = 4/3  ):
             paused = False
         if draw_button("Settings", 300 * scale_x, 350 * scale_y, 200 * scale_x, 50 * scale_y, BLACK, (255, 128, 0)):
             # settings logic here 
-            {}
-        
+            print("Opening settings...")
+            settings_menu = SettingsMenu(scale_x * 600, scale_y * 800 , current_settings) 
+            settings_menu.update()
+            new_settings = settings_menu.run(screen, Main_menu)  
+            print("New settings:", new_settings)
+            if new_settings:
+                    current_settings.update(new_settings)
+
         if draw_button("Quit", 300 * scale_x, 420 * scale_y, 200 * scale_x, 50 * scale_y, BLACK, (255, 100, 100)):
             if confirm_quit(scale_x ,scale_y):
                 running = False
