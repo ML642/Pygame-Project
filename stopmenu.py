@@ -182,7 +182,7 @@ def pause_menu( scale_x = 13/8, scale_y = 4/3  , current_settings = None):
         screen.blit(music_icon, (240 * scale_x, (240 - 20) * scale_y))
         current_settings["music_volume"] =int(draw_slider_music(300 * scale_x, (250 - 20) * scale_y , 200* scale_x, 30 * scale_x, music ) * 100)
         pygame.display.flip()
-        with open("data.json", "w") as f:
+        with open("settings.json", "w") as f:
           json.dump(current_settings, f)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

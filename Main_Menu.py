@@ -108,7 +108,7 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
                     if new_settings:
                             # Update settings with new values
                             current_settings.update(new_settings)
-                            with open("data.json", "w") as f:
+                            with open("settings.json", "w") as f:
                               json.dump(current_settings, f)
                             Main_menu(
                                 new_settings['resolution'][0], 

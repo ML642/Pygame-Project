@@ -43,7 +43,7 @@ scale_y = SELECTED_HEIGHT / BASE_HEIGHT
 current_settings = {
     'resolution': (800, 600),
     'music_volume': 50,
-    'sfx_volume': 60,
+    'sfx_volume': 50,
     'difficulty': 'medium'
 }
 
@@ -58,7 +58,7 @@ clock = pygame.time.Clock()
 
 def load_settings():
     try:
-        with open("data.json", "r") as f:
+        with open("settings.json", "r") as f:
             a = json.load(f)
             a["resolution"] = tuple(a["resolution"])
             return a
@@ -79,7 +79,7 @@ data = [ 0 , (800,600) ]
 # SELECTED_WIDTH,SELECTED_HEIGHT = data[1] 
 current_settings = Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT , current_settings )
 
-with open("data.json", "w") as f:
+with open("settings.json", "w") as f:
     json.dump(current_settings, f)
     
 print(load_settings())
