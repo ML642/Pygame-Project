@@ -280,6 +280,16 @@ while running:
                             player.reload_start_time = time.time()
 
         player.update(walls)
+        hits = pygame.sprite.spritecollide(player, solid_objects, False)
+        for wall in hits:
+            if player.rect.right > wall.rect.left and player.dx > 0:
+                player.rect.right = wall.rect.left
+            if player.rect.left < wall.rect.right and player.dx < 0:
+                player.rect.left = wall.rect.right
+            if player.rect.bottom > wall.rect.top and player.dy > 0:
+                player.rect.bottom = wall.rect.top
+            if player.rect.top < wall.rect.bottom and player.dy < 0:
+                player.rect.top = wall.rect.bottom
         camera.update(player)
 
         mouse_world_x = pygame.mouse.get_pos()[0] - camera.camera.x
