@@ -5,6 +5,8 @@ import os
 import time 
 import copy 
 import json
+import asyncio
+import sys 
 from player import Player
 from enemy import Enemy
 from camera import Camera
@@ -14,7 +16,7 @@ from stopmenu import pause_menu , draw_button , draw_slider
 from Main_Menu import Main_menu
 from interactive_objects import  DestructibleObject , SpikeTrap , ExplosiveBarrel
 from game_over import GameOver , game_over_screen ,  Restart
-
+from loading_screen import LoadingScreen
 from setting_menu import SettingsMenu
 
 
@@ -168,8 +170,43 @@ floors.add(Floor_Hallway((-300) -  int(OFFSET3) *(scale_x -1), (50 + 195) * scal
 
 
 
-for room_data in level_1data:
-    Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
+
+# for room_data in level_1data:
+#     Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
+
+async def loader(progress, loading_screen):
+    total = len(level_1data)
+    for i, room_data in enumerate(level_1data, start=1):
+        Room_Create(
+            room_data["x"],
+            room_data["y"],
+            room_data["form"],
+            room_data["type"],
+            room_data["enemies_counter"],
+        )
+        progress['loaded'] = i
+        loading_screen.update()
+        loading_screen.draw()
+        await asyncio.sleep(0)  # Yield control to the event loop
+
+    progress['done'] = True
+
+async def main():
+    loading_screen = LoadingScreen(screen, len(level_1data))
+    progress = {'loaded': 0, 'total': len(level_1data), 'done': False}
+    
+    # Initial draw of 0% progress
+    loading_screen.draw()
+    
+    await loader(progress, loading_screen)
+    
+    # Final draw of 100% progress
+    loading_screen.update(len(level_1data))
+    loading_screen.draw()
+    await asyncio.sleep(0.5)  # Show 100% briefly
+
+asyncio.run(main())
+
 
 
 enemies = pygame.sprite.Group()
