@@ -294,7 +294,7 @@ class SettingsMenu:
             scalex  = self.resolution2[self.pass_resolution][0] / 800
             scaley  = self.resolution2[self.pass_resolution][1] / 600
             
-            print(scalex , scaley)
+            #print(scalex , scaley)
       
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:

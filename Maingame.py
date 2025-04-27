@@ -4,6 +4,7 @@ import math
 import os
 import time 
 import copy 
+import json
 from player import Player
 from enemy import Enemy
 from camera import Camera
@@ -42,11 +43,11 @@ scale_y = SELECTED_HEIGHT / BASE_HEIGHT
 current_settings = {
     'resolution': (800, 600),
     'music_volume': 50,
-    'sfx_volume': 50,
+    'sfx_volume': 60,
     'difficulty': 'medium'
 }
 
-    
+
 
 
 screen = pygame.display.set_mode((800 * scale_x, 600 * scale_y))
@@ -55,6 +56,17 @@ screen = pygame.display.set_mode((800 * scale_x, 600 * scale_y))
 clock = pygame.time.Clock()
 
 
+def load_settings():
+    try:
+        with open("data.json", "r") as f:
+            a = json.load(f)
+            a["resolution"] = tuple(a["resolution"])
+            return a
+    except (FileNotFoundError, json.JSONDecodeError):
+        return current_settings  # Fallback if something goes wrong
+print(load_settings())
+
+current_settings = load_settings()
 
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -65,7 +77,14 @@ YELLOW = (255, 255, 0)
 data = [ 0 , (800,600) ]
 # data = 
 # SELECTED_WIDTH,SELECTED_HEIGHT = data[1] 
-current_settings = Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT , current_settings)
+current_settings = Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT , current_settings )
+
+with open("data.json", "w") as f:
+    json.dump(current_settings, f)
+    
+print(load_settings())
+    
+    
 
 scale_x = current_settings["resolution"][0] / BASE_WIDTH
 scale_y = current_settings["resolution"][1] / BASE_HEIGHT

@@ -4,7 +4,7 @@ from UI_components import Menu_option
 from UI_components import DustParticle
 import os 
 from setting_menu import SettingsMenu
-
+import json 
 
 pygame.init()
 
@@ -100,7 +100,7 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
                 elif active == 1:
                     pygame.mixer.music.stop()
 
-                    print("Opening settings...")
+                    print(current_settings)
                     settings_menu = SettingsMenu(actual_screen_width, actual_screen_height, current_settings) 
                     settings_menu.update()
                     new_settings = settings_menu.run(screen, Main_menu)  
@@ -108,11 +108,14 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
                     if new_settings:
                             # Update settings with new values
                             current_settings.update(new_settings)
+                            with open("data.json", "w") as f:
+                              json.dump(current_settings, f)
                             Main_menu(
                                 new_settings['resolution'][0], 
                                 new_settings['resolution'][1],
                                 settings_data=current_settings
                             )
+                            
                             return current_settings
                 elif active == 2:
                     

@@ -4,7 +4,7 @@ import random
 from UI_components import Menu_option
 from Main_Menu import Main_menu
 from setting_menu import SettingsMenu
-
+import json 
 pygame.init()
 
 pygame.display.set_caption("Pause Menu Test")
@@ -78,7 +78,7 @@ def draw_button(text, x, y, width, height, color, hover_color):
     return clicked
 
 def draw_slider(x, y, width, height, value ):
-    global volume
+    volume = value
     pygame.draw.rect(screen, DARK_GRAY, (x, y + height // 2 - 5, width, 10))
     handle_x = x + int(width * value)
     handle_rect = pygame.Rect(handle_x - 10, y, 20, height)
@@ -92,7 +92,7 @@ def draw_slider(x, y, width, height, value ):
 
 
 def draw_slider_music (x, y, width, height, value  ):
-    global music
+    music = value
     pygame.draw.rect(screen, DARK_GRAY, (x, y + height // 2 - 5, width, 10))
     handle_x = x + int(width * value)
     handle_rect = pygame.Rect(handle_x - 10, y, 20, height)
@@ -174,15 +174,16 @@ def pause_menu( scale_x = 13/8, scale_y = 4/3  , current_settings = None):
         sound_icon = pygame.transform.scale(image_sound , (50* scale_x, 50 * scale_y))
         
         screen.blit(sound_icon , (240 * scale_x, (190 - 20) * scale_y))
-        current_settings["sfx_volume"] = draw_slider(300 * scale_x, (200 - 20) * scale_y, 200 * scale_x, 30 * scale_y, volume) * 100
+        current_settings["sfx_volume"] = int(draw_slider(300 * scale_x, (200 - 20) * scale_y, 200 * scale_x, 30 * scale_y, volume) * 100)
 
         music_sound = pygame.image.load('images/music.png').convert_alpha()
         music_icon = pygame.transform.scale(music_sound , (40 * scale_x, 40 * scale_y))
    
         screen.blit(music_icon, (240 * scale_x, (240 - 20) * scale_y))
-        current_settings["music_volume"] = draw_slider_music(300 * scale_x, (250 - 20) * scale_y , 200* scale_x, 30 * scale_x, music ) * 100
+        current_settings["music_volume"] =int(draw_slider_music(300 * scale_x, (250 - 20) * scale_y , 200* scale_x, 30 * scale_x, music ) * 100)
         pygame.display.flip()
-
+        with open("data.json", "w") as f:
+          json.dump(current_settings, f)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
