@@ -504,20 +504,16 @@ while running:
             tear.update()
             for wall in walls:
                 if tear.rect.colliderect(wall.rect):
-                    if isinstance(wall , ExplosiveBarrel):
-                        for explosion in wall.explosion_effects[:]:
-                                explosion.update()
-                                explosion.draw(screen)
-                                if all(p[6] <= 0 for p in explosion.particles):
-                                    wall.explosion_effects.remove(explosion)
-
+                    if  isinstance(wall , ExplosiveBarrel):
                         enemies_counter =  wall.take_damage(FIRE_MODES[player.current_mode]["damage"] , enemies , player,interactive_objects,enemies_counter)
+                        
                         
                     elif isinstance(wall, DestructibleObject):
                         wall.take_damage(FIRE_MODES[player.current_mode]["damage"])
                     
                     player.tears.remove(tear)
                     break
+        
         for enemy in enemies:
           if player.rect.colliderect(enemy.rect) and not player.invincible:
             player.health -= 1

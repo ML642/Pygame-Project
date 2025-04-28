@@ -93,12 +93,7 @@ class ExplosiveBarrel(DestructibleObject):
         self.hp -= amount
         if self.hp <= 0:
             enemies_counter = self.explode(enemies_group, player, objects,enemies_counter)
-            self.explosion_effects.append(ExplosionEffect(
-                self.rect.centerx, 
-                self.rect.centery,
-                scale=max(self.scale_x, self.scale_y)
-            ))
-            
+      
             self.kill()
         return enemies_counter    
 
@@ -126,4 +121,5 @@ class ExplosiveBarrel(DestructibleObject):
                 if hasattr(object, "take_damage"):
                  if distance <= self.explosion_radius:
                     object.take_damage(self.explosion_damage)
+       
         return enemies_counter
