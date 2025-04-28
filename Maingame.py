@@ -25,10 +25,12 @@ pygame.init()
 
 
 interactive_objects = pygame.sprite.Group()
-wall = DestructibleObject(x=5, y=5, width=32, height=32, hp=100, k=2)
-spike = SpikeTrap(x=10, y=5, width=32, height=10, damage=15, k=2)
-barrel = ExplosiveBarrel(x=15, y=5, width=32, height=32, hp=50, explosion_radius=64, explosion_damage=30, k=2)
-interactive_objects.add(wall, spike, barrel)
+wall = DestructibleObject(x=450, y=450, width=32, height=32, hp=100 )
+spike = SpikeTrap(x=450, y=500, width=50, height=40, damage=1, k=1)
+barrel = ExplosiveBarrel(x=1150, y=450, width=32, height=32, hp=50, explosion_radius=640, explosion_damage=50, k=1)
+interactive_objects.add(wall, barrel)
+Spikes = pygame.sprite.Group()
+Spikes.add(spike)
 
 screen_width = 800 
 screen_height = 600
@@ -169,23 +171,11 @@ def Room_Create ( x , y  , form , type , enemies_counter ):
 
     
     return 0
-    
-OFFSET3 = 353
-OFFSET2 = 1000
-OFFSET = 700    
-OFFSETY = (scale_y-1) * 2
+  
+
 player = Player (scale_x,scale_y , current_settings["difficulty"])  
-#############################
-
-
 walls = pygame.sprite.Group()
-# walls = generate_room(int((-300 - ROOM_WIDTH) + int(OFFSET) * ( scale_x -1 ) )  ,int( 50 ), 7, 1, scale_x ,scale_y )  # initiate first room
-# floors.add(Floor((-300 - 700) - int(OFFSET2) * (scale_x -1 ),  50 * scale_y  , scale_x , scale_y)) 
-# floors.add(Floor_Hallway((-300) -  int(OFFSET3) *(scale_x -1), (50 + 195) * scale_y, 400 , 90  , scale_x , scale_y))
 
-
-
-#############################
 
 
 
@@ -383,6 +373,8 @@ while running:
         if mouse_buttons[0] and Stopbutton.rect.collidepoint(pygame.mouse.get_pos()):
             stop = True
             pause_menu(scale_x, scale_y, current_settings)
+        
+        
         player.update(walls)    
         camera.update(player)
   
@@ -421,9 +413,20 @@ while running:
             screen.blit(wall.image, camera.apply(wall))
         for enemy in enemies:
             screen.blit(enemy.image, camera.apply(enemy))        
+        for spike in Spikes :
+            print(spike.rect.x , spike.rect.y)
+            screen.blit(spike.image, camera.apply(spike))
+            if player.rect.colliderect(spike.rect) and not player.invincible:
+                player.health -= spike.damage
+                spike.apply_damage(player)    
+        
         screen.blit(rotated_image, rotated_rect.topleft + pygame.math.Vector2(camera.camera.topleft))
         
+        
+        
+        
         for enemy in enemies:
+        
             # Check if cooldown has passed
             current_time = pygame.time.get_ticks()
             if current_time - enemy.last_shot_time >= enemy.shoot_cooldown:
@@ -498,12 +501,18 @@ while running:
                         for (x, y) in tear.trail_positions
                     ]
                     pygame.draw.lines(screen, (255, 200, 100), False, trail_points, 2)  
-        enemies.update(player, walls)
         
         for tear in player.tears[:]:
             tear.update()
             for wall in walls:
                 if tear.rect.colliderect(wall.rect):
+                    if isinstance(wall , ExplosiveBarrel):
+                        
+                        wall.take_damage(FIRE_MODES[player.current_mode]["damage"] , enemies , player,interactive_objects)
+                        
+                    elif isinstance(wall, DestructibleObject):
+                        wall.take_damage(FIRE_MODES[player.current_mode]["damage"])
+                    
                     player.tears.remove(tear)
                     break
         for enemy in enemies:
@@ -511,11 +520,11 @@ while running:
             player.health -= 1
         for drop in drops:
             screen.blit(drop.image, camera.apply(drop))
+        enemies.update(player, walls)
         for obj in interactive_objects:
-                if hasattr(obj, "draw"):
-                    obj.draw(screen)
-                else:
-                    screen.blit(obj.image, camera.apply(obj))
+             walls.add(obj)
+             screen.blit(obj.image, camera.apply(obj))
+        
         
         # Health and UI elements (drawn without camera offset)
         font = pygame.font.SysFont(None, int(36 * scale_x))

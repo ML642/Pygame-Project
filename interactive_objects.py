@@ -3,16 +3,19 @@ import pygame
 import math
 
 class DestructibleObject(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, hp, color=(150, 150, 150), k=1):
+    def __init__(self, x, y, width, height, hp, color=(150, 150, 150), scale_x = 1, scale_y = 1):
         super().__init__()
         self.hp = hp
         self.max_hp = hp
-        self.image = pygame.Surface((width * k, height * k))
-        self.image.fill(color)
-        self.rect = self.image.get_rect(topleft=(x * k, y * k))
+        self.image = pygame.image.load('images/destructable_object.png').convert_alpha()
+        
+        self.image = pygame.transform.scale(self.image, (width * scale_x, height * scale_y))
+    
+    
+        self.rect = self.image.get_rect(topleft=(x * scale_x, y *  scale_y))
 
-    def take_damage(self, amount_blyat):
-        self.hp -= amount_blyat
+    def take_damage(self, amount):
+        self.hp -= amount
         if self.hp <= 0:
             self.kill()
 
@@ -28,8 +31,8 @@ class SpikeTrap(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, damage=10, k=1):
         super().__init__()
         self.damage = damage
-        self.image = pygame.Surface((width * k, height * k))
-        self.image.fill((200, 0, 0))
+        self.image = pygame.image.load('images/spikes.jpg').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (width * k, height * k))
         self.rect = self.image.get_rect(topleft=(x * k, y * k))
 
     def apply_damage(self, target):
@@ -39,20 +42,39 @@ class SpikeTrap(pygame.sprite.Sprite):
 
 class ExplosiveBarrel(DestructibleObject):
     def __init__(self, x, y, width, height, hp=40, explosion_radius=100, explosion_damage=25, k=1):
-        super().__init__(x, y, width, height, hp, color=(255, 100, 0), k=k)
+        super().__init__(x, y, width, height, hp, color=(255, 100, 0), scale_x=k ,scale_y=k)
         self.explosion_radius = explosion_radius * k
         self.explosion_damage = explosion_damage
-
-    def take_damage(self, amount, enemies_group=None):
+        self.image = pygame.image.load('images/explosive.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (width * k, height * k))
+    def take_damage(self, amount, enemies_group=None,player=None , objects = None):
+        print("ouch")
         self.hp -= amount
         if self.hp <= 0:
-            if enemies_group:
-                self.explode(enemies_group)
+            
+            self.explode(enemies_group, player, objects)
             self.kill()
 
-    def explode(self, enemies_group):
-        for enemy in enemies_group:
-            if hasattr(enemy, "take_damage"):
+    def explode(self, enemies_group = None, player=None, objects=None):
+        print("BOOM!")
+        
+        if enemies_group :
+            for enemy in enemies_group:
                 distance = math.hypot(self.rect.centerx - enemy.rect.centerx, self.rect.centery - enemy.rect.centery)
-                if distance <= self.explosion_radius:
-                    enemy.take_damage(self.explosion_damage)
+                if hasattr(enemy, "take_damage"):
+                    if distance <= self.explosion_radius:
+                        enemy.take_damage(self.explosion_damage)
+                else :
+                    distance = math.hypot(self.rect.centerx - enemy.rect.centerx, self.rect.centery - enemy.rect.centery)
+                    if distance <= self.explosion_radius:
+                        enemy.health -= self.explosion_damage
+        if player:
+            distance = math.hypot(self.rect.centerx - player.rect.centerx, self.rect.centery - player.rect.centery)
+            if distance <= self.explosion_radius:
+                        player.health -= self.explosion_damage
+        if objects:            
+            for object in objects:
+                distance = math.hypot(self.rect.centerx - object.rect.centerx, self.rect.centery - object.rect.centery)
+                if hasattr(object, "take_damage"):
+                 if distance <= self.explosion_radius:
+                    object.take_damage(self.explosion_damage)
