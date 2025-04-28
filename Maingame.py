@@ -11,7 +11,7 @@ from player import Player
 from enemy import Enemy
 from camera import Camera
 from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
-from UI_components import draw_health_bar , Menu_option , DustParticle , draw_reload_bar
+from UI_components import draw_health_bar , Menu_option , DustParticle , draw_reload_bar , StopButton
 from stopmenu import pause_menu , draw_button , draw_slider
 from Main_Menu import Main_menu
 from interactive_objects import  DestructibleObject , SpikeTrap , ExplosiveBarrel
@@ -66,7 +66,7 @@ def load_settings():
             return a
     except (FileNotFoundError, json.JSONDecodeError):
         return current_settings  # Fallback if something goes wrong
-print(load_settings())
+#print(load_settings())
 
 current_settings = load_settings()
 
@@ -76,9 +76,9 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
+
 data = [ 0 , (800,600) ]
-# data = 
-# SELECTED_WIDTH,SELECTED_HEIGHT = data[1] 
+
 current_settings = Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT , current_settings )
 
 with open("settings.json", "w") as f:
@@ -172,8 +172,18 @@ floors.add(Floor_Hallway((-300) -  int(OFFSET3) *(scale_x -1), (50 + 195) * scal
 
 
 # for room_data in level_1data:
+#     loading_screen = LoadingScreen(screen, len(level_1data))
+
 #     Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
 
+
+#     loading_screen.update(1)
+#     loading_screen.draw()
+#     pygame.display.flip()
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             pygame.quit()
+    
 async def loader(progress, loading_screen):
     total = len(level_1data)
     for i, room_data in enumerate(level_1data, start=1):
@@ -187,6 +197,9 @@ async def loader(progress, loading_screen):
         progress['loaded'] = i
         loading_screen.update()
         loading_screen.draw()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
         await asyncio.sleep(0)  # Yield control to the event loop
 
     progress['done'] = True
@@ -224,6 +237,17 @@ OFFSET = 700
 OFFSETY = (scale_y-1) * 200    
     
 player.rect.center = ( -500 +(1-scale_x) * OFFSET ,50 + ( 700 / 2 )* scale_y - OFFSETY  )  # - move the player to the room 
+
+def rerender (data,walls,floors,Rooms,enemies,drops,interactive_objects,player):
+    walls.empty()
+    floors.empty()
+    Rooms.empty()
+    enemies.empty()
+    
+    interactive_objects.empty()
+    player.tears.clear()
+    for room_data in data :
+        Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
 
 
 
@@ -270,6 +294,7 @@ while running:
                      Restart(Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY)
                      enemies_counter = 0 
                      FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
+                
                 
         if player.is_reloading and FIRE_MODES[player.current_mode]["full"] != FIRE_MODES[player.current_mode]["bullets"]: 
             current_time = time.time()
@@ -333,7 +358,9 @@ while running:
           elif not player.is_reloading and FIRE_MODES[player.current_mode]["ammo"] > 0:
                             player.is_reloading = True
                             player.reload_start_time = time.time()
-            
+        if mouse_buttons[0] and Stopbutton.rect.collidepoint(pygame.mouse.get_pos()):
+            stop = True
+            pause_menu(scale_x, scale_y, current_settings)
         player.update(walls)    
         camera.update(player)
   
@@ -433,7 +460,7 @@ while running:
         draw_health_bar(screen,player.health, player.max_health,scale_x , scale_y)
         #screen.blit(coordinates, (20 * scale_x, 50 * scale_y))
         if player.health <= 1:
-            result =   game_over_screen(screen,kills , time , 1  , current_time - start_time)
+            result =   game_over_screen(screen, kills , time , 1  , current_time - start_time)
             if result == "restart":
                 Restart(Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY)
                 enemies_counter = 0
@@ -483,8 +510,12 @@ while running:
         ammo_rect = ammo_text.get_rect(center=(0, 0))
         screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )   
         
+        Stopbutton = StopButton(screen, current_settings["resolution"][0] - 100*scale_x - 2, 2, 100 * scale_x, 50 * scale_y)
+        Stopbutton.draw(screen)
+             
         cursor_rect = cursor.get_rect(center=(mouse_world_x + camera.camera.x, mouse_world_y + camera.camera.y))
         screen.blit(cursor, cursor_rect.topleft)
+   
         pygame.mouse.set_visible(False)     
         pygame.display.flip()
         clock.tick(60)

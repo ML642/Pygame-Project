@@ -180,3 +180,19 @@ def draw_reload_bar(screen, x, y, scale_x, scale_y, reload_progress,
         screen.blit(reload_icon, (pos_x + bar_width + 5 * scale_x, pos_y - 2 * scale_y))
     except FileNotFoundError:
         pass
+    
+    
+class StopButton :
+        def __init__(self, screen, x, y, width, height):
+            self.screen = screen
+            self.x = x
+            self.y = y
+            self.width = width
+            self.height = height
+            self.image = pygame.image.load('images/button.webp').convert_alpha()
+            self.image = pygame.transform.scale(self.image, (width, height))
+            self.rect = self.image.get_rect(topleft=(x, y))
+            
+        def draw(self,screen):
+            screen.blit(self.image, (self.x, self.y))
+            pygame.draw.rect(screen, WHITE, self.rect, 2)

@@ -6,6 +6,7 @@ import os
 from setting_menu import SettingsMenu
 import json 
 
+
 pygame.init()
 
 def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings_data =  None  ):
@@ -93,7 +94,7 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                 if active == 0:
                     pygame.mixer.music.stop()
-
+    
                     Main_Menu = False
                     running = True
                     pygame.mouse.set_visible(True)
