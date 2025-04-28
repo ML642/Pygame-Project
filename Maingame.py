@@ -422,6 +422,49 @@ while running:
         for enemy in enemies:
             screen.blit(enemy.image, camera.apply(enemy))        
         screen.blit(rotated_image, rotated_rect.topleft + pygame.math.Vector2(camera.camera.topleft))
+        
+        for enemy in enemies:
+            # Check if cooldown has passed
+            current_time = pygame.time.get_ticks()
+            if current_time - enemy.last_shot_time >= enemy.shoot_cooldown:
+                enemy.can_shoot = True
+
+            if enemy.can_shoot:
+                # Calculate direction towards the player
+                dx = player.rect.centerx - enemy.rect.centerx
+                dy = player.rect.centery - enemy.rect.centery
+                dist = max(1, math.sqrt(dx * dx + dy * dy))
+                direction = (dx / dist, dy / dist)
+
+                # Create a new projectile (tear) for the enemy
+                tear = enemy.shoot(player)
+                if tear:
+                    enemy.tears.append(tear)
+
+                # Set cooldown for the next shot
+                enemy.can_shoot = False
+                enemy.last_shot_time = current_time
+
+            # Update enemy projectiles
+            for tear in enemy.tears[:]:
+                if tear.update() :
+                    enemy.tears.remove(tear)
+                elif tear.rect.colliderect(player.rect):
+                    player.health -= 1
+                    enemy.tears.remove(tear)
+        for enemy in enemies:
+            for tear in enemy.tears[:]:
+                if tear.update():
+                    enemy.tears.remove(tear)
+                else:
+                    for wall in walls:
+                        if tear.rect.colliderect(wall.rect):
+                            enemy.tears.remove(tear)
+                            break
+        for enemy in enemies:
+         for tear in enemy.tears[:]:
+            screen.blit(tear.image, camera.apply(tear))
+                
         if player.is_dashing and len(player.dash_trail) > 1:
             num_points = len(player.dash_trail)
             

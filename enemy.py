@@ -2,6 +2,8 @@ import pygame
 import random
 import math
 from drop import Drop
+from player import Tear
+
 
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -27,7 +29,15 @@ class Enemy(pygame.sprite.Sprite):
         self.health = 30* self.multiplier
         self.drops = drops
         
+        self.scale_x = scale_x
+        self.scale_y = scale_y
         
+        self.tears = []
+        
+        self.last_shot_time = 0
+        self.can_shoot = True
+        
+        self.shoot_cooldown = 600
         
         self.flag_X1 = 1
         self.flag_Y1 = 1
@@ -35,6 +45,7 @@ class Enemy(pygame.sprite.Sprite):
         self.flag_X = 1
         self.flag_Y = 1
         
+            
     def update(self, player, walls):
         self.flag_X = True  
         self.flag_Y = True 
@@ -43,6 +54,9 @@ class Enemy(pygame.sprite.Sprite):
         dist = max(1, math.sqrt(dx*dx + dy*dy))
         dx, dy = dx/dist, dy/dist
         
+        for tear in self.tears:
+            if tear.update():
+                self.tears.remove(tear)
         
         # Wall collision
         new_rect = self.rect.copy()
@@ -102,7 +116,20 @@ class Enemy(pygame.sprite.Sprite):
                 
         self.rect.x += dx * self.speed
         self.rect.y += dy * self.speed
-        # Minor stuff cheking if enemy is done. Needed for droping items.
+    def shoot(self, player):
+        dx = player.rect.centerx - self.rect.centerx
+        dy = player.rect.centery - self.rect.centery
+        dist = max(1, math.sqrt(dx*dx + dy*dy))
+        dx, dy = dx/dist, dy/dist
+        
+        
+        
+        tear = Tear(self.rect.centerx, self.rect.centery,(dx, dy),7,10,self.scale_x, self.scale_y)
+        
+        angle = math.degrees(math.atan2(dx, dy))  + 90
+        tear.image = pygame.transform.rotate(tear.image, angle)
+        self.tears.append(tear)
+        
     def take_damage(self , amount ):
         self.health -=  amount 
         if self.health <= 0:
@@ -115,7 +142,7 @@ class Enemy(pygame.sprite.Sprite):
         drop_chance = random.random()
         if drop_chance < 0.2:
             x, y = self.rect.center
-            health_drop = Drop(x, y, "hp") # "ammo" is a hollow type, because this system is not finished yet. Done just in case.
+            health_drop = Drop(x, y, "hp") # "ammo" is a hollow type, because this system is not finished yet.
             self.drops.add(health_drop)
         elif drop_chance < 0.4:
             x, y = self.rect.center
