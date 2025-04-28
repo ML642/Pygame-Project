@@ -25,9 +25,9 @@ pygame.init()
 
 
 interactive_objects = pygame.sprite.Group()
-wall = DestructibleObject(x=450, y=450, width=32, height=32, hp=100 )
-spike = SpikeTrap(x=450, y=500, width=50, height=40, damage=1, k=1)
-barrel = ExplosiveBarrel(x=1150, y=450, width=32, height=32, hp=50, explosion_radius=640, explosion_damage=50, k=1)
+wall = DestructibleObject(x=450, y=450, width=32, height=32, hp=100 ,scale_x=1 , scale_y=1)
+spike = SpikeTrap(x=450, y=500, width=50, height=40, damage=1 , scale_x=1 , scale_y=1)
+barrel = ExplosiveBarrel(x=1150, y=450, width=32, height=32, hp=50, explosion_radius=640, explosion_damage=50, scale_x=1 , scale_y=1)
 interactive_objects.add(wall, barrel)
 Spikes = pygame.sprite.Group()
 Spikes.add(spike)
@@ -167,13 +167,12 @@ def Room_Create ( x , y  , form , type , enemies_counter ):
     if form == 1 or form == 3  or form == 5  : # top corridor , 
         floors.add(Floor_Hallway( (x + 250) *  scale_x , (y -  230)* scale_y   , 210 , 255  ,scale_x ,scale_y ))
 
-    
-
-    
     return 0
+
   
 
 player = Player (scale_x,scale_y , current_settings["difficulty"])  
+
 walls = pygame.sprite.Group()
 
 
@@ -242,9 +241,8 @@ running = False
 stop = False
 drops = pygame.sprite.Group()
 running = True  
-OFFSET = 700
-OFFSETY = (scale_y-1) * 200    
-    
+
+
 player.rect.center = (150* scale_x ,  150 * scale_y)# - move the player to the room 
 
 def rerender (data,walls,floors,Rooms,enemies,drops,interactive_objects,player):
@@ -300,7 +298,7 @@ while running:
                             player.is_reloading = True
                             player.reload_start_time = time.time()
                 elif event.key == pygame.K_TAB:
-                     Restart(Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY)
+                     Restart(Rooms,player, enemies ,drops,scale_x, scale_y )
                      enemies_counter = 0 
                      FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
                 elif event.key == pygame.K_q:
@@ -536,13 +534,13 @@ while running:
         if player.health <= 1:
             result =   game_over_screen(screen, kills , time , 1  , current_time - start_time)
             if result == "restart":
-                Restart(Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY)
+                Restart(Rooms,player, enemies ,drops,scale_x, scale_y)
                 enemies_counter = 0
                 kills = 0
                 FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
                 start_time = current_time
             elif result == "menu":
-                Restart(Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY)
+                Restart(Rooms,player, enemies ,drops,scale_x, scale_y)
                 enemies_counter = 0
                 kills = 0
                 start_time = 0

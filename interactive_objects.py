@@ -28,12 +28,12 @@ class DestructibleObject(pygame.sprite.Sprite):
 
 
 class SpikeTrap(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, damage=10, k=1):
+    def __init__(self, x, y, width, height, damage=10, scale_x = 1 , scale_y = 1):
         super().__init__()
         self.damage = damage
         self.image = pygame.image.load('images/spikes.jpg').convert_alpha()
-        self.image = pygame.transform.scale(self.image, (width * k, height * k))
-        self.rect = self.image.get_rect(topleft=(x * k, y * k))
+        self.image = pygame.transform.scale(self.image, (width * scale_x, height * scale_y))
+        self.rect = self.image.get_rect(topleft=(x * scale_x, y * scale_y))
 
     def apply_damage(self, target):
         if hasattr(target, "take_damage"):
@@ -41,12 +41,12 @@ class SpikeTrap(pygame.sprite.Sprite):
 
 
 class ExplosiveBarrel(DestructibleObject):
-    def __init__(self, x, y, width, height, hp=40, explosion_radius=100, explosion_damage=25, k=1):
-        super().__init__(x, y, width, height, hp, color=(255, 100, 0), scale_x=k ,scale_y=k)
-        self.explosion_radius = explosion_radius * k
+    def __init__(self, x, y, width, height, hp=40, explosion_radius=100, explosion_damage=25, scale_x = 1 ,scale_y = 1):
+        super().__init__(x, y, width, height, hp, color=(255, 100, 0), scale_x  = scale_x,scale_y=scale_y)
+        self.explosion_radius = explosion_radius * scale_x
         self.explosion_damage = explosion_damage
         self.image = pygame.image.load('images/explosive.png').convert_alpha()
-        self.image = pygame.transform.scale(self.image, (width * k, height * k))
+        self.image = pygame.transform.scale(self.image, (width * scale_x, height * scale_y))
     def take_damage(self, amount, enemies_group=None,player=None , objects = None):
         print("ouch")
         self.hp -= amount

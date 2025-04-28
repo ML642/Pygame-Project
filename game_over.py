@@ -3,7 +3,7 @@ from pygame.locals import *
 
 from Main_Menu import Main_menu
 
-def Restart (Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY): 
+def Restart (Rooms,player, enemies ,drops,scale_x, scale_y): 
     for room in Rooms :
         room.active = False 
         room.clear = False 
