@@ -103,7 +103,7 @@ CELL_SIZE = 40
 
 
 level_1data = [
-    {"x": 50, "y": 50, "form": 2, "type": 1, "enemies_counter": 3},
+    {"x": 50, "y": 50, "form": 8, "type": 1, "enemies_counter": 0},
     {"x": 700 + 50 + 240 + 100, "y": 50, "form": 9, "type": 1, "enemies_counter": 3},
     {"x": 50 + (700 + 240 + 100) * 2, "y": 50, "form": 3, "type": 1, "enemies_counter": 3},
     {"x": 50 + (700 + 240 + 100) * 2, "y": 50 - (500 + 260), "form": 8, "type": 1, "enemies_counter": 3},
@@ -119,7 +119,26 @@ level_1data = [
     {"x": 50 + (700 + 240 + 100) * 2, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
     {"x": 50 + (700 + 240 + 100) * 3, "y": 10 + (500 + 260) * 4, "form": 6, "type": 1, "enemies_counter": 3}
 ]
-
+level_2data = [
+    {"x": 50, "y": 50, "form": 7, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100), "y": 50, "form": 2, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 2 , "y": 50, "form": 9, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 3,  "y": 50, "form": 2, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 4 , "y": 50, "form": 6, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 3 , "y": 50 + (500+240), "form": 11, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 4 , "y": 50 + (500+240), "form": 4, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 4,  "y": 50 + (500+240) * 2 , "form": 10, "type": 1, "enemies_counter": 0},
+    
+    {"x": 50 + (700 + 240 + 100) , "y": 50+(500 + 240), "form": 5, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) , "y": 50+(500 + 240) * 2, "form": 5, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100), "y": 50+(500 + 240) * 3, "form": 11, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 2, "y": 50+(500 + 240) * 3, "form": 2, "type": 1, "enemies_counter": 0},
+    
+    {"x": 50 + (700 + 240 + 100) * 3 ,"y": 50+(500 + 240) * 3, "form": 6, "type": 1, "enemies_counter": 3 },
+    {"x": 50 + (700 + 240 + 100) * 2, "y": 50+(500 + 240) * 4, "form": 11, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 3, "y": 50+(500 + 240) * 4, "form": 9, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 4, "y": 50+(500 + 240) * 4, "form": 6, "type": 1, "enemies_counter": 0},
+]
 
 
 
@@ -133,17 +152,17 @@ camera = Camera(800 * scale_x,600 * scale_y , 12000 * scale_x,12000 * scale_y, s
 floors.add(Floor(50 * scale_x,50 * scale_y))
 def Room_Create ( x , y  , form , type , enemies_counter ):
     walls.add(generate_room(int(x ),int(y ),form,type , scale_x , scale_y))
-    floors.add(Floor(x *  scale_x, y * scale_y,scale_x , scale_y))
+    floors.add(Floor( x *  scale_x, y * scale_y   , scale_x  ,  scale_y))
     
     
-    Rooms.add(Room(x  * scale_x,(y+50) * scale_y , enemies_counter,scale_x , scale_y))
+    Rooms.add(Room( x * scale_x,(y+50) * scale_y , enemies_counter,scale_x , scale_y))
     if form == 1 or form == 2 or form ==9 or form == 8 or form == 11 or form ==7 :   # right corridor  
          floors.add(Floor_Hallway((x + 677) * scale_x , (y + 195)* scale_y , 300  , 90  ,scale_x,scale_y))
     if form == 1 or form == 2 or form == 3 or form == 4 or form == 5 or form ==8 : # bottom corridor 
         floors.add(Floor_Hallway( (x + 250)*scale_x , (y + 480)*scale_y , 210  , 260 , scale_x ,  scale_y ))
     if form ==1 or form == 2 or form == 3 or form == 4 or form ==6 or form == 9  : # left corrior 
         floors.add(Floor_Hallway( (x  - 300) * scale_x , (y + 195)*scale_y , 300  ,  90  , scale_x , scale_y))	
-    if form == 1 or form == 3 or form ==4 or form == 5  or form == 7 : # top corridor , 
+    if form == 1 or form == 3  or form == 5  : # top corridor , 
         floors.add(Floor_Hallway( (x + 250) *  scale_x , (y -  230)* scale_y   , 210 , 255  ,scale_x ,scale_y ))
 
     
@@ -159,10 +178,10 @@ player = Player (scale_x,scale_y , current_settings["difficulty"])
 #############################
 
 
-
-walls = generate_room(int((-300 - ROOM_WIDTH) + int(OFFSET) * ( scale_x -1 ) )  ,int( 50 ), 7, 1, scale_x ,scale_y )  # initiate first room
-floors.add(Floor((-300 - 700) - int(OFFSET2) * (scale_x -1 ),  50 * scale_y  , scale_x , scale_y)) 
-floors.add(Floor_Hallway((-300) -  int(OFFSET3) *(scale_x -1), (50 + 195) * scale_y, 400 , 90  , scale_x , scale_y))
+walls = pygame.sprite.Group()
+# walls = generate_room(int((-300 - ROOM_WIDTH) + int(OFFSET) * ( scale_x -1 ) )  ,int( 50 ), 7, 1, scale_x ,scale_y )  # initiate first room
+# floors.add(Floor((-300 - 700) - int(OFFSET2) * (scale_x -1 ),  50 * scale_y  , scale_x , scale_y)) 
+# floors.add(Floor_Hallway((-300) -  int(OFFSET3) *(scale_x -1), (50 + 195) * scale_y, 400 , 90  , scale_x , scale_y))
 
 
 
@@ -236,16 +255,16 @@ running = True
 OFFSET = 700
 OFFSETY = (scale_y-1) * 200    
     
-player.rect.center = ( -500 +(1-scale_x) * OFFSET ,50 + ( 700 / 2 )* scale_y - OFFSETY  )  # - move the player to the room 
+player.rect.center = (150* scale_x ,  150 * scale_y)# - move the player to the room 
 
 def rerender (data,walls,floors,Rooms,enemies,drops,interactive_objects,player):
     walls.empty()
     floors.empty()
     Rooms.empty()
     enemies.empty()
-    
     interactive_objects.empty()
     player.tears.clear()
+    
     for room_data in data :
         Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
 
@@ -294,6 +313,9 @@ while running:
                      Restart(Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY)
                      enemies_counter = 0 
                      FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
+                elif event.key == pygame.K_q:
+                    rerender(level_2data,walls,floors,Rooms,enemies,drops,interactive_objects,player)
+                    player.rect.center =( 150 * scale_x , 150 * scale_y)
                 
                 
         if player.is_reloading and FIRE_MODES[player.current_mode]["full"] != FIRE_MODES[player.current_mode]["bullets"]: 

@@ -53,7 +53,7 @@ class Player(pygame.sprite.Sprite):
         self.max_health = 30 * self.multiplier
         self.shot_cooldown = 0
         self.tears = []  # Projectiles
-        self.angle = 0
+        self.angle = 180
         
         #dash mechanics
         self.dash_speed_multiplier = 3
@@ -145,12 +145,12 @@ class Player(pygame.sprite.Sprite):
                 self.rect.centerx,
                 self.rect.centery,
                 direction,
-                speed=mode["speed"],
-                damage=mode["damage"],
+                speed = mode["speed"],
+                damage = mode["damage"],
                 scale_x=self.scale_x,
                 scale_y=self.scale_y
             )
-            angle = math.degrees(math.atan2(-direction[1], direction[0]))
+            angle = math.degrees(math.atan2(-direction[1], direction[0])) + 180
             tear.image = pygame.transform.rotate(tear.image, angle)
             self.tears.append(tear)
             self.last_shot_time = current_time            

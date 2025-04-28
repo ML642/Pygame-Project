@@ -7,7 +7,7 @@ def Restart (Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY):
     for room in Rooms :
         room.active = False 
         room.clear = False 
-    player.rect.center = ( -500 +(1-scale_x) * OFFSET ,50 + ( 700 / 2 )* scale_y - OFFSETY  )  # - move the player to the room
+    player.rect.center =(150 * scale_x , 150 * scale_y ) # - move the player to the room
     player.health = player.max_health
     for enemy in enemies:
         enemy.kill()
