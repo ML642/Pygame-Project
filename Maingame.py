@@ -505,8 +505,13 @@ while running:
             for wall in walls:
                 if tear.rect.colliderect(wall.rect):
                     if isinstance(wall , ExplosiveBarrel):
-                        
-                        wall.take_damage(FIRE_MODES[player.current_mode]["damage"] , enemies , player,interactive_objects)
+                        for explosion in wall.explosion_effects[:]:
+                                explosion.update()
+                                explosion.draw(screen)
+                                if all(p[6] <= 0 for p in explosion.particles):
+                                    wall.explosion_effects.remove(explosion)
+
+                        enemies_counter =  wall.take_damage(FIRE_MODES[player.current_mode]["damage"] , enemies , player,interactive_objects,enemies_counter)
                         
                     elif isinstance(wall, DestructibleObject):
                         wall.take_damage(FIRE_MODES[player.current_mode]["damage"])
@@ -518,11 +523,14 @@ while running:
             player.health -= 1
         for drop in drops:
             screen.blit(drop.image, camera.apply(drop))
+       
         enemies.update(player, walls)
+       
         for obj in interactive_objects:
              walls.add(obj)
              screen.blit(obj.image, camera.apply(obj))
-        
+       
+
         
         # Health and UI elements (drawn without camera offset)
         font = pygame.font.SysFont(None, int(36 * scale_x))

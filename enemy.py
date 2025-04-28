@@ -146,7 +146,7 @@ class Enemy(pygame.sprite.Sprite):
         if self.health <= 0:
             self.drop_item()
             self.kill()
-    
+            return "kill"
     
 
     def drop_item(self):
