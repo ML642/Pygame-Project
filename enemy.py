@@ -23,7 +23,9 @@ class Enemy(pygame.sprite.Sprite):
             self.multiplier = 1.75
         
         self.orig = pygame.image.load('images/player.png').convert_alpha()
+        self.orig2 =pygame.transform.scale(self.orig, (50 * scale_x, 50 * scale_y))
         self.image = pygame.transform.scale(self.orig, (50 * scale_x, 50 * scale_y))
+        
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = (random.uniform(1,2)) * scale_x * self.multiplier
         self.health = 30* self.multiplier
@@ -53,6 +55,15 @@ class Enemy(pygame.sprite.Sprite):
         dy = player.rect.centery - self.rect.centery
         dist = max(1, math.sqrt(dx*dx + dy*dy))
         dx, dy = dx/dist, dy/dist
+        
+        raw_angle = math.degrees(math.atan2(dx, dy)) % 360
+        angle = raw_angle + 270
+
+        # 3) Rotate the original, then update image & rect
+        rotated = pygame.transform.rotate(self.orig2, angle)
+        self.image = rotated
+        # Re-center so the sprite doesn’t “jump” around
+        self.rect = self.image.get_rect(center=self.rect.center)
         
         for tear in self.tears:
             if tear.update():
