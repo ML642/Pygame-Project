@@ -1,10 +1,12 @@
 # 🎮 Bullet Born  
 
 *A 2D roguelike shooter with procedural dungeons, permadeath, and dynamic combat.*  
+## 🖼️ Screenshots
 
-|![Gameplay Screenshot](images/Preview.png)  | ![Screenshot 2] (images/screen2.png) |
-
----
+| Screenshot 1 | Screenshot 2 | Screenshot 3 |
+|--------------|--------------|--------------|
+| ![Screenshot 1](images/Preview.png) | ![Screenshot 2](images/screen2.png) | ![Screenshot 3](images/game_paused.png) |
+| *Main_menu* | *Game_play* | *Game_paused*|
 
 ## ✨ Features  
 - **Procedural Dungeons**: Randomly generated rooms and corridors.  
