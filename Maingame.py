@@ -25,15 +25,14 @@ pygame.init()
 
 
 interactive_objects = pygame.sprite.Group()
-wall = DestructibleObject(x=450, y=450, width=32, height=32, hp=100 ,scale_x=1 , scale_y=1)
-spike = SpikeTrap(x=450, y=500, width=50, height=40, damage=1 , scale_x=1 , scale_y=1)
-barrel = ExplosiveBarrel(x=1150, y=450, width=32, height=32, hp=50, explosion_radius=640, explosion_damage=50, scale_x=1 , scale_y=1)
-interactive_objects.add(wall, barrel)
+# wall = DestructibleObject(x=450, y=450, width=32, height=32, hp=100 ,scale_x=1 , scale_y=1)
+# spike = SpikeTrap(x=450, y=500, width=50, height=40, damage=1 , scale_x=1 , scale_y=1)
+# barrel = ExplosiveBarrel(x=1150, y=450, width=32, height=32, hp=50, explosion_radius=640, explosion_damage=50, scale_x=1 , scale_y=1)
+# interactive_objects.add(wall, barrel)
 Spikes = pygame.sprite.Group()
-Spikes.add(spike)
+# Spikes.add(spike)
 
-screen_width = 800 
-screen_height = 600
+
 os.environ['SDL_VIDEO_CENTERED'] = "1"
 BASE_WIDTH = 800 
 BASE_HEIGHT = 600
@@ -86,12 +85,13 @@ current_settings = Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT , current_settings
 with open("settings.json", "w") as f:
     json.dump(current_settings, f)
     
-print(load_settings())
+#print(load_settings())
     
     
 
 scale_x = current_settings["resolution"][0] / BASE_WIDTH
 scale_y = current_settings["resolution"][1] / BASE_HEIGHT
+
 FIRE_MODES = {
             1: {"speed": 7, "damage": 10, "fire_rate": 0.6 ,"url": "images/pistol.png","bullets" : 10 , "ammo" :9  , "full" : 10 , "reload_time" :2 },
             2: {"speed": 12, "damage": 5, "fire_rate": 0.3 , "url": "images/shotgun.png" ,"bullets" : 10 , "ammo" : 2 , "full": 30 , "reload_time" :1.5 }, 
@@ -151,12 +151,11 @@ kills = 0
 camera = Camera(800 * scale_x,600 * scale_y , 12000 * scale_x,12000 * scale_y, scale_x , scale_y)
 
 # technical debt
-floors.add(Floor(50 * scale_x,50 * scale_y))
 def Room_Create ( x , y  , form , type , enemies_counter ):
     walls.add(generate_room(int(x ),int(y ),form,type , scale_x , scale_y))
+    
     floors.add(Floor( x *  scale_x, y * scale_y   , scale_x  ,  scale_y))
-    
-    
+     
     Rooms.add(Room( x * scale_x,(y+50) * scale_y , enemies_counter,scale_x , scale_y))
     if form == 1 or form == 2 or form ==9 or form == 8 or form == 11 or form ==7 :   # right corridor  
          floors.add(Floor_Hallway((x + 677) * scale_x , (y + 195)* scale_y , 300  , 90  ,scale_x,scale_y))
@@ -178,13 +177,13 @@ walls = pygame.sprite.Group()
 
 
 
-
+# alternative loading screen
 # for room_data in level_1data:
 #     loading_screen = LoadingScreen(screen, len(level_1data))
-
+#
 #     Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
-
-
+#
+#
 #     loading_screen.update(1)
 #     loading_screen.draw()
 #     pygame.display.flip()
