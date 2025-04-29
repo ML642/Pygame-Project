@@ -2,7 +2,7 @@
 
 *A 2D roguelike shooter with procedural dungeons, permadeath, and dynamic combat.*  
 
-![Gameplay Screenshot](images/preview.png)  
+![Gameplay Screenshot](images/Preview.png)  
 
 ---
 
