@@ -47,7 +47,7 @@ class Player(pygame.sprite.Sprite):
         self.scale_y = scale_y
         self.image = pygame.transform.scale(self.orig, (50 * scale_x, 50 * scale_y))
         self.original_image = self.image 
-        self.rect = self.image.get_rect(center=(400, 300))
+        self.rect = self.image.get_rect(center=(400 * self.scale_x, 300 * self.scale_y))
         self.speed = 5 *  self.multiplier
         self.health = 30 * self.multiplier
         self.max_health = 30 * self.multiplier
