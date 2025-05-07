@@ -251,7 +251,7 @@ def rerender (data,walls,floors,Rooms,enemies,drops,interactive_objects,player):
     enemies.empty()
     interactive_objects.empty()
     player.tears.clear()
-    
+    enemies_counter = 0
     for room_data in data :
         Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
 
@@ -303,6 +303,7 @@ while running:
                 elif event.key == pygame.K_q:
                     rerender(level_2data,walls,floors,Rooms,enemies,drops,interactive_objects,player)
                     player.rect.center =( 150 * scale_x , 150 * scale_y)
+                    enemies_counter = 0
                 
                 
         if player.is_reloading and FIRE_MODES[player.current_mode]["full"] != FIRE_MODES[player.current_mode]["bullets"]: 
