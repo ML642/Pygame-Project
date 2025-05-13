@@ -97,7 +97,9 @@ level_1data = [
     {"x": 50 + (700 + 240 + 100), "y": 10 + (500 + 260) * 4, "form": 11, "type": 1, "enemies_counter": 3},
     {"x": 50 + (700 + 240 + 100), "y": 30 + (500 + 260) * 3, "form": 5, "type": 1, "enemies_counter": 3},
     {"x": 50 + (700 + 240 + 100) * 2, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (700 + 240 + 100) * 3, "y": 10 + (500 + 260) * 4, "form": 6, "type": 1, "enemies_counter": 3}
+    {"x": 50 + (700 + 240 + 100) * 3, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100) * 4, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
+    {"x": (50 + (700 + 240 + 100) * 5) - 60, "y": (10 + (500 + 260) * 4) - 110, "form": "boss", "type": 1, "enemies_counter": 0}
 ]
 
 
@@ -152,31 +154,43 @@ floors.add(Floor_Hallway((-300) -  int(OFFSET3) *(scale_x -1), (50 + 195) * scal
 
 for room_data in level_1data:
     Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
-last_room_x = level_1data[-1]["x"]
-last_room_y = level_1data[-1]["y"]
 
-for wall in walls:
-    if wall.rect.collidepoint(last_room_x + 680, last_room_y + 200):
+last_room_x = level_1data[-2]["x"]
+last_room_y = level_1data[-2]["y"]
+
+boss_room_x = last_room_x + 700 + 240 
+boss_room_y = last_room_y 
+
+for wall in walls.copy():
+    if wall.rect.x in range(last_room_x + 680, last_room_x + 710) and wall.rect.y in range(last_room_y + 180, last_room_y + 220):
         walls.remove(wall)
-        break
+
+# Boss hallway and floor cringe generation (I'm tired)
+hallway_x = last_room_x + 680
+hallway_y = last_room_y + 195 - 30
+hallway_width = 320
+hallway_height = 135
+walls.add(Wall(hallway_x, hallway_y, hallway_width, 20, scale_x, scale_y))
+walls.add(Wall(hallway_x, hallway_y + hallway_height - 20, hallway_width, 20, scale_x, scale_y))
+floors.add(Floor_Hallway(hallway_x * scale_x, hallway_y * scale_y, hallway_width, hallway_height, scale_x, scale_y))
+
+# boss_gates = []
 
 walls.add(Wall(last_room_x + 680, last_room_y, 20, 190 - last_room_y, scale_x, scale_y))
 walls.add(Wall(last_room_x + 680, last_room_y + 310, 20, (500 - 310), scale_x, scale_y))
 
-corridor_start_x = last_room_x + 800
-corridor_start_y = last_room_y + 300
+# corridor_start_x = last_room_x + 800
+# corridor_start_y = last_room_y + 195
 
-for i in range(0, 240, 40):
-    walls.add(Wall(corridor_start_x + i, corridor_start_y - 40, 40, 40, scale_x, scale_y))
-    walls.add(Wall(corridor_start_x + i, corridor_start_y + 80, 40, 40, scale_x, scale_y))
-    floors.add(Floor(corridor_start_x + i, corridor_start_y, scale_x, scale_y))
+# for i in range(0, 240, 40):
+#     walls.add(Wall(corridor_start_x + i, corridor_start_y - 40, 40, 40, scale_x, scale_y))
+#     walls.add(Wall(corridor_start_x + i, corridor_start_y + 80, 40, 40, scale_x, scale_y))
+#     floors.add(Floor(corridor_start_x + i, corridor_start_y, scale_x, scale_y))
 
 boss_room_x = last_room_x + (700 + 240)
 boss_room_y = last_room_y
 
-boss_walls = generate_boss_room(boss_room_x, boss_room_y, scale_x, scale_y)
-walls.add(boss_walls)
-floors.add(Floor(boss_room_x, boss_room_y, scale_x, scale_y))
+
 
 for wall in walls:
     if wall.rect.collidepoint(boss_room_x, boss_room_y + 200):
@@ -267,11 +281,20 @@ while running:
                 room.active = True
                 #enemies_counter = room.enemies_counter
         #boss room check
-        if boss_room_x <= player.rect.centerx <= boss_room_x + 700 * scale_x and \
-           boss_room_y <= player.rect.centery <= boss_room_y + 500 * scale_y and not boss_spawned:
-            boss = Boss(boss_room_x + 350 * scale_x, boss_room_y + 250 * scale_y, player, scale_x, scale_y)
+        if boss_room_x <= player.rect.centerx <= boss_room_x + 900 * scale_x and \
+           boss_room_y <= player.rect.centery <= boss_room_y + 700 * scale_y and not boss_spawned:
+
+            boss = Boss(boss_room_x + 450 * scale_x, boss_room_y + 350 * scale_y, player, scale_x, scale_y, drops, current_settings["difficulty"])
             enemies.add(boss)
             boss_spawned = True
+            # # Boss gates
+            # gate_left = Gate(boss_room_x, boss_room_y + 250, 20, 200, scale_x, scale_y)
+            # gate_right = Gate(boss_room_x + 880, boss_room_y + 250, 20, 200, scale_x, scale_y)
+
+            # walls.add(gate_left, gate_right)
+            # boss_gates.extend([gate_left, gate_right])
+
+
 
 
 
@@ -403,6 +426,11 @@ while running:
                     if tear in boss.tears:
                         boss.tears.remove(tear)
 
+        # if boss and not boss.alive():
+        #     for gate in boss_gates:
+        #         if not gate.is_open:
+        #             gate.toogle(walls)
+
         if boss and boss.alive():
             boss.draw_health_bar(screen, scale_x, scale_y)
 
@@ -480,7 +508,14 @@ while running:
         ammo_text = font.render(f"{FIRE_MODES[player.current_mode]['bullets']}/{FIRE_MODES[player.current_mode]['ammo']}", True, BLACK)
         ammo_rect = ammo_text.get_rect(center=(0, 0))
         screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )     
-        draw_minimap(screen, player, Rooms, boss_room_rect=pygame.Rect(boss_room_x, boss_room_y, 700 * scale_x, 500 * scale_y))
+        # boss_room_rect = pygame.Rect(
+        #     boss_room_x,
+        #     boss_room_y,
+        #     900 * scale_x,
+        #     700 * scale_y
+        # )
+        # draw_minimap(screen, player, Rooms, boss_room_rect=pygame.Rect(boss_room_x, boss_room_y, 900 * scale_x, 700 * scale_y))
+        draw_minimap(screen, player, Rooms)
         pygame.display.flip()
         clock.tick(60)
 
