@@ -1,15 +1,17 @@
 import pygame
 from pygame import mixer
 import ctypes
+import sys 
 
 
 class SettingsMenu:
     def __init__(self, screen_width, screen_height , settings_data=None):
-        user32 = ctypes.windll.user32
         
-        self.max_resolution = (user32.GetSystemMetrics(0), user32.GetSystemMetrics(1))
-        
-        
+        import tkinter as tk
+        root = tk.Tk()
+        root.withdraw()  # Hide the main window
+        self.max_resolution = (root.winfo_screenwidth(), root.winfo_screenheight())
+        root.destroy()
         self.screen_width = screen_width
         self.screen_height = screen_height
         self.active = False
