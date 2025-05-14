@@ -7,13 +7,17 @@ import copy
 import json
 import asyncio
 import sys 
+
+
 from player import Player
 from enemy import Enemy
 from camera import Camera
+
 from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
 from UI_components import draw_health_bar , Menu_option , DustParticle , draw_reload_bar , StopButton
 from stopmenu import pause_menu , draw_button , draw_slider
 from Main_Menu import Main_menu
+
 from interactive_objects import  DestructibleObject , SpikeTrap , ExplosiveBarrel
 from game_over import GameOver , game_over_screen ,  Restart
 from loading_screen import LoadingScreen
@@ -23,20 +27,20 @@ from setting_menu import SettingsMenu
 pygame.init()
 
 
-
 interactive_objects = pygame.sprite.Group()
-# wall = DestructibleObject(x=450, y=450, width=32, height=32, hp=100 ,scale_x=1 , scale_y=1)
-# spike = SpikeTrap(x=450, y=500, width=50, height=40, damage=1 , scale_x=1 , scale_y=1)
-# barrel = ExplosiveBarrel(x=1150, y=450, width=32, height=32, hp=50, explosion_radius=640, explosion_damage=50, scale_x=1 , scale_y=1)
-# interactive_objects.add(wall, barrel)
+ # wall = DestructibleObject(x=450, y=450, width=32, height=32, hp=100 ,scale_x=1 , scale_y=1)
+ # spike = SpikeTrap(x=450, y=500, width=50, height=40, damage=1 , scale_x=1 , scale_y=1)
+ # barrel = ExplosiveBarrel(x=1150, y=450, width=32, height=32, hp=50, explosion_radius=640, explosion_damage=50, scale_x=1 , scale_y=1)
+ # interactive_objects.add(wall, barrel)
 Spikes = pygame.sprite.Group()
-# Spikes.add(spike)
+ # Spikes.add(spike)
 
 
 os.environ['SDL_VIDEO_CENTERED'] = "1"
 BASE_WIDTH = 800 
 BASE_HEIGHT = 600
-# 1350 x 800
+
+
 SELECTED_WIDTH = 800
 SELECTED_HEIGHT = 600   
 
@@ -57,6 +61,7 @@ screen = pygame.display.set_mode((800 * scale_x, 600 * scale_y))
 
 
 clock = pygame.time.Clock()
+
 
 
 def load_settings():
@@ -82,6 +87,7 @@ data = [ 0 , (800,600) ]
 
 current_settings = Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT , current_settings )
 
+
 with open("settings.json", "w") as f:
     json.dump(current_settings, f)
     
@@ -94,13 +100,15 @@ scale_y = current_settings["resolution"][1] / BASE_HEIGHT
 
 FIRE_MODES = {
             1: {"speed": 7, "damage": 10, "fire_rate": 0.6 ,"url": "images/pistol.png","bullets" : 10 , "ammo" :9  , "full" : 10 , "reload_time" :2 },
-            2: {"speed": 12, "damage": 5, "fire_rate": 0.3 , "url": "images/shotgun.png" ,"bullets" : 10 , "ammo" : 2 , "full": 30 , "reload_time" :1.5 }, 
+            2: {"speed": 12, "damage": 5, "fire_rate": 0.3 , "url": "images/shotgun.png" , "bullets" : 10 , "ammo" : 2 , "full": 30 , "reload_time" :1.5 }, 
             3: {"speed": 20, "damage": 20, "fire_rate": 1 , "url": "images/sniper.png" , "bullets" : 10 ,   "ammo" : 3, "full":10 , "reload_time" : 2.5 },
         }
 FIRE_MODES_COPY = copy.deepcopy(FIRE_MODES)
 
 ROOM_WIDTH, ROOM_HEIGHT = 700 * scale_x, 500 * scale_y
 CELL_SIZE = 40
+
+
 
 
 
@@ -121,6 +129,8 @@ level_1data = [
     {"x": 50 + (700 + 240 + 100) * 2, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
     {"x": 50 + (700 + 240 + 100) * 3, "y": 10 + (500 + 260) * 4, "form": 6, "type": 1, "enemies_counter": 3}
 ]
+
+
 level_2data = [
     {"x": 50, "y": 50, "form": 7, "type": 1, "enemies_counter": 0},
     {"x": 50 + (700 + 240 + 100), "y": 50, "form": 2, "type": 1, "enemies_counter": 0},
@@ -150,9 +160,10 @@ kills = 0
 
 camera = Camera(800 * scale_x,600 * scale_y , 12000 * scale_x,12000 * scale_y, scale_x , scale_y)
 
+
 # technical debt
 def Room_Create ( x , y  , form , type , enemies_counter ):
-    walls.add(generate_room(int(x ),int(y ),form,type , scale_x , scale_y))
+    walls.add(generate_room(int( x ),int( y ),form,type , scale_x , scale_y))
     
     floors.add(Floor( x *  scale_x, y * scale_y   , scale_x  ,  scale_y))
      
@@ -173,7 +184,6 @@ def Room_Create ( x , y  , form , type , enemies_counter ):
 player = Player (scale_x,scale_y , current_settings["difficulty"])  
 
 walls = pygame.sprite.Group()
-
 
 
 
@@ -202,7 +212,9 @@ async def loader(progress, loading_screen):
             room_data["enemies_counter"],
         )
         progress['loaded'] = i
+        
         loading_screen.update()
+        
         loading_screen.draw()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -223,7 +235,10 @@ async def main():
     # Final draw of 100% progress
     loading_screen.update(len(level_1data))
     loading_screen.draw()
-    await asyncio.sleep(0.5)  # Show 100% briefly
+    await asyncio.sleep(0.5)  
+
+    
+
 
 asyncio.run(main())
 
