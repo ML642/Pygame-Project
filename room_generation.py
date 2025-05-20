@@ -97,7 +97,7 @@ class Gate(Wall):
              
           self.update_image()
 def generate_room( x , y , form , type ,scale_x = 1 , scale_y = 1 ):
-    print(f"Generating room ({x}, {y}), form: {form}") #Room gen type check, debug thing
+    # print(f"Generating room ({x}, {y}), form: {form}") #Room gen type check, debug thing
     if form == 'boss':
         return generate_boss_room(x, y, scale_x, scale_y)
     walls = pygame.sprite.Group()

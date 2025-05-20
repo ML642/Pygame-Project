@@ -1,6 +1,8 @@
 import pygame
 import random
 import math
+from grenade import Grenade
+
 
 
 class Tear(pygame.sprite.Sprite):
@@ -140,7 +142,39 @@ class Player(pygame.sprite.Sprite):
         current_time = time.time()
 
         if current_time - self.last_shot_time >= mode["fire_rate"]:
-            FIRE_MODES [self.current_mode]["bullets"] -=1
+            if mode.get("type") == "grenade":
+                if mode["ammo"] <= 0:
+                    return FIRE_MODES  # нет гранат
+
+                FIRE_MODES[self.current_mode]["ammo"] -= 1
+                grenade = Grenade(self.rect.centerx, self.rect.centery, direction,
+                                  mode["speed"],
+                                  mode["damage"],
+                                  mode["radius"],
+                                  self.scale_x, self.scale_y)
+                self.tears.append(grenade)
+                self.last_shot_time = current_time
+                return FIRE_MODES
+            else:
+                if mode["bullets"] <= 0:
+                    return FIRE_MODES
+
+                FIRE_MODES[self.current_mode]["bullets"] -= 1
+                tear = Tear(
+                    self.rect.centerx,
+                    self.rect.centery,
+                    direction,
+                    speed=mode["speed"],
+                    damage=mode["damage"],
+                    scale_x=self.scale_x,
+                    scale_y=self.scale_y
+                )
+                angle = math.degrees(math.atan2(-direction[1], direction[0]))
+                tear.image = pygame.transform.rotate(tear.image, angle)
+                self.tears.append(tear)
+                self.last_shot_time = current_time
+                return FIRE_MODES
+
             tear = Tear(
                 self.rect.centerx,
                 self.rect.centery,
@@ -178,4 +212,7 @@ class Player(pygame.sprite.Sprite):
             self.dash_timer = self.dash_duration
             self.dash_cooldown_timer = self.dash_cooldown
             self.dash_trail = []
+    def take_damage(self, amount):
+        self.health -= amount
+
             
