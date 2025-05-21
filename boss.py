@@ -4,6 +4,7 @@ import random
 import time
 from player import Tear
 from enemy import Enemy
+from grenade import Grenade
 
 class Boss(pygame.sprite.Sprite):
     def __init__(self, x, y, player, scale_x=1, scale_y=1, drops=None, difficulty="medium"):
@@ -37,6 +38,9 @@ class Boss(pygame.sprite.Sprite):
         self.reload_start_time = 0
         self.shots_fired = 0
         self.difficulty = difficulty
+        self.last_special_attack = 0
+        self.special_cooldown = 10000
+        self.phase_two = False
 
 
     def update(self, player=None, walls=None):
@@ -71,7 +75,7 @@ class Boss(pygame.sprite.Sprite):
         elif self.phase == 3:
             self.shoot_cooldown = 0.1
             self.reload_time = 3
-            self.speed = 2 * self.scale_x
+            self.speed = 3 * self.scale_x
             self.roll_cooldown = 1.5
 
 
@@ -90,12 +94,17 @@ class Boss(pygame.sprite.Sprite):
 
         move_x, move_y = 0, 0
 
-        if distance < self.attack_distance:
-            move_x = -dx * self.speed
-            move_y = -dy * self.speed
-        elif distance > self.safe_distance:
+        if self.phase == 3:
             move_x = dx * self.speed
             move_y = dy * self.speed
+        else:
+            if distance < self.attack_distance:
+                move_x = -dx * self.speed
+                move_y = -dy * self.speed
+            elif distance > self.safe_distance:
+                move_x = dx * self.speed
+                move_y = dy * self.speed
+
 
         new_rect = self.rect.copy()
         new_rect.x += move_x
@@ -113,7 +122,7 @@ class Boss(pygame.sprite.Sprite):
             self.shots_fired += 1
             self.last_shot_time = current_time
 
-            if self.shots_fired >= 30:
+            if self.shots_fired >= 60:
                 self.reloading = True
                 self.reload_start_time = current_time
                 self.shots_fired = 0
@@ -123,12 +132,19 @@ class Boss(pygame.sprite.Sprite):
 
         # Bullet update
         for tear in self.tears[:]:
-            if tear.update():
-                self.tears.remove(tear)
-                continue
+            if isinstance(tear, Grenade):
+                exploded = tear.update(walls)
+                if exploded:
+                    self.tears.remove(tear)
+                    continue
+            else:
+                if tear.update():
+                    self.tears.remove(tear)
+                    continue
 
-            if walls and any(tear.rect.colliderect(wall.rect) for wall in walls):
-                self.tears.remove(tear)
+                if walls and any(tear.rect.colliderect(wall.rect) for wall in walls):
+                    self.tears.remove(tear)
+
 
         health_ratio = self.health / self.max_health
         if health_ratio > 2 / 3:
@@ -142,6 +158,12 @@ class Boss(pygame.sprite.Sprite):
         else:
             self.phase = 3
 
+        if self.phase == 2:
+            now = pygame.time.get_ticks()
+            if now - self.last_special_attack >= self.special_cooldown:
+                self.last_special_attack = now
+                self.throw_grenades()
+
 
     def shoot(self):
         # Shooting ai
@@ -150,7 +172,7 @@ class Boss(pygame.sprite.Sprite):
         distance = math.hypot(dx, dy)
         if distance != 0:
             direction = (dx / distance, dy / distance)
-            bullet = Tear(self.rect.centerx, self.rect.centery, direction, speed=10, damage=80, scale_x=self.scale_x, scale_y=self.scale_y)
+            bullet = Tear(self.rect.centerx, self.rect.centery, direction, speed=10, damage=10, scale_x=self.scale_x, scale_y=self.scale_y)
             angle = math.degrees(math.atan2(-direction[1], direction[0]))
             bullet.image = pygame.transform.rotate(bullet.image, angle)
             self.tears.append(bullet)
@@ -209,5 +231,25 @@ class Boss(pygame.sprite.Sprite):
                 if not any(enemy.rect.colliderect(w.rect) for w in self.groups()[0] if isinstance(w, pygame.sprite.Sprite)):
                     self.groups()[0].add(enemy) 
                     break
+
+    def throw_grenades(self):
+        angles = [0, 60, 120, 180, 240, 300]
+        for angle_deg in angles:
+            angle_rad = math.radians(angle_deg)
+            dir_x = math.cos(angle_rad)
+            dir_y = math.sin(angle_rad)
+            grenade = Grenade(
+                self.rect.centerx,
+                self.rect.centery,
+                direction=(dir_x, dir_y),
+                speed=15,
+                damage=80,
+                radius=200,
+                scale_x=self.scale_x,
+                scale_y=self.scale_y
+            )
+            grenade.max_distance = 600
+            grenade.speed *= 1.2
+            self.tears.append(grenade)
 
 
