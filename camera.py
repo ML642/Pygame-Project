@@ -14,8 +14,8 @@ class Camera:
         return entity.rect.move(self.camera.topleft)
 
     def update(self, target):
-        x = -target.rect.centerx + (self.screen_width // 2) / self.scale_x
-        y = -target.rect.centery + (self.screen_height // 2) / self.scale_y
+        x = -target.rect.centerx + (self.screen_width // 2) 
+        y = -target.rect.centery + (self.screen_height // 2) 
         
         # Limit camera to world bounds
        

@@ -3,11 +3,13 @@ from pygame.locals import *
 
 from Main_Menu import Main_menu
 
-def Restart (Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY): 
+
+
+def Restart (Rooms,player, enemies ,drops,scale_x, scale_y): 
     for room in Rooms :
         room.active = False 
         room.clear = False 
-    player.rect.center = ( -500 +(1-scale_x) * OFFSET ,50 + ( 700 / 2 )* scale_y - OFFSETY  )  # - move the player to the room
+    player.rect.center =(150 * scale_x , 150 * scale_y ) # - move the player to the room
     player.health = player.max_health
     for enemy in enemies:
         enemy.kill()
@@ -15,7 +17,6 @@ def Restart (Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY):
         
     drops.empty()
     
-
     
     return 0
 class GameOver:
@@ -124,27 +125,9 @@ class GameOver:
         return None
 
 # Example usage in your game loop:
-def game_over_screen(screen, kills, time, level):
-    game_over = GameOver(screen, kills, time, level)
-    
-    while True:
-        mouse_pos = pygame.mouse.get_pos()
-        
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-                return 'exit'
-            elif event.type == MOUSEBUTTONDOWN:
-                action = game_over.handle_input(event)
-                if action == 'restart':
-                    return 'restart'
-                elif action == 'menu':
-                    return 'menu'
-        
-        # Draw background (your game's last frame should be underneath)
-        game_over.draw(mouse_pos)
-        pygame.display.flip()
+
 def game_over_screen(screen, kills, time, level,start_time):
+    pygame.mouse.set_visible(True)
     game_over = GameOver(screen, kills, time, level ,start_time)
     
     while True:

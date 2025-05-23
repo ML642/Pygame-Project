@@ -4,16 +4,35 @@ import math
 import os
 import time 
 import copy 
+
 from player import Player, Tear
 from enemy import Enemy
 from camera import Camera
 from room_generation import generate_boss_room, generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
 from UI_components import draw_health_bar , Menu_option , DustParticle , draw_reload_bar , draw_minimap
+
+import json
+import asyncio
+import sys 
+
+
+from player import Player
+from enemy import Enemy
+from camera import Camera
+
+from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
+from UI_components import draw_health_bar , Menu_option , DustParticle , draw_reload_bar , StopButton
+
 from stopmenu import pause_menu , draw_button , draw_slider
 from Main_Menu import Main_menu
+
 from interactive_objects import  DestructibleObject , SpikeTrap , ExplosiveBarrel
 from game_over import GameOver , game_over_screen ,  Restart
+
 from boss import Boss
+
+
+from loading_screen import LoadingScreen
 
 from setting_menu import SettingsMenu
 
@@ -21,19 +40,23 @@ from grenade import Grenade, ExplosionEffect
 pygame.init()
 
 
-explosions = pygame.sprite.Group()
-interactive_objects = pygame.sprite.Group()
-wall = DestructibleObject(x=5, y=5, width=32, height=32, hp=100, k=2)
-spike = SpikeTrap(x=10, y=5, width=32, height=10, damage=15, k=2)
-barrel = ExplosiveBarrel(x=15, y=5, width=32, height=32, hp=50, explosion_radius=64, explosion_damage=30, k=2)
-interactive_objects.add(wall, spike, barrel)
 
-screen_width = 800 
-screen_height = 600
+explosions = pygame.sprite.Group()
+
+interactive_objects = pygame.sprite.Group()
+ # wall = DestructibleObject(x=450, y=450, width=32, height=32, hp=100 ,scale_x=1 , scale_y=1)
+ # spike = SpikeTrap(x=450, y=500, width=50, height=40, damage=1 , scale_x=1 , scale_y=1)
+ # barrel = ExplosiveBarrel(x=1150, y=450, width=32, height=32, hp=50, explosion_radius=640, explosion_damage=50, scale_x=1 , scale_y=1)
+ # interactive_objects.add(wall, barrel)
+Spikes = pygame.sprite.Group()
+ # Spikes.add(spike)
+
+
 os.environ['SDL_VIDEO_CENTERED'] = "1"
 BASE_WIDTH = 800 
 BASE_HEIGHT = 600
-# 1350 x 800
+
+
 SELECTED_WIDTH = 800
 SELECTED_HEIGHT = 600   
 
@@ -47,7 +70,7 @@ current_settings = {
     'difficulty': 'medium'
 }
 
-    
+
 
 
 screen = pygame.display.set_mode((800 * scale_x, 600 * scale_y))
@@ -57,22 +80,43 @@ clock = pygame.time.Clock()
 
 
 
+def load_settings():
+    try:
+        with open("settings.json", "r") as f:
+            a = json.load(f)
+            a["resolution"] = tuple(a["resolution"])
+            return a
+    except (FileNotFoundError, json.JSONDecodeError):
+        return current_settings  # Fallback if something goes wrong
+#print(load_settings())
+
+current_settings = load_settings()
+
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
+
 data = [ 0 , (800,600) ]
-# data = 
-# SELECTED_WIDTH,SELECTED_HEIGHT = data[1] 
-current_settings = Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT , current_settings)
+
+current_settings = Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT , current_settings )
+
+
+with open("settings.json", "w") as f:
+    json.dump(current_settings, f)
+    
+#print(load_settings())
+    
+    
 
 scale_x = current_settings["resolution"][0] / BASE_WIDTH
 scale_y = current_settings["resolution"][1] / BASE_HEIGHT
+
 FIRE_MODES = {
             1: {"speed": 7, "damage": 10, "fire_rate": 0.6 ,"url": "images/pistol.png","bullets" : 10 , "ammo" :9  , "full" : 10 , "reload_time" :2 },
-            2: {"speed": 12, "damage": 5, "fire_rate": 0.3 , "url": "images/shotgun.png" ,"bullets" : 10 , "ammo" : 2 , "full": 30 , "reload_time" :1.5 }, 
+            2: {"speed": 12, "damage": 5, "fire_rate": 0.3 , "url": "images/shotgun.png" , "bullets" : 10 , "ammo" : 2 , "full": 30 , "reload_time" :1.5 }, 
             3: {"speed": 20, "damage": 20, "fire_rate": 1 , "url": "images/sniper.png" , "bullets" : 10 ,   "ammo" : 3, "full":10 , "reload_time" : 2.5 },
             4: {"type": "grenade", "speed": 15, "damage": 100, "radius": 200, "fire_rate": 1.2, "url": "images/grenade.png", "bullets": None, "ammo": 3, "full": None, "reload_time": 0}
         }
@@ -83,8 +127,10 @@ CELL_SIZE = 40
 
 
 
+
+
 level_1data = [
-    {"x": 50, "y": 50, "form": 2, "type": 1, "enemies_counter": 3},
+    {"x": 50, "y": 50, "form": 8, "type": 1, "enemies_counter": 0},
     {"x": 700 + 50 + 240 + 100, "y": 50, "form": 9, "type": 1, "enemies_counter": 3},
     {"x": 50 + (700 + 240 + 100) * 2, "y": 50, "form": 3, "type": 1, "enemies_counter": 3},
     {"x": 50 + (700 + 240 + 100) * 2, "y": 50 - (500 + 260), "form": 8, "type": 1, "enemies_counter": 3},
@@ -104,6 +150,27 @@ level_1data = [
 ]
 
 
+level_2data = [
+    {"x": 50, "y": 50, "form": 7, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100), "y": 50, "form": 2, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 2 , "y": 50, "form": 9, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 3,  "y": 50, "form": 2, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 4 , "y": 50, "form": 6, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 3 , "y": 50 + (500+240), "form": 11, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 4 , "y": 50 + (500+240), "form": 4, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 4,  "y": 50 + (500+240) * 2 , "form": 10, "type": 1, "enemies_counter": 0},
+    
+    {"x": 50 + (700 + 240 + 100) , "y": 50+(500 + 240), "form": 5, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) , "y": 50+(500 + 240) * 2, "form": 5, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100), "y": 50+(500 + 240) * 3, "form": 11, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 2, "y": 50+(500 + 240) * 3, "form": 2, "type": 1, "enemies_counter": 0},
+    
+    {"x": 50 + (700 + 240 + 100) * 3 ,"y": 50+(500 + 240) * 3, "form": 6, "type": 1, "enemies_counter": 3 },
+    {"x": 50 + (700 + 240 + 100) * 2, "y": 50+(500 + 240) * 4, "form": 11, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 3, "y": 50+(500 + 240) * 4, "form": 9, "type": 1, "enemies_counter": 0},
+    {"x": 50 + (700 + 240 + 100) * 4, "y": 50+(500 + 240) * 4, "form": 6, "type": 1, "enemies_counter": 0},
+]
+
 
 
 Rooms = pygame.sprite.Group()
@@ -112,49 +179,84 @@ kills = 0
 
 camera = Camera(800 * scale_x,600 * scale_y , 12000 * scale_x,12000 * scale_y, scale_x , scale_y)
 
+
 # technical debt
-floors.add(Floor(50 * scale_x,50 * scale_y))
 def Room_Create ( x , y  , form , type , enemies_counter ):
-    walls.add(generate_room(int(x ),int(y ),form,type , scale_x , scale_y))
-    floors.add(Floor(x *  scale_x, y * scale_y,scale_x , scale_y))
+    walls.add(generate_room(int( x ),int( y ),form,type , scale_x , scale_y))
     
-    
-    Rooms.add(Room(x  * scale_x,(y+50) * scale_y , enemies_counter,scale_x , scale_y))
+    floors.add(Floor( x *  scale_x, y * scale_y   , scale_x  ,  scale_y))
+     
+    Rooms.add(Room( x * scale_x,(y+50) * scale_y , enemies_counter,scale_x , scale_y))
     if form == 1 or form == 2 or form ==9 or form == 8 or form == 11 or form ==7 :   # right corridor  
          floors.add(Floor_Hallway((x + 677) * scale_x , (y + 195)* scale_y , 300  , 90  ,scale_x,scale_y))
     if form == 1 or form == 2 or form == 3 or form == 4 or form == 5 or form ==8 : # bottom corridor 
         floors.add(Floor_Hallway( (x + 250)*scale_x , (y + 480)*scale_y , 210  , 260 , scale_x ,  scale_y ))
     if form ==1 or form == 2 or form == 3 or form == 4 or form ==6 or form == 9  : # left corrior 
         floors.add(Floor_Hallway( (x  - 300) * scale_x , (y + 195)*scale_y , 300  ,  90  , scale_x , scale_y))	
-    if form == 1 or form == 3 or form ==4 or form == 5  or form == 7 : # top corridor , 
+    if form == 1 or form == 3  or form == 5  : # top corridor , 
         floors.add(Floor_Hallway( (x + 250) *  scale_x , (y -  230)* scale_y   , 210 , 255  ,scale_x ,scale_y ))
 
-    
-
-    
     return 0
-    
-OFFSET3 = 353
-OFFSET2 = 1000
-OFFSET = 700    
-OFFSETY = (scale_y-1) * 2
+
+  
+
 player = Player (scale_x,scale_y , current_settings["difficulty"])  
-#############################
+
+walls = pygame.sprite.Group()
 
 
 
-walls = generate_room(int((-300 - ROOM_WIDTH) + int(OFFSET) * ( scale_x -1 ) )  ,int( 50 ), 7, 1, scale_x ,scale_y )  # initiate first room
-floors.add(Floor((-300 - 700) - int(OFFSET2) * (scale_x -1 ),  50 * scale_y  , scale_x , scale_y)) 
-floors.add(Floor_Hallway((-300) -  int(OFFSET3) *(scale_x -1), (50 + 195) * scale_y, 400 , 90  , scale_x , scale_y))
+# alternative loading screen
+# for room_data in level_1data:
+#     loading_screen = LoadingScreen(screen, len(level_1data))
+#
+#     Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
+#
+#
+#     loading_screen.update(1)
+#     loading_screen.draw()
+#     pygame.display.flip()
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             pygame.quit()
+    
+async def loader(progress, loading_screen):
+    total = len(level_1data)
+    for i, room_data in enumerate(level_1data, start=1):
+        Room_Create(
+            room_data["x"],
+            room_data["y"],
+            room_data["form"],
+            room_data["type"],
+            room_data["enemies_counter"],
+        )
+        progress['loaded'] = i
+        
+        loading_screen.update()
+        
+        loading_screen.draw()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+        await asyncio.sleep(0)  # Yield control to the event loop
 
+    progress['done'] = True
 
+async def main():
+    loading_screen = LoadingScreen(screen, len(level_1data))
+    progress = {'loaded': 0, 'total': len(level_1data), 'done': False}
+    
+    # Initial draw of 0% progress
+    loading_screen.draw()
+    
+    await loader(progress, loading_screen)
+    
+    # Final draw of 100% progress
+    loading_screen.update(len(level_1data))
+    loading_screen.draw()
+    await asyncio.sleep(0.5)  
 
-#############################
-
-
-
-for room_data in level_1data:
-    Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
+    
 
 last_room_x = level_1data[-2]["x"]
 last_room_y = level_1data[-2]["y"]
@@ -213,6 +315,7 @@ boss_spawned = False
 boss_room_entered = False
 boss = None
 
+asyncio.run(main())
 
 
 
@@ -227,6 +330,7 @@ running = False
 stop = False
 drops = pygame.sprite.Group()
 running = True  
+
 OFFSET = 700
 OFFSETY = (scale_y-1) * 200    
     
@@ -236,8 +340,24 @@ player.rect.center = (boss_room_x + -10 * scale_x, boss_room_y + 250 * scale_y)
 
 
 
+player.rect.center = (150* scale_x ,  150 * scale_y)# - move the player to the room 
+
+def rerender (data,walls,floors,Rooms,enemies,drops,interactive_objects,player):
+    walls.empty()
+    floors.empty()
+    Rooms.empty()
+    enemies.empty()
+    interactive_objects.empty()
+    player.tears.clear()
+    enemies_counter = 0
+    for room_data in data :
+        Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
 
 
+
+
+cursor = pygame.image.load("images/cursor.png").convert_alpha()
+cursor = pygame.transform.scale(cursor, (50 * scale_x, 50 * scale_y))
 pygame.mouse.set_visible(True)
 
 start_time = pygame.time.get_ticks()  # Record the start time
@@ -254,7 +374,7 @@ while running:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     paused = True
-                    pause_menu(scale_x , scale_y)
+                    pause_menu(scale_x , scale_y ,  current_settings )
                 elif event.key == pygame.K_e: # Added "E" hotkey to pick up items.
                     for drop in drops:
                         if player.rect.colliderect(drop.rect):
@@ -279,9 +399,14 @@ while running:
                                 player.is_reloading = True
                                 player.reload_start_time = time.time()
                 elif event.key == pygame.K_TAB:
-                     Restart(Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY)
+                     Restart(Rooms,player, enemies ,drops,scale_x, scale_y )
                      enemies_counter = 0 
                      FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
+                elif event.key == pygame.K_q:
+                    rerender(level_2data,walls,floors,Rooms,enemies,drops,interactive_objects,player)
+                    player.rect.center =( 150 * scale_x , 150 * scale_y)
+                    enemies_counter = 0
+                
                 
         if player.is_reloading and FIRE_MODES[player.current_mode]["full"] != FIRE_MODES[player.current_mode]["bullets"]: 
             current_time = time.time()
@@ -364,6 +489,7 @@ while running:
             mouse_world_x = pygame.mouse.get_pos()[0]  - camera.camera.x # i am sceptical about this resolution fix 
             mouse_world_y = pygame.mouse.get_pos()[1] - camera.camera.y
     
+
             # Calculate direction relative to player's WORLD position
             dx = mouse_world_x - player.rect.centerx 
             dy = mouse_world_y - player.rect.centery 
@@ -379,11 +505,30 @@ while running:
                     player.reload_start_time = time.time()
 
             
+
+    # Calculate direction relative to player's WORLD position
+    #      dx = mouse_world_x - player.rect.centerx 
+    #      dy = mouse_world_y - player.rect.centery 
+    #      dist = max(1, math.sqrt(dx*dx + dy*dy))
+    #      if FIRE_MODES[player.current_mode]["bullets"] > 0:
+    #        FIRE_MODES = player.shoot((dx/dist, dy/dist), FIRE_MODES)
+    #        
+    #        #print(FIRE_MODES[player.current_mode]["bullets"])
+    #      elif not player.is_reloading and FIRE_MODES[player.current_mode]["ammo"] > 0:
+    #                        player.is_reloading = True
+    #                        player.reload_start_time = time.time()
+    #    if mouse_buttons[0] and Stopbutton.rect.collidepoint(pygame.mouse.get_pos()):
+    #        stop = True
+    #        pause_menu(scale_x, scale_y, current_settings)
+        
+        
+
         player.update(walls)    
         camera.update(player)
   
         mouse_world_x = pygame.mouse.get_pos()[0] - camera.camera.x
         mouse_world_y = pygame.mouse.get_pos()[1] - camera.camera.y
+        
         dx = mouse_world_x - player.rect.centerx
         dy = mouse_world_y - player.rect.centery
         player_angle = math.degrees(math.atan2(-dx, -dy)) % 360 + 90
@@ -442,7 +587,61 @@ while running:
             screen.blit(wall.image, camera.apply(wall))
         for enemy in enemies:
             screen.blit(enemy.image, camera.apply(enemy))        
+        for spike in Spikes :
+            print(spike.rect.x , spike.rect.y)
+            screen.blit(spike.image, camera.apply(spike))
+            if player.rect.colliderect(spike.rect) and not player.invincible:
+                player.health -= spike.damage
+                spike.apply_damage(player)    
+        
         screen.blit(rotated_image, rotated_rect.topleft + pygame.math.Vector2(camera.camera.topleft))
+        
+        
+        
+        
+        for enemy in enemies:
+        
+            # Check if cooldown has passed
+            current_time = pygame.time.get_ticks()
+            if current_time - enemy.last_shot_time >= enemy.shoot_cooldown:
+                enemy.can_shoot = True
+
+            if enemy.can_shoot:
+                # Calculate direction towards the player
+                dx = player.rect.centerx - enemy.rect.centerx
+                dy = player.rect.centery - enemy.rect.centery
+                dist = max(1, math.sqrt(dx * dx + dy * dy))
+                direction = (dx / dist, dy / dist)
+
+                # Create a new projectile (tear) for the enemy
+                tear = enemy.shoot(player)
+                if tear:
+                    enemy.tears.append(tear)
+
+                # Set cooldown for the next shot
+                enemy.can_shoot = False
+                enemy.last_shot_time = current_time
+
+            # Update enemy projectiles
+            for tear in enemy.tears[:]:
+                if tear.update() :
+                    enemy.tears.remove(tear)
+                elif tear.rect.colliderect(player.rect):
+                    player.health -= 1
+                    enemy.tears.remove(tear)
+        for enemy in enemies:
+            for tear in enemy.tears[:]:
+                if tear.update():
+                    enemy.tears.remove(tear)
+                else:
+                    for wall in walls:
+                        if tear.rect.colliderect(wall.rect):
+                            enemy.tears.remove(tear)
+                            break
+        for enemy in enemies:
+         for tear in enemy.tears[:]:
+            screen.blit(tear.image, camera.apply(tear))
+                
         if player.is_dashing and len(player.dash_trail) > 1:
             num_points = len(player.dash_trail)
             
@@ -474,6 +673,7 @@ while running:
                         (x + camera.camera.x, y + camera.camera.y)
                         for (x, y) in tear.trail_positions
                     ]
+
                     pygame.draw.lines(screen, (255, 200, 100), False, trail_points, 2)
 
         for tear in player.tears[:]:
@@ -527,16 +727,37 @@ while running:
                             player.tears.remove(tear)
                         break
 
+
+     #               pygame.draw.lines(screen, (255, 200, 100), False, trail_points, 2)  
+     #   
+     #   for tear in player.tears[:]:
+     #       tear.update()
+     #       for wall in walls:
+     #           if tear.rect.colliderect(wall.rect):
+     #               if  isinstance(wall , ExplosiveBarrel):
+     #                   enemies_counter =  wall.take_damage(FIRE_MODES[player.current_mode]["damage"] , enemies , player,interactive_objects,enemies_counter)
+                        
+                        
+     #               elif isinstance(wall, DestructibleObject):
+     #                   wall.take_damage(FIRE_MODES[player.current_mode]["damage"])
+     #               
+     #               player.tears.remove(tear)
+     #               break
+        
+
         for enemy in enemies:
           if player.rect.colliderect(enemy.rect) and not player.invincible:
             player.health -= 1
         for drop in drops:
             screen.blit(drop.image, camera.apply(drop))
+       
+        enemies.update(player, walls)
+       
         for obj in interactive_objects:
-                if hasattr(obj, "draw"):
-                    obj.draw(screen)
-                else:
-                    screen.blit(obj.image, camera.apply(obj))
+             walls.add(obj)
+             screen.blit(obj.image, camera.apply(obj))
+       
+
         
         # Health and UI elements (drawn without camera offset)
         font = pygame.font.SysFont(None, int(36 * scale_x))
@@ -546,20 +767,22 @@ while running:
         draw_health_bar(screen,player.health, player.max_health,scale_x , scale_y)
         #screen.blit(coordinates, (20 * scale_x, 50 * scale_y))
         if player.health <= 1:
-            result =   game_over_screen(screen,kills , time , 1  , current_time - start_time)
+            result =   game_over_screen(screen, kills , time , 1  , current_time - start_time)
             if result == "restart":
-                Restart(Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY)
+                Restart(Rooms,player, enemies ,drops,scale_x, scale_y)
                 enemies_counter = 0
                 kills = 0
                 FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
                 start_time = current_time
             elif result == "menu":
-                Restart(Rooms,player, enemies ,drops,scale_x, scale_y, OFFSET, OFFSETY)
+                Restart(Rooms,player, enemies ,drops,scale_x, scale_y)
                 enemies_counter = 0
                 kills = 0
                 start_time = 0
                 FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
-                Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT)
+                current_settings =  Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT , current_settings)
+                scale_x = current_settings["resolution"][0] / BASE_WIDTH
+                scale_y = current_settings["resolution"][1] / BASE_HEIGHT
                 pygame.mouse.set_visible(True)
         # Debugging information
         # font_debug = pygame.font.SysFont(None, int(24 * scale_x))  # Smaller font for debugging
@@ -596,6 +819,7 @@ while running:
             ammo_text = font.render(f"{FIRE_MODES[player.current_mode]['bullets']}/{FIRE_MODES[player.current_mode]['ammo']}", True, BLACK)
 
         ammo_rect = ammo_text.get_rect(center=(0, 0))
+
         screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )     
         # boss_room_rect = pygame.Rect(
         #     boss_room_x,
@@ -610,6 +834,17 @@ while running:
                 explosions.remove(effect)
             else:
                 screen.blit(effect.image, camera.apply(effect))
+
+
+    #    screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )   
+        
+    #    Stopbutton = StopButton(screen, current_settings["resolution"][0] - 100*scale_x - 2, 2, 100 * scale_x, 50 * scale_y)
+    #    Stopbutton.draw(screen)
+             
+    #    cursor_rect = cursor.get_rect(center=(mouse_world_x + camera.camera.x, mouse_world_y + camera.camera.y))
+    #    screen.blit(cursor, cursor_rect.topleft)
+   
+    #    pygame.mouse.set_visible(False)     
 
         pygame.display.flip()
         clock.tick(60)
