@@ -18,7 +18,11 @@ class Drop(pygame.sprite.Sprite):
             player.health = min(player.health + 20, player.max_health)
         else:
             for fire_mode in Fire_Modes.values():
-                fire_mode["ammo"] += fire_mode["full"]
+                if fire_mode.get("full") is not None:
+                    fire_mode["ammo"] += fire_mode["full"]
+                else:
+                    fire_mode["ammo"] += 1
+
              
         self.kill()
         return Fire_Modes 

@@ -4,6 +4,13 @@ import math
 import os
 import time 
 import copy 
+
+from player import Player, Tear
+from enemy import Enemy
+from camera import Camera
+from room_generation import generate_boss_room, generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
+from UI_components import draw_health_bar , Menu_option , DustParticle , draw_reload_bar , draw_minimap
+
 import json
 import asyncio
 import sys 
@@ -15,17 +22,26 @@ from camera import Camera
 
 from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
 from UI_components import draw_health_bar , Menu_option , DustParticle , draw_reload_bar , StopButton
+
 from stopmenu import pause_menu , draw_button , draw_slider
 from Main_Menu import Main_menu
 
 from interactive_objects import  DestructibleObject , SpikeTrap , ExplosiveBarrel
 from game_over import GameOver , game_over_screen ,  Restart
+
+from boss import Boss
+
+
 from loading_screen import LoadingScreen
+
 from setting_menu import SettingsMenu
 
-
+from grenade import Grenade, ExplosionEffect
 pygame.init()
 
+
+
+explosions = pygame.sprite.Group()
 
 interactive_objects = pygame.sprite.Group()
  # wall = DestructibleObject(x=450, y=450, width=32, height=32, hp=100 ,scale_x=1 , scale_y=1)
@@ -102,6 +118,7 @@ FIRE_MODES = {
             1: {"speed": 7, "damage": 10, "fire_rate": 0.6 ,"url": "images/pistol.png","bullets" : 10 , "ammo" :9  , "full" : 10 , "reload_time" :2 },
             2: {"speed": 12, "damage": 5, "fire_rate": 0.3 , "url": "images/shotgun.png" , "bullets" : 10 , "ammo" : 2 , "full": 30 , "reload_time" :1.5 }, 
             3: {"speed": 20, "damage": 20, "fire_rate": 1 , "url": "images/sniper.png" , "bullets" : 10 ,   "ammo" : 3, "full":10 , "reload_time" : 2.5 },
+            4: {"type": "grenade", "speed": 15, "damage": 100, "radius": 200, "fire_rate": 1.2, "url": "images/grenade.png", "bullets": None, "ammo": 3, "full": None, "reload_time": 0}
         }
 FIRE_MODES_COPY = copy.deepcopy(FIRE_MODES)
 
@@ -127,7 +144,9 @@ level_1data = [
     {"x": 50 + (700 + 240 + 100), "y": 10 + (500 + 260) * 4, "form": 11, "type": 1, "enemies_counter": 3},
     {"x": 50 + (700 + 240 + 100), "y": 30 + (500 + 260) * 3, "form": 5, "type": 1, "enemies_counter": 3},
     {"x": 50 + (700 + 240 + 100) * 2, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (700 + 240 + 100) * 3, "y": 10 + (500 + 260) * 4, "form": 6, "type": 1, "enemies_counter": 3}
+    {"x": 50 + (700 + 240 + 100) * 3, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100) * 4, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
+    {"x": (50 + (700 + 240 + 100) * 5) - 60, "y": (10 + (500 + 260) * 4) - 110, "form": "boss", "type": 1, "enemies_counter": 0}
 ]
 
 
@@ -239,6 +258,62 @@ async def main():
 
     
 
+last_room_x = level_1data[-2]["x"]
+last_room_y = level_1data[-2]["y"]
+
+boss_room_x = last_room_x + 700 + 240 
+boss_room_y = last_room_y 
+
+for wall in walls.copy():
+    if wall.rect.x in range(last_room_x + 680, last_room_x + 710) and wall.rect.y in range(last_room_y + 180, last_room_y + 220):
+        walls.remove(wall)
+
+# Boss hallway and floor cringe generation (I'm tired)
+hallway_x = last_room_x + 680
+hallway_y = last_room_y + 195 - 30
+hallway_width = 320
+hallway_height = 135
+walls.add(Wall(hallway_x, hallway_y, hallway_width, 20, scale_x, scale_y))
+walls.add(Wall(hallway_x, hallway_y + hallway_height - 20, hallway_width, 20, scale_x, scale_y))
+floors.add(Floor_Hallway(hallway_x * scale_x, hallway_y * scale_y, hallway_width, hallway_height, scale_x, scale_y))
+floors.add(Floor((boss_room_x + 40) * scale_x, (boss_room_y - 110) * scale_y, 900 / ROOM_WIDTH, 700 / ROOM_HEIGHT))
+
+
+boss_gates = []
+
+gateboss= Gate(boss_room_x + 40, boss_room_y + 185, 20, 100, "images/Gate_Open.png", "images/Gate_Closed.png", scale_x, scale_y)
+
+gateboss.toogle(walls)
+
+walls.add(gateboss)
+boss_gates.extend([gateboss])
+
+center_x = boss_room_x + 450
+center_y = boss_room_y + 350
+
+walls.add(Wall(center_x - 200, center_y - 100, 50, 50, scale_x, scale_y))
+
+walls.add(Wall(center_x + 200, center_y, 50, 50, scale_x, scale_y))
+
+
+
+walls.add(Wall(last_room_x + 680, last_room_y, 20, 190 - last_room_y, scale_x, scale_y))
+walls.add(Wall(last_room_x + 680, last_room_y + 310, 20, (500 - 310), scale_x, scale_y))
+
+
+boss_room_x = last_room_x + (700 + 240)
+boss_room_y = last_room_y
+
+
+
+for wall in walls:
+    if wall.rect.collidepoint(boss_room_x, boss_room_y + 200):
+        walls.remove(wall)
+        break
+
+boss_spawned = False
+boss_room_entered = False
+boss = None
 
 asyncio.run(main())
 
@@ -255,6 +330,14 @@ running = False
 stop = False
 drops = pygame.sprite.Group()
 running = True  
+
+OFFSET = 700
+OFFSETY = (scale_y-1) * 200    
+    
+# player.rect.center = ( -500 +(1-scale_x) * OFFSET ,50 + ( 700 / 2 )* scale_y - OFFSETY  )  # - move the player to the room 
+player.rect.center = (boss_room_x + -10 * scale_x, boss_room_y + 250 * scale_y)
+
+
 
 
 player.rect.center = (150* scale_x ,  150 * scale_y)# - move the player to the room 
@@ -307,10 +390,14 @@ while running:
                 elif event.key == pygame.K_3:
                     player.current_mode = 3
                     player.is_reloading = False 
+                elif event.key == pygame.K_g:
+                    player.current_mode = 4
+                    player.is_reloading = False
                 elif event.key == pygame.K_r:
-                     if not player.is_reloading and FIRE_MODES[player.current_mode]["ammo"] > 0 and FIRE_MODES[player.current_mode]["full"] != FIRE_MODES[player.current_mode]["bullets"]:
-                            player.is_reloading = True
-                            player.reload_start_time = time.time()
+                     if player.current_mode != 4:
+                         if not player.is_reloading and FIRE_MODES[player.current_mode]["ammo"] > 0 and FIRE_MODES[player.current_mode]["full"] != FIRE_MODES[player.current_mode]["bullets"]:
+                                player.is_reloading = True
+                                player.reload_start_time = time.time()
                 elif event.key == pygame.K_TAB:
                      Restart(Rooms,player, enemies ,drops,scale_x, scale_y )
                      enemies_counter = 0 
@@ -337,8 +424,38 @@ while running:
             if player.rect.colliderect(room.rect) and room.active == False:
                 room.active = True
                 #enemies_counter = room.enemies_counter
-        
+        #boss room check
+        if (boss_room_x + 100 <= player.rect.centerx <= boss_room_x + 900 and
+            boss_room_y <= player.rect.centery <= boss_room_y + 700 and
+            not boss_spawned):
+
+            boss = Boss(boss_room_x + 450 * scale_x, boss_room_y + 350 * scale_y, player, scale_x, scale_y, drops, current_settings["difficulty"])
+            enemies.add(boss)
+            boss_spawned = True
+            enemies_counter = 5
+            if enemies_counter > 0:
+                for wall in walls:
+                    if isinstance(wall, Gate) and wall.is_open:
+                        wall.toogle(walls)
+
+
+
+
+
+
+
+
+
+
+
+
+
         # Game logic updates
+        if boss and boss.health <= 0:
+            for gate in boss_gates:
+                if not gate.is_open:
+                    gate.toogle(walls)
+
         if enemies_counter > 0:
             for wall in walls:
                 if isinstance(wall, Gate) and wall.is_open:
@@ -368,26 +485,44 @@ while running:
         # Player input and updates
         mouse_buttons = pygame.mouse.get_pressed()
         if mouse_buttons[0]:  # Left click
-    # Get mouse position in WORLD coordinates
-          mouse_world_x = pygame.mouse.get_pos()[0]  - camera.camera.x # i am sceptical about this resolution fix 
-          mouse_world_y = pygame.mouse.get_pos()[1] - camera.camera.y
+            # Get mouse position in WORLD coordinates
+            mouse_world_x = pygame.mouse.get_pos()[0]  - camera.camera.x # i am sceptical about this resolution fix 
+            mouse_world_y = pygame.mouse.get_pos()[1] - camera.camera.y
     
-    # Calculate direction relative to player's WORLD position
-          dx = mouse_world_x - player.rect.centerx 
-          dy = mouse_world_y - player.rect.centery 
-          dist = max(1, math.sqrt(dx*dx + dy*dy))
-          if FIRE_MODES[player.current_mode]["bullets"] > 0:
-            FIRE_MODES = player.shoot((dx/dist, dy/dist), FIRE_MODES)
+
+            # Calculate direction relative to player's WORLD position
+            dx = mouse_world_x - player.rect.centerx 
+            dy = mouse_world_y - player.rect.centery 
+            dist = max(1, math.sqrt(dx*dx + dy*dy))
+            if FIRE_MODES[player.current_mode].get("type") == "grenade":
+                if FIRE_MODES[player.current_mode]["ammo"] > 0:
+                    FIRE_MODES = player.shoot((dx / dist, dy / dist), FIRE_MODES)
+            else:
+                if FIRE_MODES[player.current_mode]["bullets"] > 0:
+                    FIRE_MODES = player.shoot((dx / dist, dy / dist), FIRE_MODES)
+                elif not player.is_reloading and FIRE_MODES[player.current_mode]["ammo"] > 0:
+                    player.is_reloading = True
+                    player.reload_start_time = time.time()
+
             
-            #print(FIRE_MODES[player.current_mode]["bullets"])
-          elif not player.is_reloading and FIRE_MODES[player.current_mode]["ammo"] > 0:
-                            player.is_reloading = True
-                            player.reload_start_time = time.time()
-        if mouse_buttons[0] and Stopbutton.rect.collidepoint(pygame.mouse.get_pos()):
-            stop = True
-            pause_menu(scale_x, scale_y, current_settings)
+
+    # Calculate direction relative to player's WORLD position
+    #      dx = mouse_world_x - player.rect.centerx 
+    #      dy = mouse_world_y - player.rect.centery 
+    #      dist = max(1, math.sqrt(dx*dx + dy*dy))
+    #      if FIRE_MODES[player.current_mode]["bullets"] > 0:
+    #        FIRE_MODES = player.shoot((dx/dist, dy/dist), FIRE_MODES)
+    #        
+    #        #print(FIRE_MODES[player.current_mode]["bullets"])
+    #      elif not player.is_reloading and FIRE_MODES[player.current_mode]["ammo"] > 0:
+    #                        player.is_reloading = True
+    #                        player.reload_start_time = time.time()
+    #    if mouse_buttons[0] and Stopbutton.rect.collidepoint(pygame.mouse.get_pos()):
+    #        stop = True
+    #        pause_menu(scale_x, scale_y, current_settings)
         
         
+
         player.update(walls)    
         camera.update(player)
   
@@ -404,21 +539,47 @@ while running:
         rotated_rect = rotated_image.get_rect(center=player.rect.center)
 
         for tear in player.tears[:]:
-         if tear.update():
-            if tear in player.tears:
-                player.tears.remove(tear)
-         else:
-            for enemy in enemies:
-                if tear.rect.colliderect(enemy.rect):
-                    enemy.take_damage(FIRE_MODES[player.current_mode]["damage"])
+            if isinstance(tear, Grenade):
+                exploded = tear.update(walls)
+                adjusted_pos = tear.rect.topleft + pygame.math.Vector2(camera.camera.topleft)
+                screen.blit(tear.image, adjusted_pos)
+
+                if exploded:
+                    for enemy in enemies:
+                        dist = math.hypot(enemy.rect.centerx - tear.rect.centerx,
+                                          enemy.rect.centery - tear.rect.centery)
+                        if dist <= tear.radius:
+                            enemy.take_damage(tear.damage)
+                            if enemy.health <= 0:
+                                enemies.remove(enemy)
+                                kills += 1
+                                enemies_counter -= 1
+
+                    dist_to_player = math.hypot(player.rect.centerx - tear.rect.centerx,
+                                                player.rect.centery - tear.rect.centery)
+                    if dist_to_player <= tear.radius and not player.invincible:
+                        player.take_damage(tear.damage)
+                    explosions.add(ExplosionEffect(x=tear.rect.centerx, y=tear.rect.centery, radius=tear.radius))
+
+                    player.tears.remove(tear)
+
+            else:
+                if tear.update():
                     if tear in player.tears:
                         player.tears.remove(tear)
-                        
-                    if enemy.health <= 0:
-                        enemies.remove(enemy)
-                        kills +=1 
-                        enemies_counter -=1
-                    break
+                else:
+                    for enemy in enemies:
+                        if tear.rect.colliderect(enemy.rect):
+                            enemy.take_damage(FIRE_MODES[player.current_mode]["damage"])
+                            if tear in player.tears:
+                                player.tears.remove(tear)
+
+                            if enemy.health <= 0:
+                                enemies.remove(enemy)
+                                kills += 1
+                                enemies_counter -= 1
+                            break
+
         
         for floor in floors:
             screen.blit(floor.image, camera.apply(floor))
@@ -506,29 +667,84 @@ while running:
             adjusted_pos = tear.rect.topleft + pygame.math.Vector2(camera.camera.topleft)
             screen.blit(tear.image, adjusted_pos)
             
-            if player.current_mode == 3:
-             if len(tear.trail_positions) > 1:
-        # Convert positions to screen coordinates
+            if player.current_mode == 3 and isinstance(tear, Tear):
+                if len(tear.trail_positions) > 1: # Convert positions to screen coordinates
                     trail_points = [
                         (x + camera.camera.x, y + camera.camera.y)
                         for (x, y) in tear.trail_positions
                     ]
-                    pygame.draw.lines(screen, (255, 200, 100), False, trail_points, 2)  
+
+                    pygame.draw.lines(screen, (255, 200, 100), False, trail_points, 2)
+
+        for tear in player.tears[:]:
+            if isinstance(tear, Grenade):
+                exploded = tear.update(walls)
+                adjusted_pos = tear.rect.topleft + pygame.math.Vector2(camera.camera.topleft)
+                screen.blit(tear.image, adjusted_pos)
+
+                if exploded:
+                    for enemy in enemies:
+                        dist = math.hypot(enemy.rect.centerx - tear.rect.centerx,
+                                          enemy.rect.centery - tear.rect.centery)
+                        if dist <= tear.radius:
+                            enemy.take_damage(tear.damage)
+                    player.tears.remove(tear)
+            else:
+                adjusted_pos = tear.rect.topleft + pygame.math.Vector2(camera.camera.topleft)
+                screen.blit(tear.image, adjusted_pos)
+
+
+
+        if boss and boss.alive():
+            for tear in boss.tears:
+                adjusted_pos = tear.rect.topleft + pygame.math.Vector2(camera.camera.topleft)
+                screen.blit(tear.image, adjusted_pos)
+                if player.rect.colliderect(tear.rect) and not player.invincible:
+                    player.take_damage(tear.damage)
+                    if tear in boss.tears:
+                        boss.tears.remove(tear)
+
+        # if boss and not boss.alive():
+        #     for gate in boss_gates:
+        #         if not gate.is_open:
+        #             gate.toogle(walls)
+
+        if boss and boss.alive():
+            boss.draw_health_bar(screen, scale_x, scale_y)
+
+        enemies.update(player, walls)
         
         for tear in player.tears[:]:
-            tear.update()
-            for wall in walls:
-                if tear.rect.colliderect(wall.rect):
-                    if  isinstance(wall , ExplosiveBarrel):
-                        enemies_counter =  wall.take_damage(FIRE_MODES[player.current_mode]["damage"] , enemies , player,interactive_objects,enemies_counter)
-                        
-                        
-                    elif isinstance(wall, DestructibleObject):
-                        wall.take_damage(FIRE_MODES[player.current_mode]["damage"])
-                    
+            if isinstance(tear, Grenade):
+                exploded = tear.update(walls)
+                if exploded and tear in player.tears:
                     player.tears.remove(tear)
-                    break
+            else:
+                tear.update()
+                for wall in walls:
+                    if tear.rect.colliderect(wall.rect):
+                        if tear in player.tears:
+                            player.tears.remove(tear)
+                        break
+
+
+     #               pygame.draw.lines(screen, (255, 200, 100), False, trail_points, 2)  
+     #   
+     #   for tear in player.tears[:]:
+     #       tear.update()
+     #       for wall in walls:
+     #           if tear.rect.colliderect(wall.rect):
+     #               if  isinstance(wall , ExplosiveBarrel):
+     #                   enemies_counter =  wall.take_damage(FIRE_MODES[player.current_mode]["damage"] , enemies , player,interactive_objects,enemies_counter)
+                        
+                        
+     #               elif isinstance(wall, DestructibleObject):
+     #                   wall.take_damage(FIRE_MODES[player.current_mode]["damage"])
+     #               
+     #               player.tears.remove(tear)
+     #               break
         
+
         for enemy in enemies:
           if player.rect.colliderect(enemy.rect) and not player.invincible:
             player.health -= 1
@@ -597,17 +813,39 @@ while running:
         pygame.draw.circle(screen, (192,192,192), (0, 0) , 150 * scale_x , 0)
         screen.blit(weapon_image, (0, 0))
         font = pygame.font.SysFont(None, int(24 * scale_x))
-        ammo_text = font.render(f"{FIRE_MODES[player.current_mode]['bullets']}/{FIRE_MODES[player.current_mode]['ammo']}", True, BLACK)
+        if FIRE_MODES[player.current_mode].get("type") == "grenade":
+            ammo_text = font.render(f"{FIRE_MODES[player.current_mode]['ammo']}", True, BLACK)
+        else:
+            ammo_text = font.render(f"{FIRE_MODES[player.current_mode]['bullets']}/{FIRE_MODES[player.current_mode]['ammo']}", True, BLACK)
+
         ammo_rect = ammo_text.get_rect(center=(0, 0))
-        screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )   
+
+        screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )     
+        # boss_room_rect = pygame.Rect(
+        #     boss_room_x,
+        #     boss_room_y,
+        #     900 * scale_x,
+        #     700 * scale_y
+        # )
+        # draw_minimap(screen, player, Rooms, boss_room_rect=pygame.Rect(boss_room_x, boss_room_y, 900 * scale_x, 700 * scale_y))
+        draw_minimap(screen, player, Rooms)
+        for effect in explosions.copy():
+            if effect.update():
+                explosions.remove(effect)
+            else:
+                screen.blit(effect.image, camera.apply(effect))
+
+
+    #    screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )   
         
-        Stopbutton = StopButton(screen, current_settings["resolution"][0] - 100*scale_x - 2, 2, 100 * scale_x, 50 * scale_y)
-        Stopbutton.draw(screen)
+    #    Stopbutton = StopButton(screen, current_settings["resolution"][0] - 100*scale_x - 2, 2, 100 * scale_x, 50 * scale_y)
+    #    Stopbutton.draw(screen)
              
-        cursor_rect = cursor.get_rect(center=(mouse_world_x + camera.camera.x, mouse_world_y + camera.camera.y))
-        screen.blit(cursor, cursor_rect.topleft)
+    #    cursor_rect = cursor.get_rect(center=(mouse_world_x + camera.camera.x, mouse_world_y + camera.camera.y))
+    #    screen.blit(cursor, cursor_rect.topleft)
    
-        pygame.mouse.set_visible(False)     
+    #    pygame.mouse.set_visible(False)     
+
         pygame.display.flip()
         clock.tick(60)
 
