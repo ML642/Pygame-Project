@@ -43,6 +43,7 @@ class Boss(pygame.sprite.Sprite):
         self.phase_two = False
 
 
+
     def update(self, player=None, walls=None):
         current_time = time.time()
         if self.dashing:
@@ -146,6 +147,7 @@ class Boss(pygame.sprite.Sprite):
                     self.tears.remove(tear)
 
 
+
         health_ratio = self.health / self.max_health
         if health_ratio > 2 / 3:
             self.phase = 1
@@ -165,17 +167,29 @@ class Boss(pygame.sprite.Sprite):
                 self.throw_grenades()
 
 
-    def shoot(self):
-        # Shooting ai
+    def shoot(self, player=None):
         dx = self.player.rect.centerx - self.rect.centerx
         dy = self.player.rect.centery - self.rect.centery
         distance = math.hypot(dx, dy)
         if distance != 0:
             direction = (dx / distance, dy / distance)
-            bullet = Tear(self.rect.centerx, self.rect.centery, direction, speed=10, damage=10, scale_x=self.scale_x, scale_y=self.scale_y)
+
+            bullet_speed = 10 * self.scale_x
+            bullet = Tear(
+                self.rect.centerx,
+                self.rect.centery,
+                direction,
+                speed=bullet_speed,
+                damage=10,
+                scale_x=self.scale_x,
+                scale_y=self.scale_y
+            )
+            bullet.max_distance = 700 * self.scale_x
+
             angle = math.degrees(math.atan2(-direction[1], direction[0]))
             bullet.image = pygame.transform.rotate(bullet.image, angle)
             self.tears.append(bullet)
+
 
     def draw_health_bar(self, surface, scale_x, scale_y):
         # Health bar
@@ -194,6 +208,7 @@ class Boss(pygame.sprite.Sprite):
         if self.health <= 0:
             self.kill()
             self.drop_loot()
+
 
     def drop_loot(self):
         
@@ -249,7 +264,9 @@ class Boss(pygame.sprite.Sprite):
                 scale_y=self.scale_y
             )
             grenade.max_distance = 600
-            grenade.speed *= 1.2
+            grenade.speed *= 0.5
             self.tears.append(grenade)
-
+            grenade.image = pygame.image.load("images/mine.png").convert_alpha()
+            grenade.image = pygame.transform.scale(grenade.image, (30 * self.scale_x, 30 * self.scale_y))
+            self.tears.append(grenade)
 

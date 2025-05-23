@@ -8,16 +8,18 @@ class Grenade(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (30 * scale_x, 30 * scale_y))
         self.rect = self.image.get_rect(center=(x, y))
         self.direction = pygame.math.Vector2(direction).normalize()
-        self.speed = speed * 0.5
+        self.speed = speed * scale_x
         self.damage = damage
-        self.radius = radius
+        self.radius = radius * ((scale_x + scale_y) / 2)
         self.distance_travelled = 0
-        self.max_distance = 1000
+        self.max_distance = 1000 * scale_x
         self.bounce_count = 3
         self.explode_timer_started = False
         self.explode_start_time = 0
         self.explode_delay = 1000
 
+        self.scale_x = scale_x
+        self.scale_y = scale_y
 
     def update(self, walls):
         if self.explode_timer_started:
@@ -48,15 +50,17 @@ class Grenade(pygame.sprite.Sprite):
         return False
 
 class ExplosionEffect(pygame.sprite.Sprite):
-    def __init__(self, x, y, radius, duration=100):
+    def __init__(self, x, y, radius, scale_x=1, scale_y=1, duration=100):
         super().__init__()
-        self.radius = radius
-        self.image = pygame.Surface((radius * 2, radius * 2), pygame.SRCALPHA)
-        pygame.draw.circle(self.image, (255, 100, 0, 120), (radius, radius), radius)
+        self.scale_x = scale_x
+        self.scale_y = scale_y
+        self.radius = radius * ((scale_x + scale_y) / 2)
+        size = int(self.radius * 2)
+        self.image = pygame.Surface((size, size), pygame.SRCALPHA)
+        pygame.draw.circle(self.image, (255, 100, 0, 120), (size // 2, size // 2), int(self.radius))
         self.rect = self.image.get_rect(center=(x, y))
         self.spawn_time = pygame.time.get_ticks()
         self.duration = duration
 
     def update(self):
         return pygame.time.get_ticks() - self.spawn_time > self.duration
-
