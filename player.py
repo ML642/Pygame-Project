@@ -17,7 +17,7 @@ class Tear(pygame.sprite.Sprite):
         self.damage = damage
         self.trail_positions = []  # Store positions for trail
         self.max_trail_length = 5 
-    def update(self):
+    def update(self, walls=None):
         self.rect.x += self.direction[0] * self.speed
         self.rect.y += self.direction[1] * self.speed
         self.lifetime -= 1
@@ -164,7 +164,7 @@ class Player(pygame.sprite.Sprite):
                     self.rect.centerx,
                     self.rect.centery,
                     direction,
-                    speed=mode["speed"],
+                    speed=mode["speed"] * self.scale_x,
                     damage=mode["damage"],
                     scale_x=self.scale_x,
                     scale_y=self.scale_y

@@ -9,19 +9,13 @@ from player import Player, Tear
 from enemy import Enemy
 from camera import Camera
 from room_generation import generate_boss_room, generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
-from UI_components import draw_health_bar , Menu_option , DustParticle , draw_reload_bar , draw_minimap
+from UI_components import draw_health_bar , Menu_option , DustParticle , draw_reload_bar , draw_minimap , StopButton
 
 import json
 import asyncio
 import sys 
 
 
-from player import Player
-from enemy import Enemy
-from camera import Camera
-
-from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room 
-from UI_components import draw_health_bar , Menu_option , DustParticle , draw_reload_bar , StopButton
 
 from stopmenu import pause_menu , draw_button , draw_slider
 from Main_Menu import Main_menu
@@ -115,9 +109,9 @@ scale_x = current_settings["resolution"][0] / BASE_WIDTH
 scale_y = current_settings["resolution"][1] / BASE_HEIGHT
 
 FIRE_MODES = {
-            1: {"speed": 7, "damage": 10, "fire_rate": 0.6 ,"url": "images/pistol.png","bullets" : 10 , "ammo" :9  , "full" : 10 , "reload_time" :2 },
-            2: {"speed": 12, "damage": 5, "fire_rate": 0.3 , "url": "images/shotgun.png" , "bullets" : 10 , "ammo" : 2 , "full": 30 , "reload_time" :1.5 }, 
-            3: {"speed": 20, "damage": 20, "fire_rate": 1 , "url": "images/sniper.png" , "bullets" : 10 ,   "ammo" : 3, "full":10 , "reload_time" : 2.5 },
+            1: {"speed": 7, "damage": 10, "fire_rate": 0.6 ,"url": "images/pistol.png","bullets" : 10 , "ammo" :40  , "full" : 10 , "reload_time" :2 },
+            2: {"speed": 12, "damage": 7, "fire_rate": 0.2 , "url": "images/shotgun.png" , "bullets" : 30 , "ammo" : 30 , "full": 30 , "reload_time" :1.5 }, 
+            3: {"speed": 20, "damage": 30, "fire_rate": 1 , "url": "images/sniper.png" , "bullets" : 10 ,   "ammo" : 5, "full":10 , "reload_time" : 2.5 },
             4: {"type": "grenade", "speed": 15, "damage": 100, "radius": 200, "fire_rate": 1.2, "url": "images/grenade.png", "bullets": None, "ammo": 3, "full": None, "reload_time": 0}
         }
 FIRE_MODES_COPY = copy.deepcopy(FIRE_MODES)
@@ -146,7 +140,7 @@ level_1data = [
     {"x": 50 + (700 + 240 + 100) * 2, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
     {"x": 50 + (700 + 240 + 100) * 3, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
     {"x": 50 + (700 + 240 + 100) * 4, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
-    {"x": (50 + (700 + 240 + 100) * 5) - 60, "y": (10 + (500 + 260) * 4) - 110, "form": "boss", "type": 1, "enemies_counter": 0}
+    {"x": (50 + (700 + 240 + 100) * 5) - 180, "y": (10 + (500 + 260) * 4) - 110, "form": "boss", "type": 1, "enemies_counter": 0}
 ]
 
 
@@ -177,16 +171,26 @@ Rooms = pygame.sprite.Group()
 floors = pygame.sprite.Group()
 kills = 0
 
-camera = Camera(800 * scale_x,600 * scale_y , 12000 * scale_x,12000 * scale_y, scale_x , scale_y)
+camera = Camera(screen_width=current_settings["resolution"][0], screen_height=current_settings["resolution"][1], world_width=30000, world_height=30000, scale_x=scale_x, scale_y=scale_y)
 
 
 # technical debt
-def Room_Create ( x , y  , form , type , enemies_counter ):
-    walls.add(generate_room(int( x ),int( y ),form,type , scale_x , scale_y))
-    
-    floors.add(Floor( x *  scale_x, y * scale_y   , scale_x  ,  scale_y))
-     
-    Rooms.add(Room( x * scale_x,(y+50) * scale_y , enemies_counter,scale_x , scale_y))
+def Room_Create(x, y, form, type, enemies_counter):
+    if form == "boss":
+        global boss_center, boss_gates
+        boss_walls, boss_floors, boss_center, gate = generate_boss_room(int(x), int(y), scale_x, scale_y)
+        globals()['boss_center'] = boss_center
+        walls.add(boss_walls)
+        floors.add(boss_floors)
+        boss_gates.append(gate)
+    else:
+        room_walls = generate_room(int(x), int(y), form, type, scale_x, scale_y)
+        walls.add(room_walls)
+
+    floors.add(Floor(x * scale_x, y * scale_y, scale_x, scale_y))
+    Rooms.add(Room(x * scale_x, (y + 50) * scale_y, enemies_counter, scale_x, scale_y))
+    ...
+
     if form == 1 or form == 2 or form ==9 or form == 8 or form == 11 or form ==7 :   # right corridor  
          floors.add(Floor_Hallway((x + 677) * scale_x , (y + 195)* scale_y , 300  , 90  ,scale_x,scale_y))
     if form == 1 or form == 2 or form == 3 or form == 4 or form == 5 or form ==8 : # bottom corridor 
@@ -203,7 +207,7 @@ def Room_Create ( x , y  , form , type , enemies_counter ):
 player = Player (scale_x,scale_y , current_settings["difficulty"])  
 
 walls = pygame.sprite.Group()
-
+boss_gates = [] 
 
 
 # alternative loading screen
@@ -258,64 +262,30 @@ async def main():
 
     
 
-last_room_x = level_1data[-2]["x"]
-last_room_y = level_1data[-2]["y"]
+asyncio.run(main())
 
-boss_room_x = last_room_x + 700 + 240 
-boss_room_y = last_room_y 
+boss_room_x = level_1data[-1]["x"]
+boss_room_y = level_1data[-1]["y"]
+
+scaled_x = boss_room_x * scale_x
+scaled_y = boss_room_y * scale_y
 
 for wall in walls.copy():
-    if wall.rect.x in range(last_room_x + 680, last_room_x + 710) and wall.rect.y in range(last_room_y + 180, last_room_y + 220):
-        walls.remove(wall)
+    if isinstance(wall, Wall):
+        is_left_wall = abs(wall.rect.left - int(boss_room_x * scale_x)) < 5
+        is_boss_wall_height = wall.rect.height >= int(500 * scale_y)
 
-# Boss hallway and floor cringe generation (I'm tired)
-hallway_x = last_room_x + 680
-hallway_y = last_room_y + 195 - 30
-hallway_width = 320
-hallway_height = 135
-walls.add(Wall(hallway_x, hallway_y, hallway_width, 20, scale_x, scale_y))
-walls.add(Wall(hallway_x, hallway_y + hallway_height - 20, hallway_width, 20, scale_x, scale_y))
-floors.add(Floor_Hallway(hallway_x * scale_x, hallway_y * scale_y, hallway_width, hallway_height, scale_x, scale_y))
-floors.add(Floor((boss_room_x + 40) * scale_x, (boss_room_y - 110) * scale_y, 900 / ROOM_WIDTH, 700 / ROOM_HEIGHT))
+        if is_left_wall and is_boss_wall_height:
+            walls.remove(wall)
+            break
 
 
-boss_gates = []
-
-gateboss= Gate(boss_room_x + 40, boss_room_y + 185, 20, 100, "images/Gate_Open.png", "images/Gate_Closed.png", scale_x, scale_y)
-
-gateboss.toogle(walls)
-
-walls.add(gateboss)
-boss_gates.extend([gateboss])
-
-center_x = boss_room_x + 450
-center_y = boss_room_y + 350
-
-walls.add(Wall(center_x - 200, center_y - 100, 50, 50, scale_x, scale_y))
-
-walls.add(Wall(center_x + 200, center_y, 50, 50, scale_x, scale_y))
-
-
-
-walls.add(Wall(last_room_x + 680, last_room_y, 20, 190 - last_room_y, scale_x, scale_y))
-walls.add(Wall(last_room_x + 680, last_room_y + 310, 20, (500 - 310), scale_x, scale_y))
-
-
-boss_room_x = last_room_x + (700 + 240)
-boss_room_y = last_room_y
-
-
-
-for wall in walls:
-    if wall.rect.collidepoint(boss_room_x, boss_room_y + 200):
-        walls.remove(wall)
-        break
 
 boss_spawned = False
 boss_room_entered = False
 boss = None
 
-asyncio.run(main())
+
 
 
 
@@ -335,12 +305,12 @@ OFFSET = 700
 OFFSETY = (scale_y-1) * 200    
     
 # player.rect.center = ( -500 +(1-scale_x) * OFFSET ,50 + ( 700 / 2 )* scale_y - OFFSETY  )  # - move the player to the room 
-player.rect.center = (boss_room_x + -10 * scale_x, boss_room_y + 250 * scale_y)
+# player.rect.center = (boss_room_x + -10 * scale_x, boss_room_y + 250 * scale_y)
 
 
 
 
-player.rect.center = (150* scale_x ,  150 * scale_y)# - move the player to the room 
+player.rect.center = (150 * scale_x ,  150 * scale_y) # - move the player to the room 
 
 def rerender (data,walls,floors,Rooms,enemies,drops,interactive_objects,player):
     walls.empty()
@@ -425,19 +395,30 @@ while running:
                 room.active = True
                 #enemies_counter = room.enemies_counter
         #boss room check
-        if (boss_room_x + 100 <= player.rect.centerx <= boss_room_x + 900 and
-            boss_room_y <= player.rect.centery <= boss_room_y + 700 and
-            not boss_spawned):
+        trigger_margin_x = 150 * scale_x
+        trigger_margin_y = 50 * scale_y
 
-            boss = Boss(boss_room_x + 450 * scale_x, boss_room_y + 350 * scale_y, player, scale_x, scale_y, drops, current_settings["difficulty"])
+        trigger_x_start = boss_room_x * scale_x + trigger_margin_x
+        trigger_x_end = boss_room_x * scale_x + (900 - trigger_margin_x) * scale_x
+
+        trigger_y_start = boss_room_y * scale_y + trigger_margin_y
+        trigger_y_end = boss_room_y * scale_y + (700 - trigger_margin_y) * scale_y
+
+        if (trigger_x_start <= player.rect.centerx <= trigger_x_end and
+            trigger_y_start <= player.rect.centery <= trigger_y_end and
+            not boss_spawned and 'boss_center' in globals()):
+
+
+
+
+            boss = Boss(boss_center[0], boss_center[1], player, scale_x, scale_y, drops, current_settings["difficulty"])
             enemies.add(boss)
             boss_spawned = True
             enemies_counter = 5
-            if enemies_counter > 0:
-                for wall in walls:
-                    if isinstance(wall, Gate) and wall.is_open:
-                        wall.toogle(walls)
 
+            for gate in boss_gates:
+                if gate.is_open:
+                    gate.toogle(walls)
 
 
 
@@ -624,14 +605,14 @@ while running:
 
             # Update enemy projectiles
             for tear in enemy.tears[:]:
-                if tear.update() :
+                if tear.update(walls) :
                     enemy.tears.remove(tear)
                 elif tear.rect.colliderect(player.rect):
                     player.health -= 1
                     enemy.tears.remove(tear)
         for enemy in enemies:
             for tear in enemy.tears[:]:
-                if tear.update():
+                if tear.update(walls):
                     enemy.tears.remove(tear)
                 else:
                     for wall in walls:
@@ -820,7 +801,7 @@ while running:
 
         ammo_rect = ammo_text.get_rect(center=(0, 0))
 
-        screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )     
+        # screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )     
         # boss_room_rect = pygame.Rect(
         #     boss_room_x,
         #     boss_room_y,
@@ -828,7 +809,7 @@ while running:
         #     700 * scale_y
         # )
         # draw_minimap(screen, player, Rooms, boss_room_rect=pygame.Rect(boss_room_x, boss_room_y, 900 * scale_x, 700 * scale_y))
-        draw_minimap(screen, player, Rooms)
+        draw_minimap(screen, player, Rooms, scale_x=scale_x, scale_y=scale_y)
         for effect in explosions.copy():
             if effect.update():
                 explosions.remove(effect)
@@ -836,15 +817,15 @@ while running:
                 screen.blit(effect.image, camera.apply(effect))
 
 
-    #    screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )   
+        screen.blit(ammo_text, ( 10 * scale_x , 100 * scale_y ) )   
         
-    #    Stopbutton = StopButton(screen, current_settings["resolution"][0] - 100*scale_x - 2, 2, 100 * scale_x, 50 * scale_y)
-    #    Stopbutton.draw(screen)
+        Stopbutton = StopButton(screen, current_settings["resolution"][0] - 100*scale_x - 2, 2, 100 * scale_x, 50 * scale_y)
+        Stopbutton.draw(screen)
              
-    #    cursor_rect = cursor.get_rect(center=(mouse_world_x + camera.camera.x, mouse_world_y + camera.camera.y))
-    #    screen.blit(cursor, cursor_rect.topleft)
+        cursor_rect = cursor.get_rect(center=(mouse_world_x + camera.camera.x, mouse_world_y + camera.camera.y))
+        screen.blit(cursor, cursor_rect.topleft)
    
-    #    pygame.mouse.set_visible(False)     
+        pygame.mouse.set_visible(False)     
 
         pygame.display.flip()
         clock.tick(60)
