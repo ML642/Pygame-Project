@@ -18,9 +18,6 @@ class Camera:
         y = -target.rect.centery + (self.screen_height // 2) 
         
         # Limit camera to world bounds
-
-        x = min(0, x)
-        y = min(0, y)
         x = max(-(self.world_width - self.screen_width), x)  # Right
         y = max(-(self.world_height - self.screen_height), y)  # Bottom
 

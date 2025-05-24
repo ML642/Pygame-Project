@@ -11,10 +11,13 @@ class Enemy(pygame.sprite.Sprite):
 
         if difficulty == "easy":
             self.multiplier = 0.5
+            self.shoot_cooldown = 900
         elif difficulty == "medium":
             self.multiplier = 1
+            self.shoot_cooldown = 600
         elif difficulty == "hard":
             self.multiplier = 1.75
+            self.shoot_cooldown = 200
 
         self.scale_x = scale_x
         self.scale_y = scale_y
@@ -26,13 +29,13 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x, y))
 
         base_speed = random.uniform(1, 2)
-        self.speed = base_speed * (0.2) * self.multiplier * max(scale_x, scale_y)
+        self.speed = base_speed * 0.7 * max(scale_x, scale_y)
 
 
         self.health = 30 * self.multiplier
 
         self.tears = []
-        self.shoot_cooldown = 600
+        # self.shoot_cooldown = 600
         self.last_shot_time = 0
         self.can_shoot = True
 
@@ -90,9 +93,9 @@ class Enemy(pygame.sprite.Sprite):
         dist = max(1, math.hypot(dx, dy))
         dx, dy = dx / dist, dy / dist
 
-        tear_speed = 7 * self.scale_x
-        tear = Tear(self.rect.centerx, self.rect.centery, (dx, dy), speed=tear_speed, damage=10, scale_x=self.scale_x, scale_y=self.scale_y)
-        angle = math.degrees(math.atan2(dx, dy)) + 90
+        tear_speed = 1 * self.scale_x
+        tear = Tear(self.rect.centerx, self.rect.centery, (dx, dy), speed=tear_speed, damage=10 * self.multiplier, scale_x=self.scale_x, scale_y=self.scale_y)
+        angle = math.degrees(math.atan2(-dy, dx))
         tear.image = pygame.transform.rotate(tear.image, angle)
         self.tears.append(tear)
         return tear
