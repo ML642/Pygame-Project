@@ -13,7 +13,7 @@ class Tear(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = speed
         self.direction = direction
-        self.lifetime = 50
+        self.lifetime = 1000 * scale_x
         self.damage = damage
         self.trail_positions = []  # Store positions for trail
         self.max_trail_length = 5 
@@ -169,7 +169,7 @@ class Player(pygame.sprite.Sprite):
                     scale_x=self.scale_x,
                     scale_y=self.scale_y
                 )
-                angle = math.degrees(math.atan2(-direction[1], direction[0]))
+                angle = math.degrees(math.atan2(-direction[1], direction[0])) + 180
                 tear.image = pygame.transform.rotate(tear.image, angle)
                 self.tears.append(tear)
                 self.last_shot_time = current_time

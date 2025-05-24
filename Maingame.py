@@ -185,9 +185,10 @@ def Room_Create(x, y, form, type, enemies_counter):
         boss_gates.append(gate)
     else:
         room_walls = generate_room(int(x), int(y), form, type, scale_x, scale_y)
+        floors.add(Floor(x * scale_x, y * scale_y, scale_x, scale_y))
         walls.add(room_walls)
+        
 
-    floors.add(Floor(x * scale_x, y * scale_y, scale_x, scale_y))
     Rooms.add(Room(x * scale_x, (y + 50) * scale_y, enemies_counter, scale_x, scale_y))
     ...
 
@@ -376,7 +377,12 @@ while running:
                     rerender(level_2data,walls,floors,Rooms,enemies,drops,interactive_objects,player)
                     player.rect.center =( 150 * scale_x , 150 * scale_y)
                     enemies_counter = 0
-                
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                 if event.button == 1:
+                     if Stopbutton.rect.collidepoint(event.pos):
+                         paused = True
+                         pause_menu(scale_x, scale_y, current_settings)
+
                 
         if player.is_reloading and FIRE_MODES[player.current_mode]["full"] != FIRE_MODES[player.current_mode]["bullets"]: 
             current_time = time.time()

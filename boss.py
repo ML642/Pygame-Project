@@ -174,7 +174,7 @@ class Boss(pygame.sprite.Sprite):
         if distance != 0:
             direction = (dx / distance, dy / distance)
 
-            bullet_speed = 10 * self.scale_x
+            bullet_speed = 4 * self.scale_x
             bullet = Tear(
                 self.rect.centerx,
                 self.rect.centery,
@@ -265,7 +265,6 @@ class Boss(pygame.sprite.Sprite):
             )
             grenade.max_distance = 600
             grenade.speed *= 0.5
-            self.tears.append(grenade)
             grenade.image = pygame.image.load("images/mine.png").convert_alpha()
             grenade.image = pygame.transform.scale(grenade.image, (30 * self.scale_x, 30 * self.scale_y))
             self.tears.append(grenade)
