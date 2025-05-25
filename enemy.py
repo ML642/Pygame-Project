@@ -14,10 +14,10 @@ class Enemy(pygame.sprite.Sprite):
             self.shoot_cooldown = 900
         elif difficulty == "medium":
             self.multiplier = 1
-            self.shoot_cooldown = 600
+            self.shoot_cooldown = 800
         elif difficulty == "hard":
             self.multiplier = 1.75
-            self.shoot_cooldown = 200
+            self.shoot_cooldown = 700
 
         self.scale_x = scale_x
         self.scale_y = scale_y

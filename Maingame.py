@@ -736,19 +736,19 @@ while running:
 
 
         
-        for tear in player.tears[:]:
-            tear.update()
-            for wall in walls:
-                if tear.rect.colliderect(wall.rect):
-                    if  isinstance(wall , ExplosiveBarrel):
-                        enemies_counter =  wall.take_damage(FIRE_MODES[player.current_mode]["damage"] , enemies , player,interactive_objects,enemies_counter)
+        # for tear in player.tears[:]:
+        #     tear.update()
+        #     for wall in walls:
+        #         if tear.rect.colliderect(wall.rect):
+        #             if  isinstance(wall , ExplosiveBarrel):
+        #                 enemies_counter =  wall.take_damage(FIRE_MODES[player.current_mode]["damage"] , enemies , player,interactive_objects,enemies_counter)
                             
                             
-                    elif isinstance(wall, DestructibleObject):
-                        wall.take_damage(FIRE_MODES[player.current_mode]["damage"])
+        #             elif isinstance(wall, DestructibleObject):
+        #                 wall.take_damage(FIRE_MODES[player.current_mode]["damage"])
                     
-                    player.tears.remove(tear)
-                    break
+        #             player.tears.remove(tear)
+        #             break
             
 
         for enemy in enemies:
