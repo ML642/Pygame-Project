@@ -4,6 +4,7 @@ import math
 import os
 import time 
 import copy 
+from collections import deque  # <-- Add this line
 
 from player import Player, Tear
 from enemy import Enemy
@@ -34,16 +35,34 @@ from grenade import Grenade, ExplosionEffect
 pygame.init()
 
 
+frame_start_time = time.time() * 1000  # milliseconds
 
+PERF_HISTORY_LENGTH = 120  # Keep 2 seconds of data at 60 FPS
+frame_times = deque(maxlen=PERF_HISTORY_LENGTH)
+perf_update_interval = 250  # Update display every 250ms
+last_perf_update = 0
+perf_metrics = {
+    'current': 0,
+    'avg': 0,
+    'min': 0,
+    'max': 0,
+    '1%_low': 0,
+    '0.1%_low': 0
+}
+PERFOMANCE_METRICS = True
+
+        # Just before pygame.display.flip() (around line 830), add this performance tracking:
+        # Calculate frame time
+frame_time = time.time() * 1000 - frame_start_time
 explosions = pygame.sprite.Group()
 
 interactive_objects = pygame.sprite.Group()
- # wall = DestructibleObject(x=450, y=450, width=32, height=32, hp=100 ,scale_x=1 , scale_y=1)
- # spike = SpikeTrap(x=450, y=500, width=50, height=40, damage=1 , scale_x=1 , scale_y=1)
- # barrel = ExplosiveBarrel(x=1150, y=450, width=32, height=32, hp=50, explosion_radius=640, explosion_damage=50, scale_x=1 , scale_y=1)
- # interactive_objects.add(wall, barrel)
+wall = DestructibleObject(x=450, y=450, width=32, height=32, hp=100 ,scale_x=1 , scale_y=1)
+spike = SpikeTrap(x=450, y=500, width=50, height=40, damage=1 , scale_x=1 , scale_y=1)
+barrel = ExplosiveBarrel(x=1150, y=450, width=32, height=32, hp=50, explosion_radius=640, explosion_damage=50, scale_x=1 , scale_y=1)
+interactive_objects.add(wall, barrel)
 Spikes = pygame.sprite.Group()
- # Spikes.add(spike)
+Spikes.add(spike)
 
 
 os.environ['SDL_VIDEO_CENTERED'] = "1"
@@ -109,7 +128,7 @@ scale_x = current_settings["resolution"][0] / BASE_WIDTH
 scale_y = current_settings["resolution"][1] / BASE_HEIGHT
 
 FIRE_MODES = {
-            1: {"speed": 7, "damage": 10, "fire_rate": 0.6 ,"url": "images/pistol.png","bullets" : 10 , "ammo" :40  , "full" : 10 , "reload_time" :2 },
+            1: {"speed": 7, "damage": 100, "fire_rate": 0.6 ,"url": "images/pistol.png","bullets" : 10 , "ammo" :40  , "full" : 10 , "reload_time" :2 },
             2: {"speed": 12, "damage": 7, "fire_rate": 0.2 , "url": "images/shotgun.png" , "bullets" : 30 , "ammo" : 30 , "full": 30 , "reload_time" :1.5 }, 
             3: {"speed": 20, "damage": 30, "fire_rate": 1 , "url": "images/sniper.png" , "bullets" : 10 ,   "ammo" : 5, "full":10 , "reload_time" : 2.5 },
             4: {"type": "grenade", "speed": 15, "damage": 100, "radius": 200, "fire_rate": 1.2, "url": "images/grenade.png", "bullets": None, "ammo": 3, "full": None, "reload_time": 0}
@@ -313,13 +332,16 @@ OFFSETY = (scale_y-1) * 200
 
 player.rect.center = (150 * scale_x ,  150 * scale_y) # - move the player to the room 
 
-def rerender (data,walls,floors,Rooms,enemies,drops,interactive_objects,player):
+player.rect.center = (boss_room_x * scale_x  +150, boss_room_y * scale_y + 150) 
+
+def rerender ( data , walls ,floors, Rooms, enemies, drops,interactive_objects,player,scale_x , scale_y):
     walls.empty()
     floors.empty()
     Rooms.empty()
     enemies.empty()
     interactive_objects.empty()
     player.tears.clear()
+    
     enemies_counter = 0
     for room_data in data :
         Room_Create(room_data["x"], room_data["y"], room_data["form"], room_data["type"], room_data["enemies_counter"])
@@ -327,8 +349,6 @@ def rerender (data,walls,floors,Rooms,enemies,drops,interactive_objects,player):
 
 
 
-cursor = pygame.image.load("images/cursor.png").convert_alpha()
-cursor = pygame.transform.scale(cursor, (50 * scale_x, 50 * scale_y))
 pygame.mouse.set_visible(True)
 
 start_time = pygame.time.get_ticks()  # Record the start time
@@ -374,7 +394,7 @@ while running:
                      enemies_counter = 0 
                      FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
                 elif event.key == pygame.K_q:
-                    rerender(level_2data,walls,floors,Rooms,enemies,drops,interactive_objects,player)
+                    rerender(level_2data,walls,floors,Rooms,enemies,drops,interactive_objects,player,scale_x,scale_y)
                     player.rect.center =( 150 * scale_x , 150 * scale_y)
                     enemies_counter = 0
             elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -715,22 +735,21 @@ while running:
                         break
 
 
-     #               pygame.draw.lines(screen, (255, 200, 100), False, trail_points, 2)  
-     #   
-     #   for tear in player.tears[:]:
-     #       tear.update()
-     #       for wall in walls:
-     #           if tear.rect.colliderect(wall.rect):
-     #               if  isinstance(wall , ExplosiveBarrel):
-     #                   enemies_counter =  wall.take_damage(FIRE_MODES[player.current_mode]["damage"] , enemies , player,interactive_objects,enemies_counter)
-                        
-                        
-     #               elif isinstance(wall, DestructibleObject):
-     #                   wall.take_damage(FIRE_MODES[player.current_mode]["damage"])
-     #               
-     #               player.tears.remove(tear)
-     #               break
         
+        for tear in player.tears[:]:
+            tear.update()
+            for wall in walls:
+                if tear.rect.colliderect(wall.rect):
+                    if  isinstance(wall , ExplosiveBarrel):
+                        enemies_counter =  wall.take_damage(FIRE_MODES[player.current_mode]["damage"] , enemies , player,interactive_objects,enemies_counter)
+                            
+                            
+                    elif isinstance(wall, DestructibleObject):
+                        wall.take_damage(FIRE_MODES[player.current_mode]["damage"])
+                    
+                    player.tears.remove(tear)
+                    break
+            
 
         for enemy in enemies:
           if player.rect.colliderect(enemy.rect) and not player.invincible:
@@ -770,6 +789,10 @@ while running:
                 current_settings =  Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT , current_settings)
                 scale_x = current_settings["resolution"][0] / BASE_WIDTH
                 scale_y = current_settings["resolution"][1] / BASE_HEIGHT
+                rerender(level_1data , walls,floors , Rooms , enemies , drops , interactive_objects , player , scale_x , scale_y)
+                player = Player(scale_x ,scale_y ,  difficulty="medium")
+                camera = Camera(screen_width=current_settings["resolution"][0], screen_height=current_settings["resolution"][1], world_width=30000, world_height=30000, scale_x=scale_x, scale_y=scale_y)
+
                 pygame.mouse.set_visible(True)
         # Debugging information
         # font_debug = pygame.font.SysFont(None, int(24 * scale_x))  # Smaller font for debugging
@@ -827,10 +850,77 @@ while running:
         
         Stopbutton = StopButton(screen, current_settings["resolution"][0] - 100*scale_x - 2, 2, 100 * scale_x, 50 * scale_y)
         Stopbutton.draw(screen)
-             
+        
+        
+        
+        cursor = pygame.image.load("images/cursor.png").convert_alpha()
+        cursor = pygame.transform.scale(cursor, (50 * scale_x, 50 * scale_y))     
         cursor_rect = cursor.get_rect(center=(mouse_world_x + camera.camera.x, mouse_world_y + camera.camera.y))
         screen.blit(cursor, cursor_rect.topleft)
-   
+        frame_time = clock.get_time()  # Time since last tick in milliseconds
+        time_text = font.render(f"Frame time: {frame_time}ms", True, (255, 255, 255))
+        screen.blit(time_text, (20 * scale_x, 20 * scale_y))
+        
+        if PERFOMANCE_METRICS:      
+            # In your main game loop (around line 350), add this at the start:
+        
+            frame_times.append(frame_time)
+
+            # Update metrics display periodically
+            current_time = pygame.time.get_ticks()
+            if current_time - last_perf_update > perf_update_interval:
+                if frame_times:
+                    sorted_times = sorted(frame_times)
+                    perf_metrics = {
+                        'current': frame_time,
+                        'avg': sum(frame_times) / len(frame_times),
+                        'min': min(frame_times),
+                        'max': max(frame_times),
+                        '1%_low': sorted_times[int(len(sorted_times) * 0.01)],
+                        '0.1%_low': sorted_times[int(len(sorted_times) * 0.001)]
+                    }
+                last_perf_update = current_time
+        
+            # Render the performance metrics (add this where you want it displayed, perhaps near other UI)
+            perf_font = pygame.font.SysFont(None, int(20 * scale_x))
+            y_offset = 60 * scale_y
+            for name, value in perf_metrics.items():
+                if name in ['1%_low', '0.1%_low']:
+                    text = perf_font.render(f"{name}: {value:.1f}ms (worst {name.split('_')[0]})", True, 
+                                        RED if value > 33.3 else GREEN)
+                else:
+                    text = perf_font.render(f"{name}: {value:.1f}ms", True, 
+                                        RED if value > 16.6 and name != 'max' else GREEN)
+                screen.blit(text, (20 * scale_x, y_offset))
+                y_offset += 20 * scale_y
+
+            # Add a frame time graph visualization (optional but helpful)
+            graph_width = 200 * scale_x
+            graph_height = 60 * scale_y
+            graph_surface = pygame.Surface((graph_width, graph_height), pygame.SRCALPHA)
+            max_frame_time = max(50, max(frame_times) if frame_times else 50 )
+
+            for i, ft in enumerate(frame_times):
+                x = i * (graph_width / PERF_HISTORY_LENGTH)
+                height = min(graph_height, (ft / max_frame_time) * graph_height)
+                color = (255, 0, 0, 150) if ft > 16.6 else (0, 255, 0, 150)
+                pygame.draw.line(graph_surface, color, (x, graph_height), (x, graph_height - height), 2)
+
+            # Draw threshold lines
+            pygame.draw.line(graph_surface, (255, 255, 0, 100), (0, graph_height * (16.6/max_frame_time)), 
+                            (graph_width, graph_height * (16.6/max_frame_time)), 1)
+            pygame.draw.line(graph_surface, (255, 0, 0, 100), (0, graph_height * (33.3/max_frame_time)), 
+                            (graph_width, graph_height * (33.3/max_frame_time)), 1)
+
+            screen.blit(graph_surface, (20 * scale_x, y_offset + 10 * scale_y))
+
+            # Add explanatory text
+            legend_font = pygame.font.SysFont(None, int(16 * scale_x))
+            screen.blit(legend_font.render("Yellow: 60FPS (16.6ms)", True, (255, 255, 0)), 
+                    (25 * scale_x, y_offset + graph_height + 15 * scale_y))
+            screen.blit(legend_font.render("Red: 30FPS (33.3ms)", True, (255, 0, 0)), 
+                    (25 * scale_x, y_offset + graph_height + 30 * scale_y))
+        
         pygame.mouse.set_visible(False)     
 
         pygame.display.flip()
