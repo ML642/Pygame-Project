@@ -7,11 +7,11 @@ import copy
 from player import Player
 from enemy import Enemy
 from camera import Camera
-from room_generation import generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room
+from room_generation import generate_secret_room, generate_room , Wall ,  Gate , Floor ,Floor_Hallway , Room
 from UI_components import draw_health_bar , Menu_option , DustParticle , draw_reload_bar
 from stopmenu import pause_menu , draw_button , draw_slider
 from Main_Menu import Main_menu
-from interactive_objects import  DestructibleObject , SpikeTrap , ExplosiveBarrel
+from interactive_objects import  DestructibleObject, ExplosiveBarrel, BreakableWall, Chest, SpikeTrap
 from game_over import GameOver , game_over_screen ,  Restart
 
 from setting_menu import SettingsMenu
@@ -19,14 +19,7 @@ from setting_menu import SettingsMenu
 
 pygame.init()
 
-solid_objects = pygame.sprite.Group()
-
-interactive_objects = pygame.sprite.Group()
-wall = DestructibleObject(x=5, y=5, width=32, height=32, hp=100, k=2)
-spike = SpikeTrap(x=10, y=5, width=32, height=10, damage=15, k=2)
-barrel = ExplosiveBarrel(x=15, y=5, width=32, height=32, hp=50, explosion_radius=64, explosion_damage=30, k=2)
-solid_objects.add(wall)
-interactive_objects.add(spike, barrel)
+explosions = pygame.sprite.Group()
 
 screen_width = 800
 screen_height = 600
@@ -136,7 +129,55 @@ OFFSET2 = 1000
 OFFSET = 700
 OFFSETY = (scale_y-1) * 2
 player = Player (scale_x,scale_y , current_settings["difficulty"])
-#############################
+
+walls = pygame.sprite.Group()
+floors = pygame.sprite.Group()
+interactive_objects = pygame.sprite.Group()
+explosion_group = pygame.sprite.Group()
+spikes = pygame.sprite.Group()
+potions = pygame.sprite.Group()
+chests = pygame.sprite.Group()
+breakablewalls = pygame.sprite.Group()
+
+
+
+def init_secret_room():
+    global walls, floors, interactive_objects, chests
+
+    secret_walls, secret_floors, secret_gate = generate_secret_room(
+        x=200, y=300, scale_x=1, scale_y=1
+    )
+
+    walls.add(*secret_walls)
+    floors.add(*secret_floors)
+    interactive_objects.add(secret_gate)
+
+    secret_chest_positions = [
+        (1250, 350), (1350, 400),
+        (1450, 500), (1300, 600),
+        (1400, 320)
+    ]
+
+    for pos in secret_chest_positions:
+        chest = Chest(
+            x=pos, y=pos,
+            ROOM_HEIGHT=700,
+            width=32, height=32,
+            scale_x=1, scale_y=1
+        )
+        chests.add(chest)
+
+
+secret_wall = BreakableWall(x=150,y=450,w=32,h=32,hp=100,scale_x=1,scale_y=1,on_destroy=init_secret_room)
+
+destructible_object = DestructibleObject(x=450, y=450, width=32, height=32, hp=100, scale_x=1, scale_y=1)
+spike = SpikeTrap(x=450, y=500, width=50, height=40, damage=1, scale_x=1, scale_y=1)
+barrel = ExplosiveBarrel(x=115, y=450, width=32, height=32, hp=50, explosion_radius=640, explosion_damage=50, scale_x=1, scale_y=1, explosion_group=explosion_group)
+
+interactive_objects.add(breakablewalls, destructible_object, secret_wall)
+explosion_group.add(barrel)
+spikes.add(spike)
+all_groups = [breakablewalls, spikes, explosion_group, interactive_objects, chests, potions]
 
 
 
@@ -146,7 +187,53 @@ floors.add(Floor_Hallway((-300) -  int(OFFSET3) *(scale_x -1), (50 + 195) * scal
 
 
 
-#############################
+async def loader(progress, loading_screen):
+    total = len(level_1data)
+    for i, room_data in enumerate(level_1data, start=1):
+        Room_Create(
+            room_data["x"],
+            room_data["y"],
+            room_data["form"],
+            room_data["type"],
+            room_data["enemies_counter"],
+        )
+        progress['loaded'] = i
+        
+        loading_screen.update()
+        
+        loading_screen.draw()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+        await asyncio.sleep(0)  # Yield control to the event loop
+
+    progress['done'] = True
+
+async def main():
+    loading_screen = LoadingScreen(screen, len(level_1data), 'images/loading_screen.gif')
+    progress = {'loaded': 0, 'total': len(level_1data), 'done': False}
+
+    clock = pygame.time.Clock()
+
+    asyncio.create_task(loader(progress, loading_screen))
+
+    while not progress['done']:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        loading_screen.update(progress['loaded'] - loading_screen.loaded_items)
+        loading_screen.draw()
+
+        await asyncio.sleep(0.016)
+        clock.tick(60)
+
+    loading_screen.update(len(level_1data))
+    loading_screen.draw()
+    await asyncio.sleep(0.5)
+    progress['done'] = True
+asyncio.run(main())
 
 
 
@@ -335,6 +422,12 @@ while running:
             screen.blit(wall.image, camera.apply(wall))
         for enemy in enemies:
             screen.blit(enemy.image, camera.apply(enemy))
+        for spike in spikes :
+            print(spike.rect.x , spike.rect.y)
+            screen.blit(spike.image, camera.apply(spike))
+            if player.rect.colliderect(spike.rect) and not player.invincible:
+                player.health -= spike.damage
+                spike.apply_damage(player)  
         screen.blit(rotated_image, rotated_rect.topleft + pygame.math.Vector2(camera.camera.topleft))
         if player.is_dashing and len(player.dash_trail) > 1:
             num_points = len(player.dash_trail)
