@@ -1,5 +1,6 @@
 import pygame
 import os
+import sys
 import random 
 from UI_components import Menu_option
 from Main_Menu import Main_menu
@@ -169,8 +170,13 @@ def pause_menu( scale_x = 13/8, scale_y = 4/3  , current_settings = None):
                 paused = False
 
         # Volume slider
-        
-        image_sound = pygame.image.load('images/volume.png').convert_alpha()
+        try:
+            image_sound = pygame.image.load('images/volume.png').convert_alpha()
+        except pygame.error:
+            pygame.QUIT
+            with open("save.json", "w") as f:
+                f.write("")
+            sys.exit()
         sound_icon = pygame.transform.scale(image_sound , (50* scale_x, 50 * scale_y))
         
         screen.blit(sound_icon , (240 * scale_x, (190 - 20) * scale_y))

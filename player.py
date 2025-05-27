@@ -21,10 +21,18 @@ class Tear(pygame.sprite.Sprite):
         self.rect.x += self.direction[0] * self.speed
         self.rect.y += self.direction[1] * self.speed
         self.lifetime -= 1
+
         self.trail_positions.append((self.rect.centerx, self.rect.centery))
         if len(self.trail_positions) > self.max_trail_length:
             self.trail_positions.pop(0)
+
+        if walls:
+            for wall in walls:
+                if self.rect.colliderect(wall.rect):
+                    return True
+
         return self.lifetime <= 0
+
     
 
 

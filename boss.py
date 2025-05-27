@@ -20,7 +20,7 @@ class Boss(pygame.sprite.Sprite):
         self.player = player
         self.shoot_cooldown = 0.1
         self.last_shot_time = 0
-        self.tears = []
+        self.tears = pygame.sprite.Group()
         self.attack_distance = 300 * scale_x
         self.safe_distance = 400 * scale_x
         self.drops = drops if drops else pygame.sprite.Group()
@@ -132,19 +132,14 @@ class Boss(pygame.sprite.Sprite):
             self.reloading = False
 
         # Bullet update
-        for tear in self.tears[:]:
+        for tear in self.tears.copy():
             if isinstance(tear, Grenade):
-                exploded = tear.update(walls)
-                if exploded:
+                if tear.update(walls):
                     self.tears.remove(tear)
-                    continue
             else:
-                if tear.update():
+                if tear.update(walls):
                     self.tears.remove(tear)
-                    continue
 
-                if walls and any(tear.rect.colliderect(wall.rect) for wall in walls):
-                    self.tears.remove(tear)
 
 
 
@@ -174,7 +169,7 @@ class Boss(pygame.sprite.Sprite):
         if distance != 0:
             direction = (dx / distance, dy / distance)
 
-            bullet_speed = 4 * self.scale_x
+            bullet_speed = 8 * self.scale_x
             bullet = Tear(
                 self.rect.centerx,
                 self.rect.centery,
@@ -188,7 +183,7 @@ class Boss(pygame.sprite.Sprite):
 
             angle = math.degrees(math.atan2(-direction[1], direction[0]))
             bullet.image = pygame.transform.rotate(bullet.image, angle)
-            self.tears.append(bullet)
+            self.tears.add(bullet)
 
 
     def draw_health_bar(self, surface, scale_x, scale_y):
@@ -267,5 +262,5 @@ class Boss(pygame.sprite.Sprite):
             grenade.speed *= 0.5
             grenade.image = pygame.image.load("images/mine.png").convert_alpha()
             grenade.image = pygame.transform.scale(grenade.image, (30 * self.scale_x, 30 * self.scale_y))
-            self.tears.append(grenade)
+            self.tears.add(grenade)
 

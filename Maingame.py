@@ -106,7 +106,7 @@ scale_x = current_settings["resolution"][0] / BASE_WIDTH
 scale_y = current_settings["resolution"][1] / BASE_HEIGHT
 
 FIRE_MODES = {
-            1: {"speed": 7, "damage": 10, "fire_rate": 0.6 ,"url": "images/pistol.png","bullets" : 10 , "ammo" :40  , "full" : 10 , "reload_time" :2 },
+            1: {"speed": 7, "damage": 10, "fire_rate": 0.6 ,"url": "images/pistol.png","bullets" : 10 , "ammo" :80  , "full" : 10 , "reload_time" :2 },
             2: {"speed": 12, "damage": 70, "fire_rate": 0.2 , "url": "images/shotgun.png" , "bullets" : 3000 , "ammo" : 30 , "full": 30 , "reload_time" :1.5 }, 
             3: {"speed": 20, "damage": 30, "fire_rate": 1 , "url": "images/sniper.png" , "bullets" : 10 ,   "ammo" : 5, "full":10 , "reload_time" : 2.5 },
             4: {"type": "grenade", "speed": 15, "damage": 100, "radius": 200, "fire_rate": 1.2, "url": "images/grenade.png", "bullets": None, "ammo": 3, "full": None, "reload_time": 0}
@@ -122,21 +122,21 @@ CELL_SIZE = 40
 
 level_1data = [
     {"x": 50, "y": 50, "form": 8, "type": 1, "enemies_counter": 0},
-    {"x": 700 + 50 + 240 + 100, "y": 50, "form": 9, "type": 1, "enemies_counter": 3},
+    {"x": 700 + 50 + 240 + 100, "y": 50, "form": 9, "type": 1, "enemies_counter": 5},
     {"x": 50 + (700 + 240 + 100) * 2, "y": 50, "form": 3, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (700 + 240 + 100) * 2, "y": 50 - (500 + 260), "form": 8, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (700 + 240 + 100) * 2, "y": -50 + 500 + 260, "form": 10, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (700 + 240 + 100) * 3, "y": 50 - (500 + 260), "form": 9, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (700 + 240 + 100) * 4, "y": 50 - (500 + 260), "form": 6, "type": 1, "enemies_counter": 3},
-    {"x": 50, "y": 500 + 50 + 260, "form": 5, "type": 1, "enemies_counter": 3},
-    {"x": 50, "y": 30 + (500 + 260) * 2, "form": 11, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (700 + 240 + 100), "y": 30 + (500 + 260) * 2, "form": 2, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100) * 2, "y": 50 - (500 + 260), "form": 8, "type": 1, "enemies_counter": 6},
+    {"x": 50 + (700 + 240 + 100) * 2, "y": -50 + 500 + 260, "form": 10, "type": 1, "enemies_counter": 5},
+    {"x": 50 + (700 + 240 + 100) * 3, "y": 50 - (500 + 260), "form": 9, "type": 1, "enemies_counter": 4},
+    {"x": 50 + (700 + 240 + 100) * 4, "y": 50 - (500 + 260), "form": 6, "type": 1, "enemies_counter": 5},
+    {"x": 50, "y": 500 + 50 + 260, "form": 5, "type": 1, "enemies_counter": 4},
+    {"x": 50, "y": 30 + (500 + 260) * 2, "form": 11, "type": 1, "enemies_counter": 5},
+    {"x": 50 + (700 + 240 + 100), "y": 30 + (500 + 260) * 2, "form": 2, "type": 1, "enemies_counter": 4},
     {"x": 50 + (700 + 240 + 100) * 2, "y": 30 + (500 + 260) * 2, "form": 6, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (700 + 240 + 100), "y": 10 + (500 + 260) * 4, "form": 11, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (700 + 240 + 100), "y": 30 + (500 + 260) * 3, "form": 5, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100), "y": 10 + (500 + 260) * 4, "form": 11, "type": 1, "enemies_counter": 4},
+    {"x": 50 + (700 + 240 + 100), "y": 30 + (500 + 260) * 3, "form": 5, "type": 1, "enemies_counter": 5},
     {"x": 50 + (700 + 240 + 100) * 2, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (700 + 240 + 100) * 3, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
-    {"x": 50 + (700 + 240 + 100) * 4, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 3},
+    {"x": 50 + (700 + 240 + 100) * 3, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 4},
+    {"x": 50 + (700 + 240 + 100) * 4, "y": 10 + (500 + 260) * 4, "form": 9, "type": 1, "enemies_counter": 6},
     {"x": (50 + (700 + 240 + 100) * 5) - 180, "y": (10 + (500 + 260) * 4) - 110, "form": "boss", "type": 1, "enemies_counter": 0}
 ]
 
@@ -162,7 +162,7 @@ level_2data = [
     {"x": 50 + (700 + 240 + 100) * 4, "y": 50+(500 + 240) * 4, "form": 6, "type": 1, "enemies_counter": 4},
 ]
 
-
+enemy_projectiles = pygame.sprite.Group()
 portals = pygame.sprite.Group()
 Rooms = pygame.sprite.Group()
 floors = pygame.sprite.Group()
@@ -534,7 +534,10 @@ while running:
         screen.fill(BLACK)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                with open("save.json", "w") as f:
+                    f.write("")
                 running = False
+
                 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -660,15 +663,21 @@ while running:
             enemies_to_spawn = enemies_counter
             last_spawn_time = pygame.time.get_ticks()
             room.clear = True 
+            enemies_to_spawn = room.enemies_counter
+
             while enemies_to_spawn > 0:
-                x = random.randint(room.rect.x, room.rect.x  + int(ROOM_WIDTH - 160 * scale_x))
-                
-                y = random.randint(room.rect.y, room.rect.y  + int(ROOM_HEIGHT - (160)*scale_y))
-                enemy = Enemy(x, y,drops,scale_x , scale_y, current_settings ["difficulty"])
-                
+                x = random.randint(room.rect.x + 50, room.rect.x + int(ROOM_WIDTH - 100 * scale_x))
+                y = random.randint(room.rect.y + 50, room.rect.y + int(ROOM_HEIGHT - 100 * scale_y))
+
+                enemy_type = random.choice(["ranged", "sniper", "melee"])
+                enemy = Enemy(x, y, drops, scale_x, scale_y, current_settings["difficulty"], type=enemy_type)
+
                 if not any(enemy.rect.colliderect(wall.rect) for wall in walls):
                     enemies.add(enemy)
                     enemies_to_spawn -= 1
+
+
+
                 
 
         # Player input and updates
@@ -792,44 +801,47 @@ while running:
         
             # Check if cooldown has passed
             current_time = pygame.time.get_ticks()
-            if current_time - enemy.last_shot_time >= enemy.shoot_cooldown:
-                enemy.can_shoot = True
 
-            if enemy.can_shoot:
-                # Calculate direction towards the player
-                dx = player.rect.centerx - enemy.rect.centerx
-                dy = player.rect.centery - enemy.rect.centery
-                dist = max(1, math.sqrt(dx * dx + dy * dy))
-                direction = (dx / dist, dy / dist)
+            if isinstance(enemy, Enemy) and enemy.type in ("ranged", "sniper"):
+                if current_time - enemy.last_shot_time >= enemy.shoot_cooldown:
+                    enemy.can_shoot = True
 
-                # Create a new projectile (tear) for the enemy
-                tear = enemy.shoot(player)
-                if tear:
-                    enemy.tears.append(tear)
+                if enemy.can_shoot:
+                    tear = enemy.shoot(player)
+                    if tear:
+                        enemy_projectiles.add(tear)
+                    enemy.can_shoot = False
+                    enemy.last_shot_time = current_time
 
-                # Set cooldown for the next shot
-                enemy.can_shoot = False
-                enemy.last_shot_time = current_time
-
-            # Update enemy projectiles
-            for tear in enemy.tears[:]:
-                if tear.update(walls) :
-                    enemy.tears.remove(tear)
-                elif tear.rect.colliderect(player.rect):
-                    player.health -= 1
-                    enemy.tears.remove(tear)
-        for enemy in enemies:
-            for tear in enemy.tears[:]:
-                if tear.update(walls):
-                    enemy.tears.remove(tear)
-                else:
-                    for wall in walls:
-                        if tear.rect.colliderect(wall.rect):
-                            enemy.tears.remove(tear)
-                            break
-        for enemy in enemies:
-         for tear in enemy.tears[:]:
+        #     # Update enemy projectiles
+        #     for tear in enemy.tears[:]:
+        #         if tear.update(walls) :
+        #             enemy.tears.remove(tear)
+        #         elif tear.rect.colliderect(player.rect):
+        #             player.health -= 1
+        #             enemy.tears.remove(tear)
+        # for enemy in enemies:
+        #     for tear in enemy.tears[:]:
+        #         if tear.update(walls):
+        #             enemy.tears.remove(tear)
+        #         else:
+        #             for wall in walls:
+        #                 if tear.rect.colliderect(wall.rect):
+        #                     enemy.tears.remove(tear)
+        #                     break
+        # for enemy in enemies:
+        #     for tear in enemy.tears[:]:
+        #         screen.blit(tear.image, camera.apply(tear))
+        for tear in enemy_projectiles:
             screen.blit(tear.image, camera.apply(tear))
+
+
+        for tear in enemy_projectiles.copy(): 
+            if tear.update(walls):
+                enemy_projectiles.remove(tear)
+            elif tear.rect.colliderect(player.rect):
+                player.take_damage(tear.damage)
+                enemy_projectiles.remove(tear)
                 
         if player.is_dashing and len(player.dash_trail) > 1:
             num_points = len(player.dash_trail)
@@ -885,13 +897,14 @@ while running:
 
 
         if boss and boss.alive():
-            for tear in boss.tears:
+            for tear in boss.tears.copy():
                 adjusted_pos = tear.rect.topleft + pygame.math.Vector2(camera.camera.topleft)
                 screen.blit(tear.image, adjusted_pos)
+
                 if player.rect.colliderect(tear.rect) and not player.invincible:
                     player.take_damage(tear.damage)
-                    if tear in boss.tears:
-                        boss.tears.remove(tear)
+                    boss.tears.remove(tear)
+
 
         # if boss and not boss.alive():
         #     for gate in boss_gates:
@@ -959,6 +972,9 @@ while running:
         if player.health <= 1:
             result =   game_over_screen(screen, kills , time , 1  , current_time - start_time)
             if result == "restart":
+                with open("save.json", "w") as f: # To erase save file
+                    f.write("")
+
                 Restart(Rooms,player, enemies ,drops,scale_x, scale_y)
                 enemies_counter = 0
                 kills = 0
