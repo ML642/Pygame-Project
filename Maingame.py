@@ -736,20 +736,25 @@ while running:
 
 
         
-        # for tear in player.tears[:]:
-        #     tear.update()
-        #     for wall in walls:
-        #         if tear.rect.colliderect(wall.rect):
-        #             if  isinstance(wall , ExplosiveBarrel):
-        #                 enemies_counter =  wall.take_damage(FIRE_MODES[player.current_mode]["damage"] , enemies , player,interactive_objects,enemies_counter)
-                            
-                            
-        #             elif isinstance(wall, DestructibleObject):
-        #                 wall.take_damage(FIRE_MODES[player.current_mode]["damage"])
-                    
-        #             player.tears.remove(tear)
-        #             break
-            
+        for tear in player.tears[:]:
+            if isinstance(tear, Grenade):
+                exploded = tear.update(walls)
+                if exploded and tear in player.tears:
+                    player.tears.remove(tear)
+            else:
+                tear.update()
+                for wall in walls:
+                    if tear.rect.colliderect(wall.rect):
+                        if  isinstance(wall , ExplosiveBarrel):
+                            enemies_counter =  wall.take_damage(FIRE_MODES[player.current_mode]["damage"] , enemies , player,interactive_objects,enemies_counter)
+                                
+                                
+                        elif isinstance(wall, DestructibleObject):
+                            wall.take_damage(FIRE_MODES[player.current_mode]["damage"])
+                        
+                        player.tears.remove(tear)
+                        break
+                
 
         for enemy in enemies:
           if player.rect.colliderect(enemy.rect) and not player.invincible:
