@@ -5,7 +5,7 @@ from UI_components import DustParticle
 import os 
 from setting_menu import SettingsMenu
 import json 
-
+from player import Player
 
 pygame.init()
 
@@ -33,7 +33,9 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
     
     scale_x = current_settings['resolution'][0] / screen_width
     scale_y = current_settings['resolution'][1]/ screen_height
-        
+    
+
+
     screen = pygame.display.set_mode((800 * scale_x, 600 * scale_y))
     clock = pygame.time.Clock()
     
@@ -47,16 +49,26 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
     WHITE = (255, 255, 255)
     YELLOW = (255, 255, 0)
 
-    
+    continue_available = os.path.exists("has_save.flag")
+
+    Option_continue = Menu_option(80 * scale_x, (230 - 100) * scale_y, 200 * scale_x, 50 * scale_y, WHITE, BLUE, "Continue")
+    Option_play = Menu_option(80 * scale_x, (300 - 100) * scale_y, 200 * scale_x, 50 * scale_y, WHITE, BLUE, "Play")
+    Option_settings = Menu_option(80 * scale_x, (370 - 100) * scale_y, 200 * scale_x, 50 * scale_y, WHITE, BLUE, "Settings")
+    Option_exit = Menu_option(80 * scale_x, (440 - 100) * scale_y, 200 * scale_x, 50 * scale_y, WHITE, BLUE, "Exit")
+
+    Options = [Option_play, Option_settings, Option_exit]
+    if continue_available:
+        Options.insert(0, Option_continue)
+
         
     background = pygame.image.load('images/Background1.png').convert_alpha()
     background = pygame.transform.scale(background,( screen_width * scale_x,screen_height * scale_y))
 
-    Option1 = Menu_option(80 * scale_x, (300 - 100) * scale_y, 200 * scale_x, 50 * scale_y, WHITE, BLUE, "Play")
-    Option2 = Menu_option(80 * scale_x, (370 - 100) * scale_y, 200 * scale_x, 50 * scale_y, WHITE, BLUE, "Settings")
-    Option3 = Menu_option(80 * scale_x, (440 - 100) * scale_y, 200 * scale_x, 50 * scale_y, WHITE, BLUE, "Exit")
+    # Option1 = Menu_option(80 * scale_x, (300 - 100) * scale_y, 200 * scale_x, 50 * scale_y, WHITE, BLUE, "Play")
+    # Option2 = Menu_option(80 * scale_x, (370 - 100) * scale_y, 200 * scale_x, 50 * scale_y, WHITE, BLUE, "Settings")
+    # Option3 = Menu_option(80 * scale_x, (440 - 100) * scale_y, 200 * scale_x, 50 * scale_y, WHITE, BLUE, "Exit")
 
-    Options = [Option1, Option2, Option3]
+    # Options = [Option1, Option2, Option3]
     active = 0
     Options[active].toogle()
     dust_particles = []
@@ -92,36 +104,66 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
                     pygame.mixer.music.stop()
                     pygame.quit()
             if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
-                if active == 0:
-                    pygame.mixer.music.stop()
-    
-                    Main_Menu = False
-                    running = True
-                    pygame.mouse.set_visible(True)
-                elif active == 1:
-                    pygame.mixer.music.stop()
+                if continue_available:
+                    if active == 0:  # Continue
+                        try:
+                            with open("save.json", "r") as f:
+                                save = json.load(f)
+                            os.remove("has_save.flag")
+                            pygame.mixer.music.stop()
+                            return {"load_save": save, "level": 2, **current_settings}
+                        except FileNotFoundError:
+                            continue_available = False
+                            continue
 
-                    print(current_settings)
-                    settings_menu = SettingsMenu(actual_screen_width, actual_screen_height, current_settings) 
-                    settings_menu.update()
-                    new_settings = settings_menu.run(screen, Main_menu)  
-                    print("New settings:", new_settings)
-                    if new_settings:
-                            # Update settings with new values
+                    elif active == 1:  # Play
+                        pygame.mixer.music.stop()
+                        return "new_game"
+
+
+                    elif active == 2:  # Settings
+                        pygame.mixer.music.stop()
+                        settings_menu = SettingsMenu(actual_screen_width, actual_screen_height, current_settings)
+                        settings_menu.update()
+                        new_settings = settings_menu.run(screen, Main_menu)
+                        if new_settings:
                             current_settings.update(new_settings)
                             with open("settings.json", "w") as f:
-                              json.dump(current_settings, f)
-                            Main_menu(
-                                new_settings['resolution'][0], 
+                                json.dump(current_settings, f)
+                            return Main_menu(
+                                new_settings['resolution'][0],
                                 new_settings['resolution'][1],
                                 settings_data=current_settings
                             )
-                            
-                            return current_settings
-                elif active == 2:
-                    
-                    pygame.quit()
-                    exit()
+
+                    elif active == 3:  # Exit
+                        pygame.quit()
+                        exit()
+
+                else:  # no Continue button
+                    if active == 0:  # Play
+                        pygame.mixer.music.stop()
+                        return "new_game"
+
+                    elif active == 1:  # Settings
+                        pygame.mixer.music.stop()
+                        settings_menu = SettingsMenu(actual_screen_width, actual_screen_height, current_settings)
+                        settings_menu.update()
+                        new_settings = settings_menu.run(screen, Main_menu)
+                        if new_settings:
+                            current_settings.update(new_settings)
+                            with open("settings.json", "w") as f:
+                                json.dump(current_settings, f)
+                            return Main_menu(
+                                new_settings['resolution'][0],
+                                new_settings['resolution'][1],
+                                settings_data=current_settings
+                            )
+
+                    elif active == 2:  # Exit
+                        pygame.quit()
+                        exit()
+
             keys = pygame.key.get_pressed()
             previous_active = active
             if keys[pygame.K_LEFT]:
@@ -177,20 +219,16 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
         screen.blit(tittle2, ((450) * scale_x, 50 * scale_y))
         screen.blit(tittle2_shadow, ((450) * scale_x, (50 + 10) * scale_y))
         
-        Option1.update(80 * scale_x, (300 - 100) * scale_y, screen)
-        
-        Option2.update(80 * scale_x, (370 - 100) * scale_y, screen)
-        
-        Option3.update(80 * scale_x, (440 - 100) * scale_y, screen)
+        for i, option in enumerate(Options):
+            y_offset = (230 + i * 70 - 100) * scale_y
+            option.update(80 * scale_x, y_offset, screen)
+
         
         arrow_x = 60 * scale_x # X position of the arrow
-        if arrow_visible == True:
-                if active == 0:
-                    draw_arrow(screen, arrow_x, (300 - 75) * scale_y)  # Adjust Y position for Option1
-                elif active == 1:
-                    draw_arrow(screen, arrow_x, (370 - 75) * scale_y)  # Adjust Y position for Option2
-                elif active == 2:
-                    draw_arrow(screen, arrow_x, (440 - 75)* scale_y) 
+        if arrow_visible:
+            arrow_y = (230 + active * 70 - 75) * scale_y
+            draw_arrow(screen, arrow_x, arrow_y)
+
         
         
             

@@ -144,7 +144,7 @@ class Player(pygame.sprite.Sprite):
         if current_time - self.last_shot_time >= mode["fire_rate"]:
             if mode.get("type") == "grenade":
                 if mode["ammo"] <= 0:
-                    return FIRE_MODES  # нет гранат
+                    return FIRE_MODES 
 
                 FIRE_MODES[self.current_mode]["ammo"] -= 1
                 grenade = Grenade(self.rect.centerx, self.rect.centery, direction,
