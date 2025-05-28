@@ -1,5 +1,6 @@
 import pygame 
 import random 
+from interactive_objects import DestructibleObject,BreakableWall, ExplosiveBarrel, Chest, SpikeTrap
 
 ROOM_WIDTH, ROOM_HEIGHT = 700 , 500
 
@@ -438,5 +439,86 @@ def generate_boss_room(x, y, scale_x=1, scale_y=1):
 
     return walls, floors, (center_x * scale_x, center_y * scale_y), gate
 
+def generate_secret_room(x, y, scale_x=1, scale_y=1):
+    walls = pygame.sprite.Group()
+    floors = pygame.sprite.Group()
+    chests = pygame.sprite.Group()
+
+    room_width = 500
+    room_height = 300
+    wall_thickness = 20
+
+    walls.add(Wall(x, y, room_width, wall_thickness, scale_x, scale_y))
+    walls.add(Wall(x, y + room_height - wall_thickness, room_width, wall_thickness, scale_x, scale_y))
+    walls.add(Wall(x + room_width - wall_thickness, y, wall_thickness, room_height, scale_x, scale_y))
+
+    corridor_height = 120
+    corridor_top = y + (room_height - corridor_height) // 2
+    corridor_bottom = corridor_top + corridor_height
+    walls.add(Wall(x, y, wall_thickness, corridor_top - y, scale_x, scale_y))
+    walls.add(Wall(x, corridor_bottom, wall_thickness, y + room_height - corridor_bottom, scale_x, scale_y))
+
+    floors.add(Floor(x * scale_x, y * scale_y,scale_x=scale_x * (900 / ROOM_WIDTH),scale_y=scale_y * (700 / ROOM_HEIGHT)))
+
+    center_x = x + room_width // 2
+    center_y = y + room_height // 2
+    walls.add(Wall(center_x - 200, center_y - 100, 50, 50, scale_x, scale_y))
+    walls.add(Wall(center_x + 200, center_y, 50, 50, scale_x, scale_y))
+
+    gate = Gate(x, y + 300, 20, 100,
+               "images/Gate_Open.png",
+               "images/Gate_Closed.png",
+               scale_x, scale_y)
+    gate.toogle(walls)
+    walls.add(gate)
+    for _ in range(2):
+        chest_x = random.randint(x + 100, x + room_width - 150)
+        chest_y = random.randint(y + 100, y + room_height - 150)
+        chests.add(Chest(chest_x, chest_y, room_height, scale_x=scale_x, scale_y=scale_y))
+
+    return list(walls), list(floors), list(chests), gate
+
+def generate_random_objects(room_rect, spikes, explosion_group, interactive_objects, breakablewalls, chests, scenery_group, scale_x=1, scale_y=1):
+    num_objects = random.randint(1, 5)
+    num_scenery_objects = random.randint(6, 8)
+    rock_img = pygame.image.load("images/Rock.webp").convert_alpha()
+    bush_img = pygame.image.load("images/Bush.webp").convert_alpha()
+    rock_img = pygame.transform.scale(rock_img, (32, 32))
+    bush_img = pygame.transform.scale(bush_img, (32, 32))
+
+    for _ in range(num_objects):
+        obj_type = random.choice(["spike", "barrel", "destructible_object", "breakable_wall","chest", "scenery"])
+        x = random.randint(room_rect.left + 50, room_rect.right - 100)
+        y = random.randint(room_rect.top + 50, room_rect.bottom - 100)
+
+        if obj_type == "spike":
+            spike = SpikeTrap(x, y, width=50, height=40, damage=1, scale_x=scale_x, scale_y=scale_y)
+            spikes.add(spike)
+
+
+        elif obj_type == "barrel":
+            barrel = ExplosiveBarrel(x, y, width=32, height=32, hp=50, explosion_radius=640, explosion_damage=50,
+                                     scale_x=scale_x, scale_y=scale_y, explosion_group=explosion_group)
+            explosion_group.add(barrel)
+
+        elif obj_type == "destructible_object":
+            destructible_object = DestructibleObject(x, y, width=32, height=32, hp=10, scale_x=scale_x, scale_y=scale_y)
+            interactive_objects.add(destructible_object)
+
+        elif obj_type == "breakable_wall":
+            wall = BreakableWall(x, y,w=20, h=100,hp=3,scale_x=scale_x, scale_y=scale_y)
+            breakablewalls.add(wall)
+
+
+        elif obj_type == "chest":
+            chest = Chest(x, y,scale_x=scale_x,scale_y=scale_y)
+            chests.add(chest)
+
+        elif obj_type == "scenery":
+            image = random.choice([rock_img, bush_img])
+            obj = pygame.sprite.Sprite()
+            obj.image = image
+            obj.rect = image.get_rect(topleft=(x, y))
+            scenery_group.add(obj)
 
 
