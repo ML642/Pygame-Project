@@ -5,6 +5,7 @@ import os
 import time 
 import copy 
 from collections import deque  # <-- Add this line
+from room_generation import generate_secret_room , generate_random_objects
 
 from player import Player, Tear
 from enemy import Enemy
@@ -36,6 +37,8 @@ pygame.init()
 
 
 frame_start_time = time.time() * 1000  # milliseconds
+
+explosions= pygame.sprite.Group()
 
 PERF_HISTORY_LENGTH = 120  # Keep 2 seconds of data at 60 FPS
 frame_times = deque(maxlen=PERF_HISTORY_LENGTH)
@@ -673,7 +676,7 @@ while running:
             screen.blit(barrel.image, camera.apply(barrel))
             if barrel.rect.colliderect(player.rect) and not player.invincible and not barrel.exploded:
                 player.health -= barrel.explosion_damage
-                enemies_counter = barrel.take_damage(barrel.hp, enemies_group, player, interactive_objects, enemies_counter)   
+                enemies_counter = barrel.take_damage(barrel.hp, enemies, player, interactive_objects, enemies_counter)   
         
         screen.blit(rotated_image, rotated_rect.topleft + pygame.math.Vector2(camera.camera.topleft))
         

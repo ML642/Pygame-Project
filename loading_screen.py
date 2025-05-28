@@ -3,7 +3,7 @@ import time
 from PIL import Image
 
 class LoadingScreen:
-    def __init__(self, screen, total_items):
+    def __init__(self, screen, total_items,gif_path='images/loading.gif'):
         self.screen = screen
         self.total_items = total_items
         self.loaded_items = 0
