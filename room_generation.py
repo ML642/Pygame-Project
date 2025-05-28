@@ -400,23 +400,43 @@ def generate_room( x , y , form , type ,scale_x = 1 , scale_y = 1 ):
 # First boss
 def generate_boss_room(x, y, scale_x=1, scale_y=1):
     walls = pygame.sprite.Group()
+    floors = pygame.sprite.Group()
 
     room_width = 900
     room_height = 700
     wall_thickness = 20
 
-    walls.add(Wall(x, y, room_width, wall_thickness, scale_x, scale_y))
+    # Main walls
+    walls.add(Wall(x, y, room_width, wall_thickness, scale_x, scale_y))  # top
+    walls.add(Wall(x, y + room_height - wall_thickness, room_width, wall_thickness, scale_x, scale_y))  # bottom
+    walls.add(Wall(x + room_width - wall_thickness, y, wall_thickness, room_height, scale_x, scale_y))  # right
 
-    walls.add(Wall(x, y + room_height - wall_thickness, room_width, wall_thickness, scale_x, scale_y))
-
-    walls.add(Wall(x + room_width - wall_thickness, y, wall_thickness, room_height, scale_x, scale_y))
-
+    # Entrance cutout (corridor)
     corridor_height = 120
     corridor_top = y + (room_height - corridor_height) // 2
     corridor_bottom = corridor_top + corridor_height
-
     walls.add(Wall(x, y, wall_thickness, corridor_top - y, scale_x, scale_y))
-    walls.add(Wall(x, corridor_bottom, wall_thickness, (y + room_height - corridor_bottom), scale_x, scale_y))
+    walls.add(Wall(x, corridor_bottom, wall_thickness, y + room_height - corridor_bottom, scale_x, scale_y))
 
-    return walls
+    # Floor
+    floors.add(Floor(x * scale_x, y * scale_y, scale_x=scale_x * (900 / ROOM_WIDTH), scale_y=scale_y * (700 / ROOM_HEIGHT)))
+
+
+
+
+
+
+    # Walls inside
+    center_x = x + room_width // 2
+    center_y = y + room_height // 2
+    walls.add(Wall(center_x - 200, center_y - 100, 50, 50, scale_x, scale_y))
+    walls.add(Wall(center_x + 200, center_y, 50, 50, scale_x, scale_y))
+    gate = Gate(x, y + 300, 20, 100, "images/Gate_Open.png", "images/Gate_Closed.png", scale_x, scale_y)
+
+    gate.toogle(walls)
+    walls.add(gate)
+
+    return walls, floors, (center_x * scale_x, center_y * scale_y), gate
+
+
 

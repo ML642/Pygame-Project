@@ -180,14 +180,14 @@ def draw_reload_bar(screen, x, y, scale_x, scale_y, reload_progress,
         screen.blit(reload_icon, (pos_x + bar_width + 5 * scale_x, pos_y - 2 * scale_y))
     except FileNotFoundError:
         pass
-def draw_minimap(screen, player, Rooms, boss_room_rect=None):
-    minimap_width = 200
-    minimap_height = 150
+
+def draw_minimap(screen, player, Rooms, boss_room_rect=None, scale_x=1, scale_y=1):
+    minimap_width = int(200 * scale_x)
+    minimap_height = int(150 * scale_y)
     minimap_surface = pygame.Surface((minimap_width, minimap_height))
     minimap_surface.fill((30, 30, 30))
 
-    room_scale_x = 10
-    room_scale_y = 7
+    map_scale = 50
 
     all_rects = [room.rect for room in Rooms]
     if boss_room_rect:
@@ -196,28 +196,45 @@ def draw_minimap(screen, player, Rooms, boss_room_rect=None):
     min_x = min(rect.x for rect in all_rects)
     min_y = min(rect.y for rect in all_rects)
 
-    for room in Rooms:
-        rect = pygame.Rect(
-            ((room.rect.x - min_x) // 70),
-            ((room.rect.y - min_y) // 70),
-            room.rect.width // 70,
-            room.rect.height // 70
+    def to_minimap_coords(x, y):
+        return (
+            int((x - min_x) / map_scale),
+            int((y - min_y) / map_scale)
         )
-        pygame.draw.rect(minimap_surface, (100, 100, 255), rect)
+
+    for room in Rooms:
+        x, y = to_minimap_coords(room.rect.x, room.rect.y)
+        w = max(1, int(room.rect.width / map_scale))
+        h = max(1, int(room.rect.height / map_scale))
+        pygame.draw.rect(minimap_surface, (100, 100, 255), pygame.Rect(x, y, w, h))
 
     if boss_room_rect:
-        rect = pygame.Rect(
-            ((boss_room_rect.x - min_x) // 70),
-            ((boss_room_rect.y - min_y) // 70),
-            boss_room_rect.width // 70,
-            boss_room_rect.height // 70
-        )
-        pygame.draw.rect(minimap_surface, (255, 0, 0), rect, 2)
+        x, y = to_minimap_coords(boss_room_rect.x, boss_room_rect.y)
+        w = max(1, int(boss_room_rect.width / map_scale))
+        h = max(1, int(boss_room_rect.height / map_scale))
+        pygame.draw.rect(minimap_surface, (255, 0, 0), pygame.Rect(x, y, w, h), 2)
 
-    player_pos = (
-        (player.rect.centerx - min_x) // 70,
-        (player.rect.centery - min_y) // 70
-    )
-    pygame.draw.circle(minimap_surface, (0, 255, 0), player_pos, 3)
+    px, py = to_minimap_coords(player.rect.centerx, player.rect.centery)
+    pygame.draw.circle(minimap_surface, (0, 255, 0), (px, py), int(3 * scale_x))
 
-    screen.blit(minimap_surface, (screen.get_width() - minimap_width - 10, 10))
+    screen.blit(minimap_surface, (screen.get_width() - minimap_width - 10, int(50 * scale_y)))
+
+
+
+    
+    
+class StopButton :
+        def __init__(self, screen, x, y, width, height):
+            self.screen = screen
+            self.x = x
+            self.y = y
+            self.width = width
+            self.height = height
+            self.image = pygame.image.load('images/button.webp').convert_alpha()
+            self.image = pygame.transform.scale(self.image, (width, height))
+            self.rect = self.image.get_rect(topleft=(x, y))
+            
+        def draw(self,screen):
+            screen.blit(self.image, (self.x, self.y))
+            pygame.draw.rect(screen, WHITE, self.rect, 2)
+
