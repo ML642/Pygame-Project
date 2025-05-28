@@ -56,6 +56,12 @@ class Player(pygame.sprite.Sprite):
         self.shot_cooldown = 0
         self.tears = []  # Projectiles
         self.angle = 180
+
+        self.base_speed = self.speed
+        self.base_attack = 10
+        self.attack = self.base_attack
+        self.buffs = {}
+        self.debuffs = {}
         
         #dash mechanics
         self.dash_speed_multiplier = 3
@@ -214,5 +220,42 @@ class Player(pygame.sprite.Sprite):
             self.dash_trail = []
     def take_damage(self, amount):
         self.health -= amount
+
+    def heal(self, amount):
+        self.health = min(self.max_health, self.health + amount)
+        print(f"[HEAL] +{amount} HP → {self.health}/{self.max_health}")
+
+
+    def add_buff(self, buff_type, duration):
+        end_time = pygame.time.get_ticks() + duration * 1000
+        self.buffs[buff_type] = end_time
+        print(f"[BUFF] {buff_type} на {duration} сек.")
+
+    def add_debuff(self, debuff_type, duration):
+        if debuff_type == "random":
+            debuff_type = random.choice(["slow", "weak"])
+        end_time = pygame.time.get_ticks() + duration * 1000
+        self.debuffs[debuff_type] = end_time
+        print(f"[DEBUFF] {debuff_type} на {duration} сек.")
+
+    def update_effects(self):
+        now = pygame.time.get_ticks()
+
+        self.buffs = {k: v for k, v in self.buffs.items() if v > now}
+        self.debuffs = {k: v for k, v in self.debuffs.items() if v > now}
+
+        self.speed = self.base_speed
+        self.attack = self.base_attack
+
+        if "speed" in self.buffs:
+            self.speed *= 1.5
+        if "strength" in self.buffs:
+            self.attack *= 1.5
+
+        if "slow" in self.debuffs:
+            self.speed *= 0.5
+        if "weak" in self.debuffs:
+            self.attack *= 0.5
+
 
             
