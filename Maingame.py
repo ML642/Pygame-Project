@@ -21,7 +21,7 @@ import sys
 from stopmenu import pause_menu , draw_button , draw_slider
 from Main_Menu import Main_menu
 
-from interactive_objects import  DestructibleObject , SpikeTrap , ExplosiveBarrel
+from interactive_objects import DestructibleObject, ExplosiveBarrel, BreakableWall, Chest, SpikeTrap
 from game_over import GameOver , game_over_screen ,  Restart
 
 from boss import Boss
@@ -54,15 +54,8 @@ PERFOMANCE_METRICS = True
         # Just before pygame.display.flip() (around line 830), add this performance tracking:
         # Calculate frame time
 frame_time = time.time() * 1000 - frame_start_time
-explosions = pygame.sprite.Group()
 
-interactive_objects = pygame.sprite.Group()
-wall = DestructibleObject(x=450, y=450, width=32, height=32, hp=100 ,scale_x=1 , scale_y=1)
-spike = SpikeTrap(x=450, y=500, width=50, height=40, damage=1 , scale_x=1 , scale_y=1)
-barrel = ExplosiveBarrel(x=1150, y=450, width=32, height=32, hp=50, explosion_radius=640, explosion_damage=50, scale_x=1 , scale_y=1)
-interactive_objects.add(wall, barrel)
-Spikes = pygame.sprite.Group()
-Spikes.add(spike)
+
 
 
 os.environ['SDL_VIDEO_CENTERED'] = "1"
@@ -194,7 +187,7 @@ camera = Camera(screen_width=current_settings["resolution"][0], screen_height=cu
 
 
 # technical debt
-def Room_Create(x, y, form, type, enemies_counter):
+def Room_Create(x, y, form, type, enemies_counter, secret=False):
     if form == "boss":
         global boss_center, boss_gates
         boss_walls, boss_floors, boss_center, gate = generate_boss_room(int(x), int(y), scale_x, scale_y)
@@ -207,24 +200,76 @@ def Room_Create(x, y, form, type, enemies_counter):
         floors.add(Floor(x * scale_x, y * scale_y, scale_x, scale_y))
         walls.add(room_walls)
         
+    if not secret:
+        room = Room(x * scale_x, (y + 50) * scale_y, enemies_counter, scale_x, scale_y)
+        Rooms.add(room)
+        generate_random_objects(room.rect, spikes, explosion_group, interactive_objects, breakablewalls, chests, scenery_group)
 
     Rooms.add(Room(x * scale_x, (y + 50) * scale_y, enemies_counter, scale_x, scale_y))
     ...
 
-    if form == 1 or form == 2 or form ==9 or form == 8 or form == 11 or form ==7 :   # right corridor  
+    if form == 1 or form == 2 or form ==9 or form == 8 or form == 11 or form ==7 and not secret:   # right corridor  
          floors.add(Floor_Hallway((x + 677) * scale_x , (y + 195)* scale_y , 300  , 90  ,scale_x,scale_y))
-    if form == 1 or form == 2 or form == 3 or form == 4 or form == 5 or form ==8 : # bottom corridor 
+    if form == 1 or form == 2 or form == 3 or form == 4 or form == 5 or form ==8 and not secret: # bottom corridor 
         floors.add(Floor_Hallway( (x + 250)*scale_x , (y + 480)*scale_y , 210  , 260 , scale_x ,  scale_y ))
-    if form ==1 or form == 2 or form == 3 or form == 4 or form ==6 or form == 9  : # left corrior 
+    if form ==1 or form == 2 or form == 3 or form == 4 or form ==6 or form == 9  and not secret: # left corrior 
         floors.add(Floor_Hallway( (x  - 300) * scale_x , (y + 195)*scale_y , 300  ,  90  , scale_x , scale_y))	
-    if form == 1 or form == 3  or form == 5  : # top corridor , 
+    if form == 1 or form == 3  or form == 5  and not secret: # top corridor , 
         floors.add(Floor_Hallway( (x + 250) *  scale_x , (y -  230)* scale_y   , 210 , 255  ,scale_x ,scale_y ))
+
+    # if not hasattr(pygame, 'secret_room_created') and not secret:
+    #     pygame.secret_room_created = True
+
+    #     corridor_width = 150
+
+    #     secret_room_x = x - ROOM_WIDTH - corridor_width
+    #     secret_room_y = y
+
+    #     floors.add(Floor_Hallway(
+    #         (secret_room_x + ROOM_WIDTH) * scale_x,
+    #         (secret_room_y + 195) * scale_y,
+    #         corridor_width, 90, scale_x, scale_y
+    #     ))
+
+    #     Room_Create(secret_room_x, secret_room_y, form='secret', type=0, enemies_counter=0, secret=True)
+
+    #     wall_x = secret_room_x + ROOM_WIDTH - 20
+    #     wall_y = secret_room_y + ROOM_HEIGHT // 2 - 50
+    #     secret_wall = BreakableWall(wall_x, wall_y, 20, 100, hp=3, scale_x=1, scale_y=1)
+    #     breakablewalls.add(secret_wall)
+    #     interactive_objects.add(secret_wall)
+
+    # if secret:
+    #     chest1 = Chest((x + 300) * scale_x, (y + 300) * scale_y, scale_x, scale_y)
+    #     chest2 = Chest((x + 500) * scale_x, (y + 300) * scale_y, scale_x, scale_y)
+    #     interactive_objects.add(chest1, chest2)
 
     return 0
 
   
 
-player = Player (scale_x,scale_y , current_settings["difficulty"])  
+player = Player (scale_x,scale_y , current_settings["difficulty"]) 
+
+
+interactive_objects = pygame.sprite.Group()
+spikes = pygame.sprite.Group()
+chests = pygame.sprite.Group()
+breakablewalls = pygame.sprite.Group()
+explosion_group= pygame.sprite.Group()
+
+scenery_group = pygame.sprite.Group()
+
+
+
+def init_secret_room(x, y):
+    global walls, floors, chests, interactive_objects
+
+    secret_walls, secret_floors, secret_chests, secret_gate = generate_secret_room(x, y, scale_x=1, scale_y=1)
+
+    walls.add(*secret_walls)
+    floors.add(*secret_floors)
+    chests.add(*secret_chests)
+    interactive_objects.add(secret_gate)
 
 walls = pygame.sprite.Group()
 boss_gates = [] 
@@ -267,21 +312,29 @@ async def loader(progress, loading_screen):
     progress['done'] = True
 
 async def main():
-    loading_screen = LoadingScreen(screen, len(level_1data))
+    loading_screen = LoadingScreen(screen, len(level_1data), 'images/loading_screen.gif')
     progress = {'loaded': 0, 'total': len(level_1data), 'done': False}
-    
-    # Initial draw of 0% progress
-    loading_screen.draw()
-    
-    await loader(progress, loading_screen)
-    
-    # Final draw of 100% progress
+
+    clock = pygame.time.Clock()
+
+    asyncio.create_task(loader(progress, loading_screen))
+
+    while not progress['done']:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+        loading_screen.update(progress['loaded'] - loading_screen.loaded_items)
+        loading_screen.draw()
+
+        await asyncio.sleep(0.016)
+        clock.tick(60)
+
     loading_screen.update(len(level_1data))
     loading_screen.draw()
-    await asyncio.sleep(0.5)  
-
-    
-
+    await asyncio.sleep(0.5)
+    progress['done'] = True
 asyncio.run(main())
 
 boss_room_x = level_1data[-1]["x"]
@@ -370,6 +423,13 @@ while running:
                     for drop in drops:
                         if player.rect.colliderect(drop.rect):
                             FIRE_MODES =  drop.pickup(player , FIRE_MODES )
+                    for chest in chests:
+                        if player.rect.colliderect(chest.rect):
+                            if not chest.is_open:
+                                chest.open()
+                            else:
+                                chest.apply_effect(player)
+                                chest.kill()
                 if event.key == pygame.K_SPACE:
                     player.dash()
                 elif event.key == pygame.K_1:
@@ -594,12 +654,26 @@ while running:
             screen.blit(wall.image, camera.apply(wall))
         for enemy in enemies:
             screen.blit(enemy.image, camera.apply(enemy))        
-        for spike in Spikes :
+        for spike in spikes :
             print(spike.rect.x , spike.rect.y)
             screen.blit(spike.image, camera.apply(spike))
             if player.rect.colliderect(spike.rect) and not player.invincible:
                 player.health -= spike.damage
-                spike.apply_damage(player)    
+                spike.apply_damage(player)
+        for obj in scenery_group:
+            screen.blit(obj.image, camera.apply(obj))
+        for chest in chests:
+            chest.update(player)
+            screen.blit(chest.image, camera.apply(chest))
+        for wall in breakablewalls:
+            print(wall.rect.x, wall.rect.y)
+            screen.blit(wall.image, camera.apply(wall))
+        for barrel in explosion_group:
+            barrel.update()
+            screen.blit(barrel.image, camera.apply(barrel))
+            if barrel.rect.colliderect(player.rect) and not player.invincible and not barrel.exploded:
+                player.health -= barrel.explosion_damage
+                enemies_counter = barrel.take_damage(barrel.hp, enemies_group, player, interactive_objects, enemies_counter)   
         
         screen.blit(rotated_image, rotated_rect.topleft + pygame.math.Vector2(camera.camera.topleft))
         
