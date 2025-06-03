@@ -181,7 +181,7 @@ class Boss(pygame.sprite.Sprite):
             )
             bullet.max_distance = 700 * self.scale_x
 
-            angle = math.degrees(math.atan2(-direction[1], direction[0]))
+            angle = math.degrees(math.atan2(-direction[1], direction[0])) + 180
             bullet.image = pygame.transform.rotate(bullet.image, angle)
             self.tears.add(bullet)
 

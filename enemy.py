@@ -220,7 +220,7 @@ class Enemy(pygame.sprite.Sprite):
         )
         # print(f"[{self.type}] Shoot dmg {damage}")
 
-        angle = math.degrees(math.atan2(-dy, dx))
+        angle = math.degrees(math.atan2(-dy, dx)) + 180
         tear.image = pygame.transform.rotate(tear.image, angle)
         return tear
 

@@ -596,6 +596,7 @@ elif isinstance(menu_result, dict):
     asyncio.run(main())
 
 player.rect.center =( 150 * scale_x , 150 * scale_y)
+player.rect.center  = (boss_room_x * scale_x + 50 * scale_x, boss_room_y * scale_y + 50 * scale_y)  
 while running:
     # print(scale_x ,scale_y)
         current_time = pygame.time.get_ticks()  # Record the start time
@@ -742,7 +743,7 @@ while running:
                     wall.toogle(walls)
                    
                 
-        print("Enemies counter:", enemies_counter)
+        #print("Enemies counter:", enemies_counter)
         for room in Rooms :
           if  room.active == True  and enemies_counter <= 0 and room.clear == False :
             enemies_counter = room.enemies_counter
@@ -752,8 +753,8 @@ while running:
             enemies_to_spawn = room.enemies_counter
 
             while enemies_to_spawn > 0:
-                x = random.randint(room.rect.x + 50, room.rect.x + int(ROOM_WIDTH - 100 * scale_x))
-                y = random.randint(room.rect.y + 50, room.rect.y + int(ROOM_HEIGHT - 100 * scale_y))
+                x = random.randint(room.rect.x + 50, room.rect.x + int(ROOM_WIDTH - 150 * scale_x))
+                y = random.randint(room.rect.y + 50, room.rect.y + int(ROOM_HEIGHT - 150 * scale_y))
 
                 enemy_type = random.choice(["ranged", "sniper", "melee"])
                 enemy = Enemy(x, y, drops, scale_x, scale_y, current_settings["difficulty"], type=enemy_type)
@@ -1065,10 +1066,12 @@ while running:
                 enemies_counter = 0
                 kills = 0
                 FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
+                boss_spawned = False
                 start_time = current_time
             elif result == "menu":
                 Restart(Rooms,player, enemies ,drops,scale_x, scale_y)
                 enemies_counter = 0
+                boss_spawned = False
                 kills = 0
                 start_time = 0
                 FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
