@@ -264,3 +264,16 @@ class Boss(pygame.sprite.Sprite):
             grenade.image = pygame.transform.scale(grenade.image, (30 * self.scale_x, 30 * self.scale_y))
             self.tears.add(grenade)
 
+    def rescale(self, scale_x, scale_y):
+        self.scale_x = scale_x
+        self.scale_y = scale_y
+
+        self.image = pygame.transform.scale(self.image_orig, (int(120 * scale_x), int(120 * scale_y)))
+        center = self.rect.center
+        self.rect = self.image.get_rect(center=center)
+
+        self.speed = 2 * scale_x
+        self.attack_distance = 300 * scale_x
+        self.safe_distance = 400 * scale_x
+        self.dash_speed = 14 * scale_x
+

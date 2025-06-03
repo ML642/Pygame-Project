@@ -84,7 +84,7 @@ class Enemy(pygame.sprite.Sprite):
         elif self.type == "sniper":
             self.update_sniper(player, walls)
         elif self.type == "melee":
-            self.update_melee(player)
+            self.update_melee(player, walls)
 
         # Update projectiles
         for tear in self.tears.copy():
@@ -124,19 +124,41 @@ class Enemy(pygame.sprite.Sprite):
                 self.tears.add(tear)
             self.last_shot_time = now
 
-    def update_melee(self, player):
-        self.move_towards(player)
+    def update_melee(self, player, walls):
+        self.move_towards(player, walls)
         now = pygame.time.get_ticks()
         if self.rect.colliderect(player.rect) and now - self.last_attack_time >= self.attack_cooldown:
             player.take_damage(self.damage)
             self.last_attack_time = now
 
-    def move_towards(self, player):
+    def move_towards(self, player, walls):
         dx = player.rect.centerx - self.rect.centerx
         dy = player.rect.centery - self.rect.centery
         dist = max(1, math.hypot(dx, dy))
-        self.rect.x += int(self.speed * dx / dist)
-        self.rect.y += int(self.speed * dy / dist)
+
+        move_x = int(self.speed * dx / dist)
+        move_y = int(self.speed * dy / dist)
+
+        original_pos = self.rect.topleft
+
+        self.rect.x += move_x
+        if pygame.sprite.spritecollide(self, walls, False):
+            self.rect.x = original_pos[0]
+            self.rect.y += int(self.speed)
+            if pygame.sprite.spritecollide(self, walls, False):
+                self.rect.y = original_pos[1]
+            else:
+                return
+
+
+        self.rect.y += move_y
+        if pygame.sprite.spritecollide(self, walls, False):
+            self.rect.y = original_pos[1]
+            self.rect.x += int(self.speed)
+            if pygame.sprite.spritecollide(self, walls, False):
+                self.rect.x = original_pos[0]
+
+
 
     def move_to_range(self, player, target_range, walls):
         dx = player.rect.centerx - self.rect.centerx
@@ -144,7 +166,7 @@ class Enemy(pygame.sprite.Sprite):
         distance = math.hypot(dx, dy)
 
         if distance > target_range + 20:
-            self.move_towards(player)
+            self.move_towards(player, walls)
         elif distance < target_range - 20:
             self.move_away_from(player, walls)
 

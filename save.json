@@ -1,0 +1,1 @@
+{"health": 50, "max_health": 300, "position": [211, 146], "current_mode": 2, "fire_modes": {"1": {"bullets": 10, "ammo": 80, "full": 10}, "2": {"bullets": 2864, "ammo": 30, "full": 30}, "3": {"bullets": 10, "ammo": 5, "full": 10}, "4": {"bullets": null, "ammo": 3, "full": null}}}

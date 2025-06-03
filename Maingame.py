@@ -86,6 +86,40 @@ def load_settings():
 #print(load_settings())
 
 current_settings = load_settings()
+def apply_new_settings(player):
+    global current_settings, scale_x, scale_y, screen, camera
+
+    current_settings = load_settings()
+
+    scale_x = current_settings["resolution"][0] / BASE_WIDTH
+    scale_y = current_settings["resolution"][1] / BASE_HEIGHT
+
+    screen = pygame.display.set_mode(current_settings["resolution"])
+
+    camera = Camera(
+        screen_width=current_settings["resolution"][0],
+        screen_height=current_settings["resolution"][1],
+        world_width=30000,
+        world_height=30000,
+        scale_x=scale_x,
+        scale_y=scale_y
+    )
+    camera.update(player)
+
+
+
+def fade_transition():
+    fade = pygame.Surface(screen.get_size())
+    fade.fill((0, 0, 0))
+    for alpha in range(0, 255, 20):
+        fade.set_alpha(alpha)
+        screen.blit(fade, (0, 0))
+        pygame.display.update()
+        pygame.time.delay(5)
+
+
+
+
 
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -221,6 +255,9 @@ boss_gates = []
 #         if event.type == pygame.QUIT:
 #             pygame.quit()
     
+camera = Camera(screen_width=current_settings["resolution"][0], screen_height=current_settings["resolution"][1], world_width=30000, world_height=30000, scale_x=scale_x, scale_y=scale_y)
+
+
 async def loader(progress, loading_screen):
     total = len(level_1data)
     for i, room_data in enumerate(level_1data, start=1):
@@ -519,13 +556,15 @@ elif isinstance(menu_result, str) and menu_result == "new_game": # New Game
     first_room = level_1data[0]
     player.rect.center = (first_room["x"] * scale_x + 50 * scale_x, first_room["y"] * scale_y + 50 * scale_y)
     asyncio.run(main())
+    fade_transition()
+    apply_new_settings(player)
 
 elif isinstance(menu_result, dict):
     current_settings = menu_result
     asyncio.run(main())
 
 
-camera = Camera(screen_width=current_settings["resolution"][0], screen_height=current_settings["resolution"][1], world_width=30000, world_height=30000, scale_x=scale_x, scale_y=scale_y)
+
 
 while running:
     # print(scale_x ,scale_y)
@@ -542,7 +581,19 @@ while running:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     paused = True
-                    pause_menu(scale_x , scale_y ,  current_settings )
+                    current_settings = load_settings()
+
+                    window_width, window_height = screen.get_size()
+                    # scale_x = window_width / 800
+                    # scale_y = window_height / 600
+                    current_settings = load_settings()
+
+                    pause_menu(screen, current_settings)
+
+                    fade_transition()
+                    apply_new_settings(player)
+                    for enemy in enemies:
+                        enemy.rescale(scale_x, scale_y)
                 elif event.key == pygame.K_e: # Added "E" hotkey to pick up items.
                     for drop in drops:
                         if player.rect.colliderect(drop.rect):
@@ -734,7 +785,7 @@ while running:
         player.angle = player_angle
         
         rotated_image = pygame.transform.rotate(player.original_image, player_angle)
-        rotated_rect = rotated_image.get_rect(center=player.rect.center)
+        rotated_rect = rotated_image.get_rect(center=camera.apply(player).center)
 
         for tear in player.tears[:]:
             if isinstance(tear, Grenade):
@@ -792,7 +843,7 @@ while running:
                 player.health -= spike.damage
                 spike.apply_damage(player)    
         
-        screen.blit(rotated_image, rotated_rect.topleft + pygame.math.Vector2(camera.camera.topleft))
+        screen.blit(rotated_image, rotated_rect.topleft)
         
         
         
@@ -987,6 +1038,7 @@ while running:
                 start_time = 0
                 FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
                 current_settings =  Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT , current_settings)
+
                 scale_x = current_settings["resolution"][0] / BASE_WIDTH
                 scale_y = current_settings["resolution"][1] / BASE_HEIGHT
                 pygame.mouse.set_visible(True)
