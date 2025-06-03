@@ -1,5 +1,6 @@
 import pygame
 import os
+import sys
 import random 
 from UI_components import Menu_option
 from Main_Menu import Main_menu
@@ -23,7 +24,6 @@ paused = False
 volume = 0.5
 music = 0.5
 
-screen = pygame.display.set_mode((800, 600))
     
 class DustParticle:
     def __init__(self, x, y):
@@ -54,7 +54,7 @@ class DustParticle:
         return self.lifetime <= 0 or self.alpha <= 0
 
 
-def draw_button(text, x, y, width, height, color, hover_color):
+def draw_button(screen, text, x, y, width, height, color, hover_color):
     font = pygame.font.SysFont("Arial", 40  )
 
     mouse_pos = pygame.mouse.get_pos()
@@ -77,7 +77,7 @@ def draw_button(text, x, y, width, height, color, hover_color):
 
     return clicked
 
-def draw_slider(x, y, width, height, value ):
+def draw_slider(screen, x, y, width, height, value ):
     volume = value
     pygame.draw.rect(screen, DARK_GRAY, (x, y + height // 2 - 5, width, 10))
     handle_x = x + int(width * value)
@@ -91,7 +91,7 @@ def draw_slider(x, y, width, height, value ):
     return volume
 
 
-def draw_slider_music (x, y, width, height, value  ):
+def draw_slider_music (screen, x, y, width, height, value  ):
     music = value
     pygame.draw.rect(screen, DARK_GRAY, (x, y + height // 2 - 5, width, 10))
     handle_x = x + int(width * value)
@@ -104,86 +104,88 @@ def draw_slider_music (x, y, width, height, value  ):
             music  = min(1.0, max(0.0, (mouse_x - x) / width))
     return music 
 
-def pause_menu( scale_x = 13/8, scale_y = 4/3  , current_settings = None):
+def pause_menu(screen, current_settings):
     pygame.mouse.set_visible(True)
-    global paused 
-    dust_particles = []
+    global paused
+    global running
     paused = True
-    global running 
-    
-    # print("Paused")
+    dust_particles = []
+
+    last_music_volume = current_settings.get('music_volume', 50) / 100
+
     while paused:
-       
-        music = current_settings['music_volume'] / 100
-        volume = current_settings['sfx_volume'] / 100
-        #print("In pause menu")
-        # print(music)
-        # print(volume)
+        window_width, window_height = screen.get_size()
+        scale_x = window_width / 800
+        scale_y = window_height / 600
+
+        music = current_settings.get('music_volume', 50) / 100
+        volume = current_settings.get('sfx_volume', 50) / 100
+
         screen.fill(BLACK)
-        
-        if random.random() < 0.85:  # adjust spawn rate
-            x = random.randint(int(0* scale_x), int(800* scale_x))
-            y = random.randint(int(400* scale_y), int (600* scale_y))  # near bottom
+
+        if random.random() < 0.85:
+            x = random.randint(int(0 * scale_x), int(800 * scale_x))
+            y = random.randint(int(400 * scale_y), int(600 * scale_y))
             dust_particles.append(DustParticle(x, y))
 
-            
         for particle in dust_particles:
             particle.update()
             particle.draw(screen)
-
-        # Remove dead particles
         dust_particles = [p for p in dust_particles if not p.is_dead()]
-        
-        
-        
-        React = pygame.Rect(220 * scale_x,140 * scale_y,360 * scale_x,400 * scale_y)
-        
-        
-        pygame.draw.rect(screen, WHITE , React  , int(10* scale_x) )
-        
-        
-        [X, Y ] = pygame.mouse.get_pos()
-        
-        font = pygame.font.SysFont("Bauhaus 93", int(70 * scale_x))
-        title = font.render(f" GAME PAUSED ", True, WHITE)
-        screen.blit(title, ((330 - 150) * scale_x, 50* scale_y))
-        
-     
-        # Buttons
-        if draw_button("Resume", 300 * scale_x, (350 - 70) * scale_y, 200 * scale_x, 50 * scale_y, BLACK, (0, 155, 0)):
-            paused = False
-        if draw_button("Settings", 300 * scale_x, 350 * scale_y, 200 * scale_x, 50 * scale_y, BLACK, (255, 128, 0)):
-            # settings logic here 
-            print("Opening settings...")
-            settings_menu = SettingsMenu(scale_x * 600, scale_y * 800 , current_settings) 
-            settings_menu.update()
-            new_settings = settings_menu.run(screen, Main_menu)  
-            print("New settings:", new_settings)
-            if new_settings:
-                    current_settings.update(new_settings)
 
-        if draw_button("Quit", 300 * scale_x, 420 * scale_y, 200 * scale_x, 50 * scale_y, BLACK, (255, 100, 100)):
-            if confirm_quit(scale_x ,scale_y):
+        React = pygame.Rect(220 * scale_x, 140 * scale_y, 360 * scale_x, 400 * scale_y)
+        pygame.draw.rect(screen, WHITE, React, int(10 * scale_x))
+
+        font = pygame.font.SysFont("Bauhaus 93", int(70 * scale_x))
+        title = font.render(" GAME PAUSED ", True, WHITE)
+        screen.blit(title, ((330 - 150) * scale_x, 50 * scale_y))
+
+        if draw_button(screen, "Resume", 300 * scale_x, 280 * scale_y, 200 * scale_x, 50 * scale_y, BLACK, (0, 155, 0)):
+            paused = False
+
+        if draw_button(screen, "Settings", 300 * scale_x, 350 * scale_y, 200 * scale_x, 50 * scale_y, BLACK, (255, 128, 0)):
+            settings_menu = SettingsMenu(scale_x * 600, scale_y * 800, current_settings)
+            settings_menu.update()
+            new_settings = settings_menu.run(screen, Main_menu)
+            if new_settings:
+                current_settings.update(new_settings)
+
+        if draw_button(screen, "Quit", 300 * scale_x, 420 * scale_y, 200 * scale_x, 50 * scale_y, BLACK, (255, 100, 100)):
+            if confirm_quit(screen, scale_x, scale_y):
                 running = False
                 pygame.quit()
                 paused = False
 
-        # Volume slider
-        
-        image_sound = pygame.image.load('images/volume.png').convert_alpha()
-        sound_icon = pygame.transform.scale(image_sound , (50* scale_x, 50 * scale_y))
-        
-        screen.blit(sound_icon , (240 * scale_x, (190 - 20) * scale_y))
-        current_settings["sfx_volume"] = int(draw_slider(300 * scale_x, (200 - 20) * scale_y, 200 * scale_x, 30 * scale_y, volume) * 100)
+        try:
+            image_sound = pygame.image.load('images/volume.png').convert_alpha()
+            sound_icon = pygame.transform.scale(image_sound, (50 * scale_x, 50 * scale_y))
+            screen.blit(sound_icon, (240 * scale_x, 170 * scale_y))
+        except pygame.error:
+            with open("save.json", "w") as f:
+                f.write("")
+            sys.exit()
 
-        music_sound = pygame.image.load('images/music.png').convert_alpha()
-        music_icon = pygame.transform.scale(music_sound , (40 * scale_x, 40 * scale_y))
-   
-        screen.blit(music_icon, (240 * scale_x, (240 - 20) * scale_y))
-        current_settings["music_volume"] =int(draw_slider_music(300 * scale_x, (250 - 20) * scale_y , 200* scale_x, 30 * scale_x, music ) * 100)
-        pygame.display.flip()
+        current_settings["sfx_volume"] = int(draw_slider(screen, 300 * scale_x, 180 * scale_y, 200 * scale_x, 30 * scale_y, volume) * 100)
+
+        try:
+            music_sound = pygame.image.load('images/music.png').convert_alpha()
+            music_icon = pygame.transform.scale(music_sound, (40 * scale_x, 40 * scale_y))
+            screen.blit(music_icon, (240 * scale_x, 230 * scale_y))
+        except pygame.error:
+            pass
+
+        new_music = draw_slider_music(screen, 300 * scale_x, 240 * scale_y, 200 * scale_x, 30 * scale_y, music)
+        current_settings["music_volume"] = int(new_music * 100)
+
+        if abs(new_music - last_music_volume) > 0.01:
+            pygame.mixer.music.set_volume(new_music)
+            last_music_volume = new_music
+
         with open("settings.json", "w") as f:
-          json.dump(current_settings, f)
+            json.dump(current_settings, f)
+
+        pygame.display.flip()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -192,18 +194,18 @@ def pause_menu( scale_x = 13/8, scale_y = 4/3  , current_settings = None):
                 if event.key == pygame.K_ESCAPE:
                     paused = False
 
-def confirm_quit(scale_x , scale_y):
-    font = pygame.font.SysFont("Arial", int(40* scale_x) )
+
+def confirm_quit(screen, scale_x , scale_y):
+    font = pygame.font.SysFont("Arial", int(40 * scale_x))
 
     while True:
-        
         screen.fill(BLACK)
         message = font.render("Quit Game?", True, WHITE)
-        screen.blit(message, (300* scale_x , 200 * scale_y))
+        screen.blit(message, (300 * scale_x, 200 * scale_y))
 
-        if draw_button("Yes", 250 * scale_x, 300* scale_y, 100* scale_x, 50 * scale_y, RED, (255, 100, 100)):
+        if draw_button(screen, "Yes", 250 * scale_x, 300 * scale_y, 100 * scale_x, 50 * scale_y, RED, (255, 100, 100)):
             return True
-        if draw_button("No", 450 * scale_x, 300 * scale_y, 100 * scale_x, 50 * scale_y, GREEN, (100, 255, 100)):
+        if draw_button(screen, "No", 450 * scale_x, 300 * scale_y, 100 * scale_x, 50 * scale_y, GREEN, (100, 255, 100)):
             return False
 
         pygame.display.flip()
@@ -211,6 +213,7 @@ def confirm_quit(scale_x , scale_y):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return True
+
 
 
 # clock = pygame.time.Clock()
