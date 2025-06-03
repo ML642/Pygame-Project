@@ -3,11 +3,12 @@ import time
 from PIL import Image
 
 class LoadingScreen:
-    def __init__(self, screen, total_items,gif_path='images/loading.gif'):
+    def __init__(self, screen, total_items,gif_path='images/loading.gif', scale=2):
         self.screen = screen
         self.total_items = total_items
         self.loaded_items = 0
         self.progress = 0
+        self.scale = scale
 
             # Load frames from GIF
         self.frames = []
@@ -19,6 +20,7 @@ class LoadingScreen:
                 size = frame.size
                 data = frame.tobytes()
                 py_image = pygame.image.fromstring(data, size, mode)
+                scaled_image = pygame.transform.scale(py_image, (size[0] * 2, size[1] * 2))
                 self.frames.append(py_image)
                 pil_img.seek(pil_img.tell() + 1)
         except EOFError:
