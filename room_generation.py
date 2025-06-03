@@ -497,12 +497,12 @@ def generate_random_objects(room_rect, spikes, explosion_group, interactive_obje
 
 
         elif obj_type == "barrel":
-            barrel = ExplosiveBarrel(x, y, width=32, height=32, hp=50, explosion_radius=640, explosion_damage=50,
+            barrel = ExplosiveBarrel(x, y, width=40, height=40, hp=50, explosion_radius=640, explosion_damage=50,
                                      scale_x=scale_x, scale_y=scale_y, explosion_group=explosion_group)
             explosion_group.add(barrel)
 
         elif obj_type == "destructible_object":
-            destructible_object = DestructibleObject(x, y, width=32, height=32, hp=10, scale_x=scale_x, scale_y=scale_y)
+            destructible_object = DestructibleObject(x, y, width=40, height=40, hp=10, scale_x=scale_x, scale_y=scale_y)
             interactive_objects.add(destructible_object)
 
         elif obj_type == "breakable_wall":
