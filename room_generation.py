@@ -483,8 +483,8 @@ def generate_random_objects(room_rect, spikes, explosion_group, interactive_obje
     num_scenery_objects = random.randint(6, 8)
     rock_img = pygame.image.load("images/Rock.webp").convert_alpha()
     bush_img = pygame.image.load("images/Bush.webp").convert_alpha()
-    rock_img = pygame.transform.scale(rock_img, (32, 32))
-    bush_img = pygame.transform.scale(bush_img, (32, 32))
+    rock_img = pygame.transform.scale(rock_img, (40, 40))
+    bush_img = pygame.transform.scale(bush_img, (40, 40))
 
     for _ in range(num_objects):
         obj_type = random.choice(["spike", "barrel", "destructible_object", "breakable_wall","chest", "scenery"])
