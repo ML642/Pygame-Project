@@ -315,7 +315,7 @@ async def loader(progress, loading_screen):
     progress['done'] = True
 
 async def main():
-    loading_screen = LoadingScreen(screen, len(level_1data), 'images/loading_screen.gif')
+    loading_screen = LoadingScreen(screen, len(level_1data), 'images/loading_screen.gif', scale=2)
     progress = {'loaded': 0, 'total': len(level_1data), 'done': False}
 
     clock = pygame.time.Clock()
@@ -525,12 +525,12 @@ while running:
             for gate in boss_gates:
                 if not gate.is_open:
                     gate.toogle(walls)
-
+        enemies_counter = len([enemy for enemy in enemies if enemy.alive()])
         if enemies_counter > 0:
             for wall in walls:
                 if isinstance(wall, Gate) and wall.is_open:
                     wall.toogle(walls)
-        
+
         if enemies_counter <= 0: 
             for wall in walls:
                 if isinstance(wall, Gate) and not wall.is_open:
@@ -657,12 +657,19 @@ while running:
             screen.blit(wall.image, camera.apply(wall))
         for enemy in enemies:
             screen.blit(enemy.image, camera.apply(enemy))        
-        for spike in spikes :
-            print(spike.rect.x , spike.rect.y)
+        for spike in spikes:
             screen.blit(spike.image, camera.apply(spike))
+            spike.update(player, enemies)
+
             if player.rect.colliderect(spike.rect) and not player.invincible:
-                player.health -= spike.damage
                 spike.apply_damage(player)
+
+            for enemy in list(enemies):
+                if spike.rect.colliderect(enemy.rect):
+                    result = spike.apply_damage(enemy)
+                    if result == "kill":
+                        enemies.remove(enemy)
+                        enemies_counter -= 1
         for obj in scenery_group:
             screen.blit(obj.image, camera.apply(obj))
         for chest in chests:

@@ -33,18 +33,32 @@ class SpikeTrap(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, damage=10, scale_x = 1 , scale_y = 1):
         super().__init__()
         self.damage = damage
-        self.image = pygame.image.load('images/spikes.jpg').convert_alpha()
-        self.image = pygame.transform.scale(self.image, (width * scale_x, height * scale_y))
+
+        try:
+            image = pygame.image.load('images/spikes.jpg').convert_alpha()
+        except:
+            image = pygame.Surface((width, height))
+            image.fill((200, 0, 0)) 
+
+        scaled_width = int(width * scale_x)
+        scaled_height = int(height * scale_y)
+
+        self.image = pygame.transform.scale(image, (scaled_width, scaled_height))
         self.rect = self.image.get_rect(topleft=(x * scale_x, y * scale_y))
 
-    def update(self, player=None):
+    def update(self, player=None, enemies=None):
         if self.rect.colliderect(player.rect) and not player.invincible:
             player.health -= self.damage
             self.apply_damage(player)
+        if enemies:
+            for enemy in enemies:
+                if self.rect.colliderect(enemy.rect):
+                    self.apply_damage(enemy)
 
     def apply_damage(self, target):
         if hasattr(target, "take_damage"):
-            target.take_damage(self.damage)
+            return target.take_damage(self.damage)
+        return None
 
 
 class ExplosiveBarrel(DestructibleObject):
@@ -69,23 +83,23 @@ class ExplosiveBarrel(DestructibleObject):
         self.rect = self.image.get_rect(topleft=(x * scale_x, y * scale_y))
 
         self.exploded = False
-        self.flash_time = 200  # мс
+        self.flash_time = 200 
         self.explosion_start_time = None
 
-    def take_damage(self, amount, enemies_group=None, player=None, objects=None, enemies_counter=0):
+    def take_damage(self, amount, enemies=None, player=None, objects=None, enemies_counter=0):
         self.hp -= amount
         if self.hp <= 0 and not self.exploded:
             self.exploded = True
             self.explosion_start_time = pygame.time.get_ticks()
-            self.image.fill(self.flash_color)  # Вспышка
-            enemies_counter = self.explode(enemies_group, player, objects, enemies_counter)
+            self.image.fill(self.flash_color) 
+            enemies_counter = self.explode(enemies, player, objects, enemies_counter)
         return enemies_counter
 
-    def explode(self, enemies_group=None, player=None, objects=None, enemies_counter=0):
+    def explode(self, enemies=None, player=None, objects=None, enemies_counter=0):
         print("BOOM!")
 
-        if enemies_group:
-            for enemy in enemies_group:
+        if enemies:
+            for enemy in enemies:
                 distance = math.hypot(self.rect.centerx - enemy.rect.centerx,
                                       self.rect.centery - enemy.rect.centery)
                 if distance <= self.explosion_radius:

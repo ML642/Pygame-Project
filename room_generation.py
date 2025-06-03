@@ -483,8 +483,8 @@ def generate_random_objects(room_rect, spikes, explosion_group, interactive_obje
     num_scenery_objects = random.randint(6, 8)
     rock_img = pygame.image.load("images/Rock.webp").convert_alpha()
     bush_img = pygame.image.load("images/Bush.webp").convert_alpha()
-    rock_img = pygame.transform.scale(rock_img, (32, 32))
-    bush_img = pygame.transform.scale(bush_img, (32, 32))
+    rock_img = pygame.transform.scale(rock_img, (40, 40))
+    bush_img = pygame.transform.scale(bush_img, (40, 40))
 
     for _ in range(num_objects):
         obj_type = random.choice(["spike", "barrel", "destructible_object", "breakable_wall","chest", "scenery"])
@@ -497,12 +497,12 @@ def generate_random_objects(room_rect, spikes, explosion_group, interactive_obje
 
 
         elif obj_type == "barrel":
-            barrel = ExplosiveBarrel(x, y, width=32, height=32, hp=50, explosion_radius=640, explosion_damage=50,
+            barrel = ExplosiveBarrel(x, y, width=40, height=40, hp=50, explosion_radius=640, explosion_damage=50,
                                      scale_x=scale_x, scale_y=scale_y, explosion_group=explosion_group)
             explosion_group.add(barrel)
 
         elif obj_type == "destructible_object":
-            destructible_object = DestructibleObject(x, y, width=32, height=32, hp=10, scale_x=scale_x, scale_y=scale_y)
+            destructible_object = DestructibleObject(x, y, width=40, height=40, hp=10, scale_x=scale_x, scale_y=scale_y)
             interactive_objects.add(destructible_object)
 
         elif obj_type == "breakable_wall":
