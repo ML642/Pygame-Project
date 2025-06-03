@@ -231,7 +231,7 @@ class Boss(pygame.sprite.Sprite):
 
     def spawn_minions(self):
         for _ in range(4):
-            for _ in range(10):
+            for _ in range(1000):
                 offset_x = random.randint(-150, 150)
                 offset_y = random.randint(-150, 150)
                 spawn_x = self.rect.centerx + offset_x
@@ -263,4 +263,17 @@ class Boss(pygame.sprite.Sprite):
             grenade.image = pygame.image.load("images/mine.png").convert_alpha()
             grenade.image = pygame.transform.scale(grenade.image, (30 * self.scale_x, 30 * self.scale_y))
             self.tears.add(grenade)
+
+    def rescale(self, scale_x, scale_y):
+        self.scale_x = scale_x
+        self.scale_y = scale_y
+
+        self.image = pygame.transform.scale(self.image_orig, (int(120 * scale_x), int(120 * scale_y)))
+        center = self.rect.center
+        self.rect = self.image.get_rect(center=center)
+
+        self.speed = 2 * scale_x
+        self.attack_distance = 300 * scale_x
+        self.safe_distance = 400 * scale_x
+        self.dash_speed = 14 * scale_x
 

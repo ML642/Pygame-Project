@@ -74,7 +74,6 @@ screen = pygame.display.set_mode((800 * scale_x, 600 * scale_y))
 clock = pygame.time.Clock()
 
 
-
 def load_settings():
     try:
         with open("settings.json", "r") as f:
@@ -86,6 +85,51 @@ def load_settings():
 #print(load_settings())
 
 current_settings = load_settings()
+menu_result = Main_menu(SELECTED_WIDTH, SELECTED_HEIGHT, current_settings)
+current_settings = menu_result
+
+camera = Camera(screen_width=current_settings["resolution"][0], screen_height=current_settings["resolution"][1], world_width=30000, world_height=30000, scale_x=scale_x, scale_y=scale_y)
+
+
+scale_x = current_settings["resolution"][0] / BASE_WIDTH
+scale_y = current_settings["resolution"][1] / BASE_HEIGHT
+
+player = Player(scale_x, scale_y, current_settings["difficulty"])
+
+
+def apply_new_settings(player):
+    global current_settings, scale_x, scale_y, screen, camera
+
+    current_settings = load_settings()
+
+    scale_x = current_settings["resolution"][0] / BASE_WIDTH
+    scale_y = current_settings["resolution"][1] / BASE_HEIGHT
+
+    screen = pygame.display.set_mode(current_settings["resolution"])
+
+    camera = Camera(
+        screen_width=current_settings["resolution"][0],
+        screen_height=current_settings["resolution"][1],
+        world_width=30000,
+        world_height=30000,
+        scale_x=scale_x,
+        scale_y=scale_y
+    )
+    camera.update(player)
+
+
+def fade_transition():
+    fade = pygame.Surface(screen.get_size())
+    fade.fill((0, 0, 0))
+    for alpha in range(0, 255, 20):
+        fade.set_alpha(alpha)
+        screen.blit(fade, (0, 0))
+        pygame.display.update()
+        pygame.time.delay(5)
+
+
+
+
 
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
@@ -221,6 +265,8 @@ boss_gates = []
 #         if event.type == pygame.QUIT:
 #             pygame.quit()
     
+
+
 async def loader(progress, loading_screen):
     total = len(level_1data)
     for i, room_data in enumerate(level_1data, start=1):
@@ -445,7 +491,6 @@ OFFSET = 700
 OFFSETY = (scale_y-1) * 200    
     
 # player.rect.center = ( -500 +(1-scale_x) * OFFSET ,50 + ( 700 / 2 )* scale_y - OFFSETY  )  # - move the player to the room 
-# player.rect.center = (boss_room_x + -10 * scale_x, boss_room_y + 250 * scale_y)
 
 
 
@@ -475,7 +520,7 @@ pygame.mouse.set_visible(True)
 start_time = pygame.time.get_ticks()  # Record the start time
 show_save_screen = False
 
-menu_result = Main_menu(SELECTED_WIDTH, SELECTED_HEIGHT, current_settings)
+
 
 if isinstance(menu_result, dict) and menu_result.get("load_save"):
     try:
@@ -519,13 +564,13 @@ elif isinstance(menu_result, str) and menu_result == "new_game": # New Game
     first_room = level_1data[0]
     player.rect.center = (first_room["x"] * scale_x + 50 * scale_x, first_room["y"] * scale_y + 50 * scale_y)
     asyncio.run(main())
+    fade_transition()
+    apply_new_settings(player)
 
 elif isinstance(menu_result, dict):
     current_settings = menu_result
     asyncio.run(main())
 
-
-camera = Camera(screen_width=current_settings["resolution"][0], screen_height=current_settings["resolution"][1], world_width=30000, world_height=30000, scale_x=scale_x, scale_y=scale_y)
 
 while running:
     # print(scale_x ,scale_y)
@@ -542,13 +587,27 @@ while running:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     paused = True
-                    pause_menu(scale_x , scale_y ,  current_settings )
+                    current_settings = load_settings()
+
+                    window_width, window_height = screen.get_size()
+                    # scale_x = window_width / 800
+                    # scale_y = window_height / 600
+                    current_settings = load_settings()
+
+                    pause_menu(screen, current_settings)
+
+                    fade_transition()
+                    apply_new_settings(player)
+                    for enemy in enemies:
+                        if hasattr(enemy, 'rescale'):
+                             enemy.rescale(scale_x, scale_y)
                 elif event.key == pygame.K_e: # Added "E" hotkey to pick up items.
                     for drop in drops:
                         if player.rect.colliderect(drop.rect):
                             FIRE_MODES =  drop.pickup(player , FIRE_MODES )
                     for portal in portals: # Portal "E" event
                         if player.rect.colliderect(portal.rect) and not portal.used:
+                            enemies_counter = 0
                             portal.used = True
                             asyncio.run(load_next_level(screen, player, scale_x, scale_y, level_2data))
                 if event.key == pygame.K_SPACE:
@@ -582,7 +641,7 @@ while running:
                  if event.button == 1:
                      if Stopbutton.rect.collidepoint(event.pos):
                          paused = True
-                         pause_menu(scale_x, scale_y, current_settings)
+                         pause_menu(screen ,  current_settings)
 
                 
         if player.is_reloading and FIRE_MODES[player.current_mode]["full"] != FIRE_MODES[player.current_mode]["bullets"]: 
@@ -657,6 +716,9 @@ while running:
             for wall in walls:
                 if isinstance(wall, Gate) and not wall.is_open:
                     wall.toogle(walls)
+                   
+                
+        print("Enemies counter:", enemies_counter)
         for room in Rooms :
           if  room.active == True  and enemies_counter <= 0 and room.clear == False :
             enemies_counter = room.enemies_counter
@@ -734,7 +796,7 @@ while running:
         player.angle = player_angle
         
         rotated_image = pygame.transform.rotate(player.original_image, player_angle)
-        rotated_rect = rotated_image.get_rect(center=player.rect.center)
+        rotated_rect = rotated_image.get_rect(center=camera.apply(player).center)
 
         for tear in player.tears[:]:
             if isinstance(tear, Grenade):
@@ -792,7 +854,7 @@ while running:
                 player.health -= spike.damage
                 spike.apply_damage(player)    
         
-        screen.blit(rotated_image, rotated_rect.topleft + pygame.math.Vector2(camera.camera.topleft))
+        screen.blit(rotated_image, rotated_rect.topleft)
         
         
         
@@ -986,7 +1048,9 @@ while running:
                 kills = 0
                 start_time = 0
                 FIRE_MODES = copy.deepcopy(FIRE_MODES_COPY)
-                current_settings =  Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT , current_settings)
+             
+                current_settings = Main_menu(SELECTED_WIDTH , SELECTED_HEIGHT , current_settings)
+              
                 scale_x = current_settings["resolution"][0] / BASE_WIDTH
                 scale_y = current_settings["resolution"][1] / BASE_HEIGHT
                 pygame.mouse.set_visible(True)

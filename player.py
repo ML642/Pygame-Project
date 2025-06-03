@@ -223,4 +223,12 @@ class Player(pygame.sprite.Sprite):
     def take_damage(self, amount):
         self.health -= amount
 
+    def rescale(self, scale_x, scale_y):
+        self.scale_x = scale_x
+        self.scale_y = scale_y
+        self.image = pygame.transform.scale(self.orig, (int(50 * scale_x), int(50 * scale_y)))
+        self.original_image = self.image
+        center = self.rect.center
+        self.rect = self.image.get_rect(center=center)
+
             

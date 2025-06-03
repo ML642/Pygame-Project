@@ -118,7 +118,7 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
 
                     elif active == 1:  # Play
                         pygame.mixer.music.stop()
-                        return "new_game"
+                        return current_settings
 
 
                     elif active == 2:  # Settings
@@ -143,7 +143,7 @@ def Main_menu (actual_screen_width = 1300, actual_screen_height = 800 , settings
                 else:  # no Continue button
                     if active == 0:  # Play
                         pygame.mixer.music.stop()
-                        return "new_game"
+                        return current_settings
 
                     elif active == 1:  # Settings
                         pygame.mixer.music.stop()

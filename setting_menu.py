@@ -33,7 +33,8 @@ class SettingsMenu:
         self.pass_resolution = 0
         self.pass_volume = 0.5
         self.pass_music = 0
-        
+
+
         print(settings_data)
 
         
@@ -46,7 +47,7 @@ class SettingsMenu:
         
         
         self.difficult = ["easy","medium" , "hard" ]
-        
+        self.difficult_n = self.difficult.index(settings_data.get("difficulty", "medium")) if settings_data else 1
         
         self.resolution = ["800x600" , "1350x700" , "Full Screen"]
         self.resolution_n =0 
@@ -282,9 +283,9 @@ class SettingsMenu:
     def run(self, screen , Mainmenu):
         self.active = True
         #pygame.mixer.music.set_volume(self.music /100)
-        pygame.mixer.init()
-        pygame.mixer.music.load("sound/music.mp3")  # Relative path
-        pygame.mixer.music.play(-1)
+        # pygame.mixer.init()
+        # pygame.mixer.music.load("sound/music.mp3")  # Relative path
+        # pygame.mixer.music.play(-1) # I hate dis music, sorry
         while self.active:
             pygame.mixer.music.set_volume(self.music / 100)
             data = {
