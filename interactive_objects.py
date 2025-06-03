@@ -14,7 +14,7 @@ class DestructibleObject(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (width * scale_x, height * scale_y))
        
     
-        self.rect = self.image.get_rect(topleft=(x * scale_x, y *  scale_y)
+        self.rect = self.image.get_rect(topleft=(x * scale_x, y *  scale_y))
 
     def take_damage(self, amount):
         self.hp -= amount
