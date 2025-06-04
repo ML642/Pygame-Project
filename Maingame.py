@@ -208,7 +208,7 @@ def Room_Create(x, y, form, type, enemies_counter, secret=False):
         Rooms.add(room)
         generate_random_objects(room.rect, spikes, explosion_group, interactive_objects, breakablewalls, chests, scenery_group)
 
-    Rooms.add(Room(x * scale_x, (y + 50) * scale_y, enemies_counter, scale_x, scale_y))
+    #Rooms.add(Room(x * scale_x, (y + 50) * scale_y, enemies_counter, scale_x, scale_y))
     ...
 
     if form == 1 or form == 2 or form ==9 or form == 8 or form == 11 or form ==7 and not secret:   # right corridor  
