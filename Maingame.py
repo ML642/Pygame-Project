@@ -519,7 +519,6 @@ OFFSETY = (scale_y-1) * 200
 
 
 
-# player.rect.center = (150 * scale_x ,  150 * scale_y) # - move the player to the room 
 
 def rerender (data,walls,floors,Rooms,enemies,drops,interactive_objects,player):
     walls.empty()
@@ -597,6 +596,8 @@ elif isinstance(menu_result, dict):
 
 player.rect.center =( 150 * scale_x , 150 * scale_y)
 player.rect.center  = (boss_room_x * scale_x + 50 * scale_x, boss_room_y * scale_y + 50 * scale_y)  
+player.rect.center = (150 * scale_x ,  150 * scale_y) # - move the player to the room 
+
 while running:
     # print(scale_x ,scale_y)
         current_time = pygame.time.get_ticks()  # Record the start time
