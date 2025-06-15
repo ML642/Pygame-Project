@@ -37,4 +37,5 @@
 git clone https://github.com/ML642/Pygame-Project.git
 cd Pygame-Project
 pip install pygame
+python maingame.py
 
