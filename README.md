@@ -34,7 +34,7 @@
 
 ### Installation  
 ```bash
-git clone https://github.com/yourusername/bullet-born.git
-cd bullet-born
+git clone https://github.com/ML642/Pygame-Project.git
+cd Pygame-Project
 pip install pygame
 
